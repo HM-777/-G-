@@ -1,2 +1,2 @@
 # Othello
-- Test
+- test
