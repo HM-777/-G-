@@ -4,3 +4,5 @@
 #### othello
 ##### othello
 ###### othello
+
+:white_circle:
