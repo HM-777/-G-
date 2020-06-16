@@ -4,4 +4,3 @@
 #### othello
 ##### othello
 ###### othello
-###### othdllo
