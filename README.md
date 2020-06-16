@@ -6,3 +6,4 @@
 ###### othello
 
 :white_circle:
+:white_circle:
