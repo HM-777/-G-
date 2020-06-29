@@ -32,6 +32,9 @@ public class Computer {
 	//以下メソッド
 	//ランダムに打つ
 	public void random() {
+		//リスト初期化
+		canputlist_x.clear();
+		canputlist_y.clear();
 		//盤面取得
 		//board = .getGrid();
 		//置ける場所(2)を探してcanputlistにチェックし
