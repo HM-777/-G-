@@ -35,8 +35,8 @@ public class Player {
     	return myID + myPassword;
     }
     public void setRecord(int r[]) {  //戦績情報の受付
-    	int rec = 10;  //recの値は暫定値
-    	for(int i=0; i<=rec; i++) {
+    	int rec = 5;
+    	for(int i=0; i<rec; i++) {
     		myRecord[i] = r[i];
         }
     }
