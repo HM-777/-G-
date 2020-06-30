@@ -16,31 +16,33 @@ public class Computer {
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {30, -12, 0, -1, -1, 0, -12, 30}
 							 };	//evaluationMap:石を置いた時の評価値表
-	int board[][]; //board:盤面情報を格納する変数
+	//int board[][]; //board:盤面情報を格納する変数→othello.grids[][]に変更
 	ArrayList<Integer> canputlist_x = new ArrayList<Integer>();
 	ArrayList<Integer> canputlist_y = new ArrayList<Integer>();	//置ける場所の一覧
-	int phase = 0;	//phase:序盤〜終盤に分割して思考を変える．使わないかも
+	//int phase = 0;	//phase:序盤〜終盤に分割して思考を変える．使わないかも
 	Random random = new Random();	//random:乱数生成器
+	Othello othello;	//othello:Othelloクラスのメソッドを利用
 
 	//コンストラクタ
-	public Computer(int level, int color){
+	public Computer(int level, int color, Othello othello){
 		//コンストラクタの中身
 		this.level = level;
 		this.color = color;
+		this.othello = othello;
 	}
 
 	//以下メソッド
 	//ランダムに打つ
-	public void random() {
+	public int random() {
 		//リスト初期化
 		canputlist_x.clear();
 		canputlist_y.clear();
 		//盤面取得
-		//board = .getGrid();
+		//board = .getGrids();
 		//置ける場所(2)を探してcanputlistにチェックし
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
-				if(board[y][x] == 2) {
+				if(othello.grids[y][x] == 2) {
 					canputlist_x.add(x);
 					canputlist_y.add(y);
 				}
@@ -48,8 +50,8 @@ public class Computer {
 		}
 		//ランダムに一つ選び
 		int i = random.nextInt(canputlist_x.size());
-		//置く
-		//.setStone(canputlist_x.get(i), canputlist_y.get(i));
+		//置く場所を返す
+		return 10*canputlist_y.get(i) + canputlist_x.get(i);
 
 	}
 
@@ -74,10 +76,11 @@ public class Computer {
 		//置ける場所(2)を探す
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
-				if(board[y][x] == 2) {
+				if(othello.grids[y][x] == 2) {
 					//試しに打つ
-					//.setStone(x, y);
-					//手番を変える
+					othello.setStone(x, y);
+					othello.checkPlaceable();
+					//手番を変える(現在はsetStoneにchangeTurnが内包)
 					//.changeTurn()
 					//次の評価値を求める
 					childValue = alphabeta(turn*(-1), depth-1, alpha, beta);
@@ -103,10 +106,10 @@ public class Computer {
 							}
 						}
 						if(value > beta) {	//βカット
-							// undo
+							othello.undo();
 							return value;
 						}
-					//相手のターンなら子ノードから最小値を選択
+					//相手のターンなら子ノードから最小値を選択(自分にとって不都合な手を指す)
 					}else{
 						if(childValue <= value) {
 							//評価値がvalueと等しければ，1/2の確率で更新
@@ -124,11 +127,11 @@ public class Computer {
 							}
 						}
 						if(value < alpha) {	//αカット
-							// undo
+							othello.undo();
 							return value;
 						}
 					}
-					// undo
+					othello.undo();
 				}
 			}
 		}
@@ -147,15 +150,34 @@ public class Computer {
 		int evaluation = 0;	//evaluation:盤面に置かれている石とevaluation_mapから算出された盤面評価値
 		//盤面取得
 		//board[][] = .getGrids();
-		//turn=-1なら黒，=1なら白の場所をチェックし，evaluattionMapの値で評価
+		//turn=-1なら黒，=1なら白が置かれているすべての場所に対し，evaluattionMapの値で評価
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
-				/*if(board[y][x] == turn){
-				 *evaluation += evaluationMap[y][x];	//開放度を計算して，その値をかけてみる？
-				 */
+				if(othello.grids[y][x] == turn){
+				 evaluation += evaluationMap[y][x];	//開放度を計算して，その値をかけてみる？
+				}
 			}
 		}
 		return evaluation;
 	}
+
+	//Clientに呼び出されるメソッド．戻り値は座標
+		//grids[][]:思考する盤面
+	public int think(int grids[][]) {
+		//現在の盤面をコピー
+		for(int y = 0; y < 8; y++) {
+			for(int x = 0; x < 8; x++) {
+				othello.grids[y][x] = grids[y][x];
+			}
+		}
+
+		if(level == 1) {
+			return random();
+		}else{
+			return alphabeta(color, level, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		}
+	}
+
+
 
 }
