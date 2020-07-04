@@ -108,14 +108,14 @@ cnt_white=0;
 	public boolean isGameover(){	// 対局終了を判断
 
 		//まだ空いている座標があるかのフラグ
-	    boolean existempty = false;
+	    boolean existempty = true;
        cnt_black=0;
        cnt_white=0;
 
 	    for(int i=0;i<8;i++) {
 	    	for(int j=0;j<8;j++) {
 	    		if(grids[i][j]==empty||grids[i][j]==placeable) {//
-	    			existempty=true;//空か置くこと可能ならばゲーム継続可能
+	    			existempty=false;//空か置くこと可能ならばゲーム継続可能
 	    		}else if(grids[i][j]==black) {
 	    			cnt_black++;//黒石のカウント
 	    		}else if(grids[i][j]==white) {
@@ -125,11 +125,11 @@ cnt_white=0;
 	    }
 
   if(cnt_black==0||cnt_white==0) {//一色で染まった場合終了
-	  existempty=false;
+	  existempty=true;
   }
 
   if(pass_count>1) {//すでにパスが二回連続で行われているならば終了
-	  existempty=false;
+	  existempty=true;
   }
 
 
@@ -140,7 +140,7 @@ cnt_white=0;
 
 	public int checkWinner(){	// 勝敗を判断
 		int winner=10;//初期値　この値が返った場合試合が終わっていない
-		if(isGameover()==false) {
+		if(isGameover()==true) {
 			if(cnt_black==cnt_white) {
 				winner=0;// draw
 
@@ -512,28 +512,52 @@ System.out.println("");
 }
 
 public static void main(String args[]) {
+
+    String red    = "\u001b[00;47m";
+    String green  = "\u001b[00;32m";
+    String yellow = "\u001b[00;33m";
+    String purple = "\u001b[00;34m";
+    String pink   = "\u001b[00;35m";
+    String cyan   = "\u001b[00;36m";
+    String end    = "\u001b[00m";
 	Othello a=new Othello(0);
+	Computer com=new Computer(1,10,a);
+	Computer com2=new Computer(-1,1,a);
 	Scanner scan=new Scanner(System.in);
-	a.checkPlaceable();
-	a.draw();
 
 
-	while(a.isGameover()==true) {
+
+	while(a.isGameover()==false) {
+
+		if(a.turn==a.black) {
 		a.checkPlaceable();
 		a.draw();
 		if(a.pass_flag==false) {
-System.out.println("x=");
+/*System.out.println("x=");
 int x=scan.nextInt();
 System.out.println("y=");
 int y=scan.nextInt();
+*/int put2=com.think(a.getGrids());
+a.setStone(put2%10,(put2-put2%10)/10);
+System.out.println(red+"\ncpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
 
 
 
-	a.setStone(x,y);
 	}
 
-	System.out.println(a.moves_count);
+
 	}
+		else if(a.turn==a.white) {
+			a.checkPlaceable();
+			a.draw();
+			if(a.pass_flag==false) {
+			int put=com.think(a.getGrids());
+			a.setStone(put%10,(put-put%10)/10);
+			System.out.println(red+"\ncpu_turn\n x="+put%10+" y="+(put-put%10)/10+end);
+			}
+
+			}
+		}
 
 
 if(a.checkWinner()==a.white) {
@@ -541,8 +565,10 @@ if(a.checkWinner()==a.white) {
 	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
 }else if(a.checkWinner()==a.black) {
 	System.out.println("black win");
+	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
 }else if(a.checkWinner()==0) {
 	System.out.println("draw");
+	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
 
 }
 
