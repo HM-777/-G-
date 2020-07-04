@@ -5,7 +5,6 @@ public class Computer {
 	//メンバ変数
 	int level;	//level:CPUの難易度 探索の深さの値？
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
-	int X = 0, Y = 0;	//評価の高い場所
 	int childValue;	//childValue:子ノードの評価値
 	int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
@@ -21,14 +20,13 @@ public class Computer {
 	ArrayList<Integer> canputlist_y = new ArrayList<Integer>();	//置ける場所の一覧
 	//int phase = 0;	//phase:序盤〜終盤に分割して思考を変える．使わないかも
 	Random random = new Random();	//random:乱数生成器
-	Othello othello;	//othello:Othelloクラスのメソッドを利用
+	Othello othello = new Othello(0);	//othello:Othelloクラスのメソッドを利用
 
 	//コンストラクタ
-	public Computer(int level, int color, Othello othello){
+	public Computer(int level, int color){
 		//コンストラクタの中身
 		this.level = level;
 		this.color = color;
-		this.othello = othello;
 	}
 
 	//以下メソッド
@@ -63,6 +61,7 @@ public class Computer {
 	//あまりに時間がかかるなら打ち切り？
 	public int alphabeta(int turn, int depth, int alpha, int beta) {
 		int value ;	//(多分)ノードの評価値
+		int X = 100, Y = 100;	//評価の高い場所
 		//末端ノードなら盤面評価値を返す
 		if(depth == 0) {
 			return evaluateBoard(turn);
@@ -73,7 +72,7 @@ public class Computer {
 		}else{
 			value = Integer.MAX_VALUE;
 		}
-		//置ける場所(2)を探す
+		//置ける場所(2)を探す.パスのときが考慮されているか検討
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
 				if(othello.grids[y][x] == 2) {
@@ -88,44 +87,46 @@ public class Computer {
 					//自分のターンなら子ノードから最大値を選択
 						//バグってたらこの辺怪しい
 					if(turn == color) {
-						if(childValue >= value) {
+						if(childValue > value) {
 							//評価値がvalueと等しければ，1/2の確率で更新
-							if(childValue == value) {
-								if(random.nextInt(2) == 0) {
-									value = childValue;
-									alpha = value;
-									X = x;
-									Y = y;
-								}
+							//if(childValue == value) {
+								//if(random.nextInt(2) == 0) {
+									//value = childValue;
+									//alpha = value;
+									//X = x;
+									//Y = y;
+								//}
 							//評価値がvalueより大きければ更新
-							}else {
+							//}else {
 							value = childValue;
 							alpha = value;
 							X = x;
 							Y = y;
 							}
-						}
+						//}
 						if(value > beta) {	//βカット
 							othello.undo();
 							return value;
 						}
 					//相手のターンなら子ノードから最小値を選択(自分にとって不都合な手を指す)
 					}else{
-						if(childValue <= value) {
+						if(childValue < value) {
 							//評価値がvalueと等しければ，1/2の確率で更新
-							if(random.nextInt(2) == 0) {
-								value = childValue;
-								beta = value;
-								X = x;
-								Y = y;
+							//if(childValue == value) {
+								//if(random.nextInt(2) == 0) {
+									//value = childValue;
+									//beta = value;
+									//X = x;
+									//Y = y;
+								//}
 								//評価値がvalueより小さければ更新
-							}else {
+							//}else {
 								value = childValue;
 								beta = value;
 								X = x;
 								Y = y;
 							}
-						}
+						//}
 						if(value < alpha) {	//αカット
 							othello.undo();
 							return value;
@@ -154,7 +155,9 @@ public class Computer {
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
 				if(othello.grids[y][x] == turn){
-				 evaluation += evaluationMap[y][x];	//開放度を計算して，その値をかけてみる？
+					evaluation += evaluationMap[y][x];	//開放度を計算して，その値をかけてみる？
+				}else if(othello.grids[y][x] == -turn) {
+					evaluation -= evaluationMap[y][x];
 				}
 			}
 		}
