@@ -38,10 +38,10 @@ public class Othello {
 
 
 		}}
-		grids[3][3] = black;
-		grids[4][4] = black;
-		grids[3][4] = white;
-		grids[4][3] = white;
+		grids[3][3] = white;
+		grids[4][4] = white;
+		grids[3][4] = black;
+		grids[4][3] = black;
 	}
 
 
@@ -70,6 +70,7 @@ public class Othello {
 		return row;
 	}
 	public int getBlackstone() {//黒石の数を取得
+		cnt_black=0;
 		for(int i=0;i<row;i++) {
 			for(int j=0;j<row;j++) {
 				if(grids[i][j]==-1) {
@@ -83,6 +84,7 @@ public class Othello {
 		return cnt_black;
 	}
 	public int getWhitestone() {//白石の数を取得
+cnt_white=0;
 
 		for(int i=0;i<row;i++) {
 			for(int j=0;j<row;j++) {
@@ -514,17 +516,23 @@ public static void main(String args[]) {
 	Scanner scan=new Scanner(System.in);
 	a.checkPlaceable();
 	a.draw();
-	while(a.isGameover()==true) {
 
+
+	while(a.isGameover()==true) {
+		a.checkPlaceable();
+		a.draw();
+		if(a.pass_flag==false) {
 System.out.println("x=");
 int x=scan.nextInt();
 System.out.println("y=");
 int y=scan.nextInt();
 
 
+
 	a.setStone(x,y);
-	a.checkPlaceable();
-	a.draw();
+	}
+
+	System.out.println(a.moves_count);
 	}
 
 
