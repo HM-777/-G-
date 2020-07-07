@@ -22,6 +22,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
@@ -35,10 +36,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-import othello.Computer;
-import othello.Othello;
-import othello.Player;
 
 public class Client extends JFrame {
 	//private StartPanel sp = new StartPanel(this, "sp");
@@ -842,6 +839,9 @@ public class Client extends JFrame {
 			client = c;
 			str = s;
 			mode = m;
+			FloatControl control = (FloatControl)bgm1.getControl(FloatControl.Type.MASTER_GAIN);
+			control.setValue((float)Math.log10(0.1) * 20);
+			bgm1.setFramePosition(0);
 			bgm1.loop(Clip.LOOP_CONTINUOUSLY);
 			//盤面情報の初期化
 			if(mode.equals("rank") || mode.equals("special")){//ネットワーク対局の場合
@@ -859,9 +859,9 @@ public class Client extends JFrame {
 				if(mode.equals("easy"))//easyモード
 					cpu = new Computer(1,1);
 				else if(mode.equals("normal"))//normalモード
-					cpu = new Computer(1,3);
+					cpu = new Computer(5,1);
 				else if(mode.equals("hard"))//hardモード
-					cpu = new Computer(1,5);
+					cpu = new Computer(9,1);
 
 				othello.checkPlaceable();
 				player.setColor("black");
@@ -1008,7 +1008,7 @@ public class Client extends JFrame {
 
 			Timer(MatchingPanel p){
 				panel = p;
-				this.tf = new JTextField(String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
+				this.tf = new JTextField("残り時間  " + String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
 				this.tf.setHorizontalAlignment(JTextField.CENTER);
 			}
 
@@ -1016,7 +1016,7 @@ public class Client extends JFrame {
 				while(!this.flagFinish) {
 					if(!this.flagStop) {
 						if(String.valueOf(numSecond).length()<2) {
-							this.tf.setText(String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
+							this.tf.setText("残り時間  " + String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
 							if(numSecond==0) {
 								if(numMinute == 0) {
 									finishMatching("timeup");
@@ -1026,7 +1026,7 @@ public class Client extends JFrame {
 								numSecond = 60;
 							}
 						}
-						else this.tf.setText(String.valueOf(numMinute) + "：" + String.valueOf(numSecond));
+						else this.tf.setText("残り時間  " + String.valueOf(numMinute) + "：" + String.valueOf(numSecond));
 						numSecond--;
 					}
 					try {
@@ -1070,6 +1070,8 @@ public class Client extends JFrame {
 
 		public void finishMatching(String str) {//対局を終了(str:win, lose, draw, resign, timeup)
 			timer.finish();
+			bgm1.stop();
+			bgm1.flush();
 			if(mode.equals("rank") || mode.equals("special")) {//ネットワーク対局時
 				confirmer.finish();
 				previousRate[0] = player.getRecord()[4];
@@ -1117,6 +1119,25 @@ public class Client extends JFrame {
 		}
 
 		public void updateDisp(int x, int y){ // 画面を更新する
+			if(x!=8 && y!=8 && x!=9 && y!=9) {//x==8とy==8は例外
+				switch(othello.getTurn()) {
+					case -1:
+						if(player.getColor().equals("black"))
+							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
+						else
+							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
+						break;
+					case 1:
+						if(player.getColor().equals("white"))
+							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
+						else
+							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
+				}
+				if(SE) {
+					se = createClip(new File("othello.wav"));
+					se.start();//SEを流す
+				}
+			}
 			for(int j=0; j<row; j++) {
 				int yy = 40 + j*38;
 				for(int i=0; i<row; i++) {
@@ -1133,25 +1154,6 @@ public class Client extends JFrame {
 					buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
 					buttonArray[j][i].addMouseListener(this);//マウス操作を認識できるようにする
 					buttonArray[j][i].setActionCommand(Integer.toString(j*8+i));//ボタンを識別するための名前(番号)を付加する
-				}
-			}
-			if(x!=8 && y!=8 && x!=9 && y!=9) {//x==8とy==8は例外
-				switch(othello.getTurn()) {
-					case -1:
-						if(player.getColor().equals("black"))
-							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
-						else
-							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
-						break;
-					case 1:
-						if(player.getColor().equals("white"))
-							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
-						else
-							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
-				}
-				if(SE) {
-					se = createClip(new File("othello.wav"));
-					se.start();//SEを流す
 				}
 			}
 			if(x!=9 && y!=9) {
@@ -1214,7 +1216,10 @@ public class Client extends JFrame {
 								Thread.sleep(400);
 							}
 							catch(InterruptedException ie) {}
-							cpuOperation = cpu.think(othello.getGrids());
+							if(mode.equals("easy"))
+								cpuOperation = cpu.random();
+							else
+								cpuOperation = cpu.think(othello.getGrids());
 							othello.setStone(cpuOperation%10, (cpuOperation-cpuOperation%10)/10);
 							updateDisp(cpuOperation%10,(cpuOperation-cpuOperation%10)/10);
 							if(!((winner = othello.checkWinner()) == 10)) {//勝敗がついた場合
@@ -1270,55 +1275,55 @@ public class Client extends JFrame {
 			//BGM用ラベル
 			labelBGM = new JLabel("BGM");
 			this.add(labelBGM);
-			labelBGM.setBounds(w/4, 2*h/7, 150, 40);
+			labelBGM.setBounds(w/4-20, 2*h/7-20, 150, 40);
 			//SE用ラベル
 			labelSE = new JLabel("SE");
 			this.add(labelSE);
-			labelSE.setBounds(w/4, 3*h/7, 150, 40);
+			labelSE.setBounds(w/4-20, 3*h/7-20, 150, 40);
 			//置ける場所表示用ラベル
 			labelPlacable = new JLabel("置ける場所表示");
 			this.add(labelPlacable);
-			labelPlacable.setBounds(w/4, 4*h/7, 150, 40);
+			labelPlacable.setBounds(w/4-20, 4*h/7-20, 150, 40);
 			//ONラジオボタン1
 			radioON1 = new JRadioButton("ON",true);
 			this.add(radioON1);
-			radioON1.setBounds(w/2, 2*h/7, 100, 40);
+			radioON1.setBounds(w/2-20, 2*h/7-20, 100, 40);
 			radioON1.addActionListener(this);//マウス操作を認識できるようにする
 			radioON1.setActionCommand("on1");//ボタンを識別するための名前を付加する
 			//ONラジオボタン2
 			radioON2 = new JRadioButton("ON",true);
 			this.add(radioON2);
-			radioON2.setBounds(w/2, 3*h/7, 100, 40);
+			radioON2.setBounds(w/2-20, 3*h/7-20, 100, 40);
 			radioON2.addActionListener(this);//マウス操作を認識できるようにする
 			radioON2.setActionCommand("on2");//ボタンを識別するための名前を付加する
 			//ONラジオボタン3
 			radioON3 = new JRadioButton("ON",true);
 			this.add(radioON3);
-			radioON3.setBounds(w/2, 4*h/7, 100, 40);
+			radioON3.setBounds(w/2-20, 4*h/7-20, 100, 40);
 			radioON3.addActionListener(this);//マウス操作を認識できるようにする
 			radioON3.setActionCommand("on3");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン1
 			radioOFF1 = new JRadioButton("OFF",false);
 			this.add(radioOFF1);
-			radioOFF1.setBounds(7*w/10, 2*h/7, 100, 40);
+			radioOFF1.setBounds(7*w/10-20, 2*h/7-20, 100, 40);
 			radioOFF1.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF1.setActionCommand("off1");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン2
 			radioOFF2 = new JRadioButton("OFF",false);
 			this.add(radioOFF2);
-			radioOFF2.setBounds(7*w/10, 3*h/7, 100, 40);
+			radioOFF2.setBounds(7*w/10-20, 3*h/7-20, 100, 40);
 			radioOFF2.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF2.setActionCommand("off2");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン3
 			radioOFF3 = new JRadioButton("OFF",false);
 			this.add(radioOFF3);
-			radioOFF3.setBounds(7*w/10, 4*h/7, 100, 40);
+			radioOFF3.setBounds(7*w/10-20, 4*h/7-20, 100, 40);
 			radioOFF3.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF3.setActionCommand("off3");//ボタンを識別するための名前を付加する
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
-			bBack.setBounds(3*w/7, 6*h/7, 120, 40);
+			bBack.setBounds(3*w/7, 6*h/7-20, 90, 24);
 			bBack.addActionListener(this);//マウス操作を認識できるようにする
 			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
 		}
@@ -1328,17 +1333,19 @@ public class Client extends JFrame {
 				setVisible(false);
 			else if(e.getSource() == radioON1) {//BGMのONボタン
 				if(radioON1.isSelected() == false) {
-					radioON1.setSelected(true);
-					radioOFF1.setSelected(false);
-					bgm1.loop(Clip.LOOP_CONTINUOUSLY);
+					
 				}
+				radioON1.setSelected(true);
+				radioOFF1.setSelected(false);
+				bgm1.loop(Clip.LOOP_CONTINUOUSLY);
 			}
 			else if(e.getSource() == radioOFF1) {//BGMのOFFボタン
 				if(radioOFF1.isSelected() == false) {
-					radioON1.setSelected(false);
-					radioOFF1.setSelected(true);
-					bgm1.stop();
+					
 				}
+				radioON1.setSelected(false);
+				radioOFF1.setSelected(true);
+				bgm1.stop();
 			}
 			else if(e.getSource() == radioON2) {//SEのONボタン
 				client.SE = true;
@@ -1505,25 +1512,34 @@ public class Client extends JFrame {
 			//ウィンドウ設定
 			this.setSize(w, h);
 			this.setLayout(null);
+			Container contentPane = getContentPane();
+		    contentPane.setBackground(new Color(243,152,0));
 			//結果用ラベル
-			if(result.equals("win"))
+			if(result.equals("win")) {
 				labelResult = new JLabel("YOU WON!");
-			else if(result.equals("lose") || result.equals("resign"))
+				labelResult.setForeground(Color.RED);
+			}
+			else if(result.equals("lose") || result.equals("resign")) {
 				labelResult = new JLabel("YOU LOST!");
-			else
+				labelResult.setForeground(Color.BLUE);
+			}
+			else {
 				labelResult = new JLabel("DRAW!");
+				labelResult.setForeground(Color.GRAY);
+			}
 			this.add(labelResult);
-			labelResult.setBounds(1*w/5+50, h/7, 200, 50);
+			labelResult.setBounds(1*w/5, h/7, 300, 50);
 			labelResult.setHorizontalAlignment(JTextField.CENTER);
+			labelResult.setFont(new Font("PixelMplus10", Font.PLAIN, 60));
 
 			if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {//ネットワーク対戦時
 				if(player.getColor().equals("black")) {
 					labelPlayer1 = new JLabel(player.getName() + " ● " + othello.getBlackstone());
-					labelPlayer2 = new JLabel(opponent.getName() + " ○ " + othello.getWhitestone());
+					labelPlayer2 = new JLabel(opponent.getName() + " ● " + othello.getWhitestone());
 				}
 				else {
-					labelPlayer1 = new JLabel(player.getName() + " ○ " + othello.getBlackstone());
-					labelPlayer2 = new JLabel(opponent.getName() + " ● " + othello.getWhitestone());
+					labelPlayer1 = new JLabel(opponent.getName() + " ● " + othello.getWhitestone());
+					labelPlayer2 = new JLabel(player.getName() + " ● " + othello.getBlackstone());
 				}
 				//プレイヤ1情報用ラベル
 				labelPlayer1.setBounds(2*w/7, 2*h/7, 300, 30);
@@ -1543,24 +1559,27 @@ public class Client extends JFrame {
 			else {//ローカル対戦時
 				//プレイヤ1情報用ラベル
 				labelPlayer1 = new JLabel("player" + " ● " + othello.getBlackstone());
-				labelPlayer1.setBounds(2*w/7, 2*h/7, 300, 30);
+				labelPlayer1.setBounds(2*w/7+30, 2*h/7+40, 300, 30);
 				this.add(labelPlayer1);
 				//プレイヤ2情報用ラベル
-				labelPlayer2 = new JLabel("   cpu" + " ○ " + othello.getWhitestone());
-				labelPlayer2.setBounds(2*w/7, 4*h/7, 300, 30);
+				labelPlayer2 = new JLabel("   cpu" + " ● " + othello.getWhitestone());
+				labelPlayer2.setBounds(2*w/7+30, 4*h/7, 300, 30);
 				this.add(labelPlayer2);
 			}
-
+			
+			labelPlayer1.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
+			labelPlayer2.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
+			labelPlayer2.setForeground(Color.WHITE);
 			//再戦希望ボタン
 			bRematch = new JButton("再戦");
 			this.add(bRematch);
-			bRematch.setBounds(1*w/5, 6*h/7, 120, 30);
+			bRematch.setBounds(1*w/5+30, 6*h/7-20, 90, 24);
 			bRematch.addActionListener(this);//マウス操作を認識できるようにする
 			bRematch.setActionCommand("rematch");//ボタンを識別するための名前を付加する
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
-			bBack.setBounds(3*w/5, 6*h/7, 120, 30);
+			bBack.setBounds(3*w/5-20, 6*h/7-20, 90, 24);
 			bBack.addActionListener(this);//マウス操作を認識できるようにする
 			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
 		}
@@ -1799,6 +1818,7 @@ public class Client extends JFrame {
 		Client oclient = new Client();
 		oclient.setVisible(true);
 		oclient.setLocation(350, 200);
+		oclient.setResizable(false);
 		try{
 			font = Font.createFont(Font.TRUETYPE_FONT,new File("PixelMplus10-Regular.ttf"));
 		}catch(FontFormatException e){
