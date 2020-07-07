@@ -4,13 +4,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 
 public class Server{
+	private static final String[][] String = null;
 	private int port; // サーバの待ち受けポート
 	private boolean [] online; //オンライン状態管理用配列
 	private PrintWriter [] out; //データ送信用オブジェクト
 	private Receiver [] receiver; //データ受信用オブジェクト
-
+    public int clientnum;
 	//コンストラクタ
 	public Server(int port) { //待ち受けポートを引数とする
 		this.port = port; //待ち受けポートを渡す
@@ -45,10 +47,24 @@ public class Server{
 				while(true) {// データを受信し続ける
 					String inputLine = br.readLine();//データを一行分読み込む、目的を読み込む
 
+				    if(inputLine.equals("makeAccount")) {//目的がアカウント作成だった場合
+				    	String user[] = new String[2];
+				    	int i=0;
+						//ここで「合致データ確認メソッド」を入れる、[ある時]「ユーザ情報転送メソッド」,「戦ラ送信メソッド」で送る
+						while(true) {
+							inputLine = br.readLine();
+							if(!inputLine.equals("end")) {
+								user[i] = inputLine;
+								i++;
+							}else {
+								break;
+							}
+						}registerUser(user[0],user[1]);
 
-					if(inputLine.equals("sendAccountInfo")) {//目的が対戦の時の相手のユーザ情報の送信だった場合、
-		//この時、相手の戦ラも必要だよな？、「ユーザ情報転送メソッド」と「戦ラ送信メソッド」
-						//アカウント作成の時のIDの送信もある、その時「ユーザ登録メソッド」と「ユーザ情報転送メソッド」
+					}
+				    else if(inputLine.equals("login")) {//目的がログイン認証要請の送信だった場合
+						//ここで「合致データ確認メソッド」を入れる、[ある時]「ユーザ情報転送メソッド」,「戦ラ送信メソッド」で送る
+
 						int i=0;
 						String accountInfo[] = new String[3];//アカウント情報用配列
 
@@ -63,8 +79,9 @@ public class Server{
 						//oclient.player = new Player(accountInfo[0], accountInfo[1], accountInfo[2]);
 					}
 
-					else if(inputLine.equals("sendLoginResult")) {//目的がログイン認証要請の送信だった場合
-						//ここで「合致データ確認メソッド」を入れる、[ある時]「ユーザ情報転送メソッド」,「戦ラ送信メソッド」で送る
+					else if(inputLine.equals("findingOpponent")) {//目的が対戦の時の相手のユーザ情報の送信だった場合、
+		//この時、相手の戦ラも必要だよな？、「ユーザ情報転送メソッド」と「戦ラ送信メソッド」
+						//アカウント作成の時のIDの送信もある、その時「ユーザ登録メソッド」と「ユーザ情報転送メソッド」
 						while(true) {
 							inputLine = br.readLine();
 							if(inputLine.equals("succeeded")) {
@@ -78,7 +95,7 @@ public class Server{
 						}
 					}
 
-					else if(inputLine.equals("sendLoginResult")) {//目的が操作情報の送信だった場合?そのまま流す
+					else if(inputLine.equals("sendOperation")) {//目的が操作情報の送信だった場合
 						while(true) {
 							inputLine = br.readLine();
 							if(inputLine.equals("succeeded")) {
@@ -93,7 +110,8 @@ public class Server{
 					}
 
 
-					else if(inputLine.equals("再戦希望")) {//目的が再戦希望の送信だった場合、「再戦集計メソッド」→「再戦の転送メソッド」
+					else if(inputLine.equals("noticeEndMatching")) {//対局終了時をクライアントからサーバに知らせる
+
 						while(true) {
 							inputLine = br.readLine();
 							if(inputLine.equals("succeeded")) {
@@ -106,7 +124,7 @@ public class Server{
 							}
 						}
 					}
-					else if(inputLine.equals("sendLoginResult")) {//目的が戦績の送信だった場合、これは分けるの？
+					else if(inputLine.equals("戦績")) {//目的が戦績の送信だった場合、これは分けるの？
 
 						while(true) {
 							inputLine = br.readLine();
@@ -137,6 +155,10 @@ public class Server{
 			ServerSocket ss = new ServerSocket(port); //ポートにバインドされたサーバソケットを用意ServerSocketはクラス
 			while (true) {
 				Socket socket = ss.accept();//新規接続を受け付ける
+				clientnum++;
+				if(clientnum % 2==0) {
+				break;
+				}
 
 			}
 		} catch (Exception e) {
@@ -144,22 +166,22 @@ public class Server{
 		}
 	}
 
-	public int printStatus(int cliantnum){ //クライアント接続状態の確認int playerNo
-		if(cliantnum==2) {
+	public int printStatus(int clientnum){ //クライアント接続状態の確認int playerNo、常に動いてる
+		if(clientnum==2) {
 			return 1;//接続中,言葉なのか数字なのか
 		}else return 0;//接続切断
 	}
 
-	public String sendColor(int playerNo){ //先手後手情報(白黒)の送信
-        if(playerNo %2==0) {
+	public String sendColor(int id1,int id2){ //先手後手情報(白黒)の送信
+        if(id1>id2) {
 	         return "白";//数字で送るのか
         }else {
 	         return "黒";
         }
     }
 
-	public String forwardMessage(String msg, int playerNo){ //操作情報の転送
-		if(playerNo==1) {//1から来たなら2に流す
+	public String forwardMessage(int[][] msg, int playerNo){ //操作情報の転送、置いた部分を受け流す
+		if() {//1から来たなら2に流す
 			return msg;//4-5白みたいな情報
 		}else return msg;//2から来たなら1に流す
 	}
@@ -175,8 +197,29 @@ public class Server{
     }
 
     public void registerUser(String name,String passward) {//ユーザ情報の登録,IDを与えてサーバで保存する
-        String id=abcd;//ランダム文字列でIDを与える？
-        System.out.println("あなたのIDは "+　id　+ " です。");
+    	Random rand = new Random();
+        int num = rand.nextInt(90000000) + 10000000;
+        int id = num;//ランダム文字列でIDを与える？
+        String a[][][] =new String[90000000][10][1000000];
+        //二次元配列の要素一次元目はID、そのIDの紐付け情報が二次元目。
+        //0.名前　1.パスワード　2.戦　3.勝　4.敗　5.%　6.投了数　7.レート　8.ランキング　9.相手のID
+        a[id][0][0]=name;
+        a[id][1][0]=passward;
+        a[id][2][0]=Integer.toString(0);
+        a[id][3][0]= Integer.toString(0);
+        a[id][4][0]= Integer.toString(0);
+        a[id][5][0]= Integer.toString(0);
+        a[id][6][0]= Integer.toString(0);
+        a[id][7][0]= Integer.toString(0);
+        a[id][8][0]= Integer.toString(1500);
+        a[id][9][0]= Integer.toString(0);//「集計メソッド」
+
+
+        System.out.println("あなたのIDは "+ id + " です。");
+        sendMessage("sendAccountInfo");
+		sendMessage(name);
+		sendMessage(passward);
+		sendMessage(Integer.toString(id));
     }
 
     public void forwardUser(String msg) {//ユーザ情報の転送
@@ -224,6 +267,14 @@ public class Server{
 //やることなし？それか再戦希望の文字を0,1にして集計メソッド呼び出して戻り値、それを文字にしてSystem.out() ?
 
     }
+
+
+    public void sendMessage(String msg){	// サーバに情報を送信
+		out.println(msg);//送信データをバッファに書き出す
+		out.flush();//送信データを送る
+		System.out.println("サーバにメッセージ " + msg + " を送信しました"); //テスト標準出力
+	}
+
 
 	public static void main(String[] args){ //main
 		Server server = new Server(1114); //待ち受けポート10000番でサーバオブジェクトを準備
