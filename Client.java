@@ -22,7 +22,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
@@ -36,6 +35,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 public class Client extends JFrame {
 	//private StartPanel sp = new StartPanel(this, "sp");
@@ -60,7 +60,7 @@ public class Client extends JFrame {
 	private boolean result;//通信時に使用
 	private boolean SE = true;
 	private boolean PLACABLE = true;
-	static Clip bgm1= createClip(new File("RapGod.wav"));
+	//static Clip bgm1= createClip(new File("RapGod.wav"));
 	static Font font;
 
 	//パネル・ダイアログ（内部クラス）
@@ -826,7 +826,7 @@ public class Client extends JFrame {
 		JTextField tfEffect;//特殊効果の表示ラベル
 		JTextArea taLog;//ログ
 		ImageIcon blackIcon, whiteIcon, boardIcon, placeableIcon; //アイコン
-		Clip se;//SE
+		//Clip se;//SE
 		int previousRate[] = new int[2];
 		int cpuOperation;
 		int winner;
@@ -839,10 +839,10 @@ public class Client extends JFrame {
 			client = c;
 			str = s;
 			mode = m;
-			FloatControl control = (FloatControl)bgm1.getControl(FloatControl.Type.MASTER_GAIN);
-			control.setValue((float)Math.log10(0.1) * 20);
-			bgm1.setFramePosition(0);
-			bgm1.loop(Clip.LOOP_CONTINUOUSLY);
+			//FloatControl control = (FloatControl)bgm1.getControl(FloatControl.Type.MASTER_GAIN);
+			//control.setValue((float)Math.log10(0.1) * 20);
+			//bgm1.setFramePosition(0);
+			//bgm1.loop(Clip.LOOP_CONTINUOUSLY);
 			//盤面情報の初期化
 			if(mode.equals("rank") || mode.equals("special")){//ネットワーク対局の場合
 				if(mode.equals("rank")) othello = new Othello(0);//ランクマッチの場合
@@ -908,27 +908,37 @@ public class Client extends JFrame {
 			//黒駒の数用ラベル
 			tfBlackNumber = new JTextField("黒　" + othello.getBlackstone() + "枚");
 			tfBlackNumber.setHorizontalAlignment(JTextField.CENTER);
+			tfBlackNumber.setEditable(false);
 			this.add(tfBlackNumber);
 			tfBlackNumber.setBounds(6*w/11,  5*h/13-30, 80, 40);
 			//白駒の数用ラベル
 			tfWhiteNumber = new JTextField("白　" + othello.getWhitestone() + "枚");
 			tfWhiteNumber.setHorizontalAlignment(JTextField.CENTER);
+			tfWhiteNumber.setEditable(false);
 			this.add(tfWhiteNumber);
 			tfWhiteNumber.setBounds(6*w/11, 6*h/13-25, 80, 40);
 			//戦況ログ用テキストエリア
 			taLog = new JTextArea(330, 200);
-			this.add(taLog);
-			taLog.setBounds(6*w/11-20, 7*h/13-15, 330, 200);
+			taLog.setEditable(false);
+			taLog.setLineWrap(true);
+			taLog.setWrapStyleWord(true);
+			JScrollPane scroll = new JScrollPane(taLog);
+			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+			scroll.setBounds(6*w/11-20, 7*h/13-15, 330, 200);
+			this.add(scroll);
+			//this.add(taLog);
 			//modeがネットワーク対戦であるとき
 			if(mode.equals("rank") || mode.equals("special")) {
 				//色表示用ラベル
 				tfColor = new JTextField("あなたは黒です");//色情報を表示するためのラベルを作成
 				tfColor.setHorizontalAlignment(JTextField.CENTER);
+				tfColor.setEditable(false);
 				tfColor.setBounds(w/5-30, 3*h/4, 160, 40);//境界を設定
 				this.add(tfColor);//色表示用ラベルをパネルに追加
 				//手番表示用ラベル
 				tfTurn = new JTextField("あなたの番です");//手番情報を表示するためのラベルを作成
 				tfTurn.setHorizontalAlignment(JTextField.CENTER);
+				tfTurn.setEditable(false);
 				tfTurn.setBounds(w/5-30, 3*h/4+50, row * 45 + 10, 40);//境界を設定
 				this.add(tfTurn);//手番情報ラベルをパネルに追加
 				//プレイヤ情報用ラベル
@@ -951,6 +961,7 @@ public class Client extends JFrame {
 				//特殊効果発動是非表示用ラベル
 				tfEffect = new JTextField("発動中特殊効果");
 				tfEffect.setHorizontalAlignment(JTextField.CENTER);
+				tfEffect.setEditable(false);
 				this.add(tfEffect);
 				tfEffect.setBounds(7*w/11, 6*h/13, 300 ,40);
 			}
@@ -964,6 +975,7 @@ public class Client extends JFrame {
 				//色表示用ラベル
 				tfColor = new JTextField("あなたは黒です");
 				tfColor.setHorizontalAlignment(JTextField.CENTER);
+				tfColor.setEditable(false);
 				tfColor.setBounds(w/5-30, 3*h/4+25, 160, 40);//境界を設定
 				this.add(tfColor);//色表示用ラベルをパネルに追加
 				//モード表示
@@ -1010,6 +1022,7 @@ public class Client extends JFrame {
 				panel = p;
 				this.tf = new JTextField("残り時間  " + String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
 				this.tf.setHorizontalAlignment(JTextField.CENTER);
+				this.tf.setEditable(false);
 			}
 
 			public void run() {
@@ -1070,8 +1083,8 @@ public class Client extends JFrame {
 
 		public void finishMatching(String str) {//対局を終了(str:win, lose, draw, resign, timeup)
 			timer.finish();
-			bgm1.stop();
-			bgm1.flush();
+			//bgm1.stop();
+			//bgm1.flush();
 			if(mode.equals("rank") || mode.equals("special")) {//ネットワーク対局時
 				confirmer.finish();
 				previousRate[0] = player.getRecord()[4];
@@ -1123,19 +1136,19 @@ public class Client extends JFrame {
 				switch(othello.getTurn()) {
 					case -1:
 						if(player.getColor().equals("black"))
-							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
+							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n");
 						else
-							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n",0);
+							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n");
 						break;
 					case 1:
 						if(player.getColor().equals("white"))
-							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
+							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n");
 						else
-							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
+							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n");
 				}
 				if(SE) {
-					se = createClip(new File("othello.wav"));
-					se.start();//SEを流す
+					//se = createClip(new File("othello.wav"));
+					//se.start();//SEを流す
 				}
 			}
 			for(int j=0; j<row; j++) {
@@ -1191,9 +1204,9 @@ public class Client extends JFrame {
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗がついた場合
 						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
 							finishMatching("win");
-						else if(winner == 0) 
+						else if(winner == 0)
 							finishMatching("draw");
-						else 
+						else
 							finishMatching("lose");
 					}
 				}
@@ -1256,8 +1269,8 @@ public class Client extends JFrame {
 		JButton bBack;
 		Client client;
 		String str;
-		int w = 480;
-		int h = 320;
+		int w = 360;
+		int h = 240;
 		//コンストラクタ
 		OptionSubDialog(Client c, String s){
 			client = c;
@@ -1270,55 +1283,55 @@ public class Client extends JFrame {
 			//BGM用ラベル
 			labelBGM = new JLabel("BGM");
 			this.add(labelBGM);
-			labelBGM.setBounds(w/4-20, 2*h/7-20, 150, 40);
+			labelBGM.setBounds(w/4-40, 2*h/7-30, 150, 40);
 			//SE用ラベル
 			labelSE = new JLabel("SE");
 			this.add(labelSE);
-			labelSE.setBounds(w/4-20, 3*h/7-20, 150, 40);
+			labelSE.setBounds(w/4-40, 3*h/7-30, 150, 40);
 			//置ける場所表示用ラベル
 			labelPlacable = new JLabel("置ける場所表示");
 			this.add(labelPlacable);
-			labelPlacable.setBounds(w/4-20, 4*h/7-20, 150, 40);
+			labelPlacable.setBounds(w/4-40, 4*h/7-30, 150, 40);
 			//ONラジオボタン1
 			radioON1 = new JRadioButton("ON",true);
 			this.add(radioON1);
-			radioON1.setBounds(w/2-20, 2*h/7-20, 100, 40);
+			radioON1.setBounds(w/2, 2*h/7-30, 100, 40);
 			radioON1.addActionListener(this);//マウス操作を認識できるようにする
 			radioON1.setActionCommand("on1");//ボタンを識別するための名前を付加する
 			//ONラジオボタン2
 			radioON2 = new JRadioButton("ON",true);
 			this.add(radioON2);
-			radioON2.setBounds(w/2-20, 3*h/7-20, 100, 40);
+			radioON2.setBounds(w/2, 3*h/7-30, 100, 40);
 			radioON2.addActionListener(this);//マウス操作を認識できるようにする
 			radioON2.setActionCommand("on2");//ボタンを識別するための名前を付加する
 			//ONラジオボタン3
 			radioON3 = new JRadioButton("ON",true);
 			this.add(radioON3);
-			radioON3.setBounds(w/2-20, 4*h/7-20, 100, 40);
+			radioON3.setBounds(w/2, 4*h/7-30, 100, 40);
 			radioON3.addActionListener(this);//マウス操作を認識できるようにする
 			radioON3.setActionCommand("on3");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン1
 			radioOFF1 = new JRadioButton("OFF",false);
 			this.add(radioOFF1);
-			radioOFF1.setBounds(7*w/10-20, 2*h/7-20, 100, 40);
+			radioOFF1.setBounds(7*w/10, 2*h/7-30, 100, 40);
 			radioOFF1.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF1.setActionCommand("off1");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン2
 			radioOFF2 = new JRadioButton("OFF",false);
 			this.add(radioOFF2);
-			radioOFF2.setBounds(7*w/10-20, 3*h/7-20, 100, 40);
+			radioOFF2.setBounds(7*w/10, 3*h/7-30, 100, 40);
 			radioOFF2.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF2.setActionCommand("off2");//ボタンを識別するための名前を付加する
 			//OFFラジオボタン3
 			radioOFF3 = new JRadioButton("OFF",false);
 			this.add(radioOFF3);
-			radioOFF3.setBounds(7*w/10-20, 4*h/7-20, 100, 40);
+			radioOFF3.setBounds(7*w/10, 4*h/7-30, 100, 40);
 			radioOFF3.addActionListener(this);//マウス操作を認識できるようにする
 			radioOFF3.setActionCommand("off3");//ボタンを識別するための名前を付加する
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
-			bBack.setBounds(3*w/7, 6*h/7-20, 90, 24);
+			bBack.setBounds(3*w/7-15, 6*h/7-20, 90, 24);
 			bBack.addActionListener(this);//マウス操作を認識できるようにする
 			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
 		}
@@ -1332,7 +1345,7 @@ public class Client extends JFrame {
 				}
 				radioON1.setSelected(true);
 				radioOFF1.setSelected(false);
-				bgm1.loop(Clip.LOOP_CONTINUOUSLY);
+				//bgm1.loop(Clip.LOOP_CONTINUOUSLY);
 			}
 			else if(e.getSource() == radioOFF1) {//BGMのOFFボタン
 				if(radioOFF1.isSelected() == false) {
@@ -1340,7 +1353,7 @@ public class Client extends JFrame {
 				}
 				radioON1.setSelected(false);
 				radioOFF1.setSelected(true);
-				bgm1.stop();
+				//bgm1.stop();
 			}
 			else if(e.getSource() == radioON2) {//SEのONボタン
 				client.SE = true;
@@ -1391,7 +1404,7 @@ public class Client extends JFrame {
 			//メッセージラベル
 			labelMessage = new JLabel("本当に投了しますか?");
 			this.add(labelMessage);
-			labelMessage.setBounds(w/3, 2*h/5, w/2, h/10);
+			labelMessage.setBounds(w/3, 2*h/5-20, w/2, h/10);
 			//OKボタン
 			bOK = new JButton("OK");
 			this.add(bOK);
