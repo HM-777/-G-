@@ -32,6 +32,7 @@ public class Othello {
 	public Othello(int i){//i=1 special i=0 nomal
 
 		turn = black; //黒が先手
+
 		for(int x=0;x<row;x++) {
 		for(int y = 0 ; y < row ; y++){
 			grids[y][x] = 0; //初めは石が置かれていない
@@ -42,6 +43,11 @@ public class Othello {
 		grids[4][4] = white;
 		grids[3][4] = black;
 		grids[4][3] = black;
+		if (i==1) {
+
+
+		}
+
 	}
 
 
@@ -62,6 +68,7 @@ public class Othello {
 					grids[i][j]=save_grids[moves_count-1][i][j];
 				}
 			}
+			changeTurn();
 			moves_count--;
 
 
@@ -155,7 +162,7 @@ cnt_white=0;
 
 
 
-	public void checkPlaceable() {//おける場所探索
+	public boolean checkPlaceable() {//おける場所探索
 pass_flag=true;
 
 		for(int i=0;i<row;i++) {
@@ -184,8 +191,9 @@ pass_flag=true;
 		}
 		if(pass_flag==true) {
 			pass_count++;
-			changeTurn();//パスフラグがtrueのままならパスカウントを増加させて手番変更
+			//パスフラグがtrueのままならパスカウントを増加
 		}
+		return !pass_flag;
 	}
  public void setStone(int x, int y) {
 
@@ -521,25 +529,27 @@ public static void main(String args[]) {
     String cyan   = "\u001b[00;36m";
     String end    = "\u001b[00m";
 	Othello a=new Othello(0);
-	Computer com=new Computer(1,10,a);
-	Computer com2=new Computer(-1,1,a);
+	Othello b=new Othello(0);
+	Computer com=new Computer(7,a.white);
+	Computer com2=new Computer(1,a.black);
 	Scanner scan=new Scanner(System.in);
 
 
 
 	while(a.isGameover()==false) {
 
-		if(a.turn==a.black) {
+	if(a.turn==a.black) {
 		a.checkPlaceable();
 		a.draw();
 		if(a.pass_flag==false) {
-/*System.out.println("x=");
+/*}System.out.println("x=");
 int x=scan.nextInt();
 System.out.println("y=");
 int y=scan.nextInt();
-*/int put2=com.think(a.getGrids());
+a.setStone(x, y);*/
+			int put2=com2.think(a.getGrids());
 a.setStone(put2%10,(put2-put2%10)/10);
-System.out.println(red+"\ncpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
+System.out.println(red+"\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
 
 
 
@@ -553,7 +563,7 @@ System.out.println(red+"\ncpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
 			if(a.pass_flag==false) {
 			int put=com.think(a.getGrids());
 			a.setStone(put%10,(put-put%10)/10);
-			System.out.println(red+"\ncpu_turn\n x="+put%10+" y="+(put-put%10)/10+end);
+			System.out.println(red+"\nalphabeta_cpu_turn\n x="+put%10+" y="+(put-put%10)/10+end);
 			}
 
 			}
