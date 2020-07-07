@@ -78,16 +78,17 @@ public class Computer {
 				if(othello.grids[y][x] == 2) {
 					//試しに打つ
 					othello.setStone(x, y);
-					othello.checkPlaceable();
+
+				othello.checkPlaceable();
 					//手番を変える(現在はsetStoneにchangeTurnが内包)
-					//.changeTurn()
+
 					//次の評価値を求める
 					childValue = alphabeta(turn*(-1), depth-1, alpha, beta);
 					//末端ノードまで来るか，子ノードの評価値が計算されているなら以下の処理へ
 					//自分のターンなら子ノードから最大値を選択
 						//バグってたらこの辺怪しい
 					if(turn == color) {
-						if(childValue > value) {
+						if(childValue >= value) {
 							//評価値がvalueと等しければ，1/2の確率で更新
 							//if(childValue == value) {
 								//if(random.nextInt(2) == 0) {
@@ -110,7 +111,7 @@ public class Computer {
 						}
 					//相手のターンなら子ノードから最小値を選択(自分にとって不都合な手を指す)
 					}else{
-						if(childValue < value) {
+						if(childValue <= value) {
 							//評価値がvalueと等しければ，1/2の確率で更新
 							//if(childValue == value) {
 								//if(random.nextInt(2) == 0) {
