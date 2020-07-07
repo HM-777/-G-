@@ -872,10 +872,10 @@ public class Client extends JFrame {
 			this.setLayout(null);
 			this.setBackground(new Color(130, 0, 170));
 			//アイコン設定(画像ファイルをアイコンとして使う)
-			whiteIcon = new ImageIcon("/Users/tomoyainazawa/selfProgram/Java/ProjectLearning/src/White.jpg");
-			blackIcon = new ImageIcon("/Users/tomoyainazawa/selfProgram/Java/ProjectLearning/src/Black.jpg");
-			boardIcon = new ImageIcon("/Users/tomoyainazawa/selfProgram/Java/ProjectLearning/src/GreenFrame.jpg");
-			placeableIcon = new ImageIcon("/Users/tomoyainazawa/selfProgram/Java/ProjectLearning/src/Placeable.jpg");
+			whiteIcon = new ImageIcon(new File("White.jpg").getAbsolutePath());
+			blackIcon = new ImageIcon(new File("Black.jpg").getAbsolutePath());
+			boardIcon = new ImageIcon(new File("GreenFrame.jpg").getAbsolutePath());
+			placeableIcon = new ImageIcon(new File("Placeable.jpg").getAbsolutePath());
 			//オセロ盤の生成
 			buttonArray = new JButton[row][row];//ボタンの配列を作成
 			updateDisp(9,9);
@@ -1189,12 +1189,12 @@ public class Client extends JFrame {
 					}
 
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗がついた場合
-						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white"))){
-							if(player.getColor().equals("black")) finishMatching("win");
-							else finishMatching("lose");
-						}
-						else if(winner == 0) finishMatching("draw");
-						else finishMatching("lose");
+						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
+							finishMatching("win");
+						else if(winner == 0) 
+							finishMatching("draw");
+						else 
+							finishMatching("lose");
 					}
 				}
 				else if (!mode.equals("rank") && !mode.equals("special") && othello.getGrids()[y][x] == 2){//ローカル対局時
@@ -1202,10 +1202,7 @@ public class Client extends JFrame {
 					updateDisp(x,y);
 
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗がついた場合
-						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white"))){
-							if(player.getColor().equals("black")) finishMatching("win");
-							else finishMatching("lose");
-						}
+						if(winner == -1) finishMatching("win");
 						else if(winner == 0) finishMatching("draw");
 						else finishMatching("lose");
 					}
@@ -1223,11 +1220,9 @@ public class Client extends JFrame {
 							othello.setStone(cpuOperation%10, (cpuOperation-cpuOperation%10)/10);
 							updateDisp(cpuOperation%10,(cpuOperation-cpuOperation%10)/10);
 							if(!((winner = othello.checkWinner()) == 10)) {//勝敗がついた場合
-								if(winner == -1){//黒の勝利
-									if(player.getColor().equals("black")) finishMatching("win");
-									else finishMatching("lose");
-								}
-								else finishMatching("draw");
+								if(winner == -1) finishMatching("win");
+								else if(winner == 0) finishMatching("draw");
+								else finishMatching("lose");
 							}
 							if(othello.checkPlaceable()) break;
 							else othello.changeTurn();
@@ -1525,7 +1520,7 @@ public class Client extends JFrame {
 			}
 			else {
 				labelResult = new JLabel("DRAW!");
-				labelResult.setForeground(Color.GRAY);
+				labelResult.setForeground(new Color(130, 0, 170));
 			}
 			this.add(labelResult);
 			labelResult.setBounds(1*w/5, h/7, 300, 50);
