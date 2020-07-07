@@ -861,7 +861,7 @@ public class Client extends JFrame {
 				else if(mode.equals("normal"))//normalモード
 					cpu = new Computer(5,1);
 				else if(mode.equals("hard"))//hardモード
-					cpu = new Computer(9,1);
+					cpu = new Computer(7,1);
 
 				othello.checkPlaceable();
 				player.setColor("black");
@@ -1129,9 +1129,9 @@ public class Client extends JFrame {
 						break;
 					case 1:
 						if(player.getColor().equals("white"))
-							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
-						else
 							taLog.insert("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
+						else
+							taLog.insert("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n",0);
 				}
 				if(SE) {
 					se = createClip(new File("othello.wav"));
@@ -1333,7 +1333,7 @@ public class Client extends JFrame {
 				setVisible(false);
 			else if(e.getSource() == radioON1) {//BGMのONボタン
 				if(radioON1.isSelected() == false) {
-					
+
 				}
 				radioON1.setSelected(true);
 				radioOFF1.setSelected(false);
@@ -1341,7 +1341,7 @@ public class Client extends JFrame {
 			}
 			else if(e.getSource() == radioOFF1) {//BGMのOFFボタン
 				if(radioOFF1.isSelected() == false) {
-					
+
 				}
 				radioON1.setSelected(false);
 				radioOFF1.setSelected(true);
@@ -1566,7 +1566,7 @@ public class Client extends JFrame {
 				labelPlayer2.setBounds(2*w/7+30, 4*h/7, 300, 30);
 				this.add(labelPlayer2);
 			}
-			
+
 			labelPlayer1.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
 			labelPlayer2.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
 			labelPlayer2.setForeground(Color.WHITE);
