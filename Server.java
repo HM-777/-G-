@@ -1,7 +1,10 @@
-import java.io.BufferedReader;
+import java.io.BufferedReader;//テキストファイルを読み込むためのクラス,1行ずつ読み込むreadlineメソッドが用意されています。
+//テキストファイルなどの文字コードを指定して読み込むためには、
+//InputStreamReader及びFileInputStreamクラスを拡張したBufferedReaderクラスを使用します。
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.InputStreamReader;//指定したストリームを、指定した文字コードで構成されるテキストファイルとして読み込みます
+import java.io.PrintWriter;//文字コードを指定してファイルに書き込みを行います。
+//一例として、BufferedWriter、OutputStreamWriter及びFileOutputStreamクラスを拡張した、PrintWriterクラス
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
@@ -33,8 +36,7 @@ public class Server{
 		Receiver (Socket socket, int playerNo){
 			try{
 				this.playerNo = playerNo; //プレイヤ番号を渡す
-				sisr = new InputStreamReader(socket.getInputStream());//受信したバイトデータを文字ストリームに
-				br = new BufferedReader(sisr);//文字ストリームをバッファリングする
+				br = new BufferedReader(new InputStreamReader(socket.getInputStream()));//文字ストリームをバッファリングする
 
 			} catch (IOException e) {
 				System.err.println("データ受信時にエラーが発生しました: " + e);
@@ -47,10 +49,9 @@ public class Server{
 				while(true) {// データを受信し続ける
 					String inputLine = br.readLine();//データを一行分読み込む、目的を読み込む
 
-				    if(inputLine.equals("makeAccount")) {//目的がアカウント作成だった場合
+				    if(inputLine.equals("makeAccount")) {//目的が「アカウント作成」
 				    	String user[] = new String[2];
 				    	int i=0;
-						//ここで「合致データ確認メソッド」を入れる、[ある時]「ユーザ情報転送メソッド」,「戦ラ送信メソッド」で送る
 						while(true) {
 							inputLine = br.readLine();
 							if(!inputLine.equals("end")) {
@@ -62,11 +63,11 @@ public class Server{
 						}registerUser(user[0],user[1]);
 
 					}
-				    else if(inputLine.equals("login")) {//目的がログイン認証要請の送信だった場合
+				    else if(inputLine.equals("login")) {//目的が「ログイン認証要請」
 						//ここで「合致データ確認メソッド」を入れる、[ある時]「ユーザ情報転送メソッド」,「戦ラ送信メソッド」で送る
 
 						int i=0;
-						String accountInfo[] = new String[3];//アカウント情報用配列
+						String accountInfo[] = new String[2];//アカウント情報用配列
 
 						while(true) {//データを受信し続ける
 							inputLine = br.readLine();//１行読み込む
@@ -74,39 +75,45 @@ public class Server{
 								accountInfo[i] = inputLine;//アカウント情報用配列に格納
 								i++;
 							}
-							else break;
-						}
-						//oclient.player = new Player(accountInfo[0], accountInfo[1], accountInfo[2]);
+							else {
+								break;
+							}
+						}confirmDate(accountInfo[0],accountInfo[1]);
+
 					}
 
-					else if(inputLine.equals("findingOpponent")) {//目的が対戦の時の相手のユーザ情報の送信だった場合、
+					else if(inputLine.equals("findingOpponent")) {//目的が「対戦相手とのマッチング」
 		//この時、相手の戦ラも必要だよな？、「ユーザ情報転送メソッド」と「戦ラ送信メソッド」
 						//アカウント作成の時のIDの送信もある、その時「ユーザ登録メソッド」と「ユーザ情報転送メソッド」
-						while(true) {
-							inputLine = br.readLine();
-							if(inputLine.equals("succeeded")) {
-								result = true;
-							} else if(inputLine.equals("failed")){
-								result = false;
-							} else {
-								flag = true;
+						int i=0;
+						String accountInfo[] = new String[2];//アカウント情報用配列
+
+						while(true) {//データを受信し続ける
+							inputLine = br.readLine();//１行読み込む
+							if(!inputLine.equals("end")) {//終了サインじゃなかったら
+								accountInfo[i] = inputLine;//アカウント情報用配列に格納
+								i++;
+							}
+							else {
 								break;
 							}
-						}
+						}confirmDate(accountInfo[0],accountInfo[1]);
 					}
 
-					else if(inputLine.equals("sendOperation")) {//目的が操作情報の送信だった場合
-						while(true) {
-							inputLine = br.readLine();
-							if(inputLine.equals("succeeded")) {
-								result = true;
-							} else if(inputLine.equals("failed")){
-								result = false;
-							} else {
-								flag = true;
+					else if(inputLine.equals("sendOperation")) {//目的が「操作情報の送信」
+						int i=0;
+						String operationInfo[] = new String[2];//アカウント情報用配列
+
+						while(true) {//データを受信し続ける
+							inputLine = br.readLine();//１行読み込む
+							if(!inputLine.equals("end")) {//終了サインじゃなかったら
+								operationInfo[i] = inputLine;//アカウント情報用配列に格納
+								i++;
+							}
+							else {
 								break;
 							}
-						}
+						}forwardMessage(Integer.parseInt(operationInfo[0]),Integer.parseInt(operationInfo[1]));//x,y座標
 					}
 
 
@@ -155,12 +162,11 @@ public class Server{
 			ServerSocket ss = new ServerSocket(port); //ポートにバインドされたサーバソケットを用意ServerSocketはクラス
 			while (true) {
 				Socket socket = ss.accept();//新規接続を受け付ける
-				clientnum++;
-				if(clientnum % 2==0) {
-				break;
-				}
+				System.out.println("新規接続を受け入れました。");
 
 			}
+
+
 		} catch (Exception e) {
 			System.err.println("ソケット作成時にエラーが発生しました: " + e);
 		}
@@ -172,7 +178,7 @@ public class Server{
 		}else return 0;//接続切断
 	}
 
-	public String sendColor(int id1,int id2){ //先手後手情報(白黒)の送信
+	public String sendColor(int id1,int id2,int playerNo){ //先手後手情報(白黒)の送信
         if(id1>id2) {
 	         return "白";//数字で送るのか
         }else {
@@ -180,10 +186,8 @@ public class Server{
         }
     }
 
-	public String forwardMessage(int[][] msg, int playerNo){ //操作情報の転送、置いた部分を受け流す
-		if() {//1から来たなら2に流す
-			return msg;//4-5白みたいな情報
-		}else return msg;//2から来たなら1に流す
+	public int forwardMessage(int x,int playerNo){ //操作情報の転送、置いた部分を受け流す
+		return x;//2から来たなら1に流す
 	}
 
     public void collectGrade() {//戦績・ランキング情報の集計
@@ -202,7 +206,7 @@ public class Server{
         int id = num;//ランダム文字列でIDを与える？
         String a[][][] =new String[90000000][10][1000000];
         //二次元配列の要素一次元目はID、そのIDの紐付け情報が二次元目。
-        //0.名前　1.パスワード　2.戦　3.勝　4.敗　5.%　6.投了数　7.レート　8.ランキング　9.相手のID
+        //0.名前　1.パスワード　2.戦　3.勝　4.分　5.敗　6.%　7.投了数　8.レート　9.ランキング　10.相手のID
         a[id][0][0]=name;
         a[id][1][0]=passward;
         a[id][2][0]=Integer.toString(0);
@@ -223,8 +227,8 @@ public class Server{
     }
 
     public void forwardUser(String msg) {//ユーザ情報の転送
-    	out.println(msg);//送信データをバッファに書き出す
-		out.flush();//送信データを送る
+    	//out.println(msg);//送信データをバッファに書き出す
+		//out.flush();//送信データを送る
 		System.out.println("サーバにメッセージ " + msg + " を送信しました"); //テスト標準出力
     	//ログイン時の転送（下のconfirmDateでデータ[ある時]送信,[ない時]エラーメッセージ送信）
     	//テスト標準出力//、対戦時の相手の情報の転送
@@ -238,11 +242,11 @@ public class Server{
 
         int pos = -1;
         for (int i = 0; i < a.length; i++) {
-            if (a[i].name == name && a[i].passward == passward) {
+           // if (a[i].name == name && a[i].passward == passward) {
                 pos = i;
                 break;
             }
-        }
+        //}
         if (pos < 0) {
             System.out.println("見つかりません");
         } else {
@@ -270,14 +274,14 @@ public class Server{
 
 
     public void sendMessage(String msg){	// サーバに情報を送信
-		out.println(msg);//送信データをバッファに書き出す
-		out.flush();//送信データを送る
+		//out.println(msg);//送信データをバッファに書き出す
+		//out.flush();//送信データを送る
 		System.out.println("サーバにメッセージ " + msg + " を送信しました"); //テスト標準出力
 	}
 
 
 	public static void main(String[] args){ //main
-		Server server = new Server(1114); //待ち受けポート10000番でサーバオブジェクトを準備
+		Server server = new Server(10000); //待ち受けポート10000番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
