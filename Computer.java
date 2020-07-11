@@ -5,7 +5,7 @@ public class Computer {
 	//メンバ変数
 	int level;	//level:CPUの難易度 探索の深さの値？
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
-	int childValue;	//childValue:子ノードの評価値
+	//int childValue;	//childValue:子ノードの評価値
 	int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {0, -3, 0, -1, -1, 0, -3, 0},
@@ -61,6 +61,7 @@ public class Computer {
 	//あまりに時間がかかるなら打ち切り？
 	public int alphabeta(int turn, int depth, int alpha, int beta) {
 		int value ;	//(多分)ノードの評価値
+		int childValue;
 		int X = 100, Y = 100;	//評価の高い場所
 		//末端ノードなら盤面評価値を返す
 		if(depth == 0) {
@@ -78,12 +79,11 @@ public class Computer {
 				if(othello.grids[y][x] == 2) {
 					//試しに打つ
 					othello.setStone(x, y);
-
-				othello.checkPlaceable();
+					othello.checkPlaceable();
 					//手番を変える(現在はsetStoneにchangeTurnが内包)
 
 					//次の評価値を求める
-					childValue = alphabeta(turn*(-1), depth-1, alpha, beta);
+					childValue = alphabeta(-turn, depth-1, alpha, beta);
 					//末端ノードまで来るか，子ノードの評価値が計算されているなら以下の処理へ
 					//自分のターンなら子ノードから最大値を選択
 						//バグってたらこの辺怪しい
@@ -146,6 +146,86 @@ public class Computer {
 		}
 	}
 
+
+	//全探索
+		//とりあえず単純に実装するけど高速化の必要があるかも
+		private int exhaustiveSearch(int turn, int depth, int alpha, int beta) {
+			othello.checkPlaceable();
+			//System.out.println("T:"+othello.getTurn());
+			//System.out.println("Pass:"+othello.pass_count);
+			int value;
+			int childValue;
+			int pass= 0;
+			int X = 100, Y = 100;
+			//System.out.println(depth);
+			//ゲーム終了まで進んだら，黒石と白石の数の差を返す
+			//if(othello.getBlackstone() + othello.getWhitestone() == 64 || othello.pass_count == 2) {
+			if(othello.isGameover() == true) {
+				//System.out.println("owari");
+				if(color == -1) {
+					return othello.getBlackstone() - othello.getWhitestone();
+				}else {
+					return othello.getWhitestone() - othello.getBlackstone();
+				}
+			}
+			if(turn == color) {
+				value = Integer.MIN_VALUE;
+			}else{
+				value = Integer.MAX_VALUE;
+			}
+			for(int y = 0; y < 8; y++) {
+				for(int x = 0; x < 8; x++) {
+					if(othello.grids[y][x] == 2) {
+						pass++;
+						//System.out.println("put " + othello.getTurn());
+						othello.setStone(x, y);
+						othello.checkPlaceable();
+						childValue =  exhaustiveSearch(-turn, depth-1, alpha, beta);
+						if(turn == color) {
+							if(childValue >= value) {
+								value = childValue;
+								alpha = value;
+								X = x;
+								Y = y;
+								}
+							if(value > beta) {	//βカット
+								othello.undo();
+								return value;
+							}
+						}else {
+							if(childValue <= value) {
+									value = childValue;
+									beta = value;
+									X = x;
+									Y = y;
+								}
+							if(value < alpha) {	//αカット
+								othello.undo();
+								return value;
+							}
+						}
+						othello.undo();
+					}
+				}
+			}
+			//System.out.println(depth + " " + value);
+			if(pass == 0) {
+				othello.changeTurn();
+				othello.checkPlaceable();
+				//othello.draw();
+				//System.out.println(othello.pass_count);
+				value =  exhaustiveSearch(-turn, depth, alpha, beta);
+			}
+			//先頭ノードだったら打つ場所を返す
+			if(depth == level) {
+					System.out.println("zentansaku " + value);
+					return 10*Y + X; //1つの値で返す必要があるのでこの形に．Xは(戻り値)%10,Yは((戻り値)-(戻り値)%10)/10で復元できる．
+			}else {
+				return value;
+			}
+		}
+
+
 	//盤面評価
 		//turn:自分の番か相手の番かを表現
 	private int evaluateBoard(int turn) {	//元々doubleだったけど現状intになりました
@@ -166,21 +246,33 @@ public class Computer {
 	}
 
 	//Clientに呼び出されるメソッド．戻り値は座標
-		//grids[][]:思考する盤面
-	public int think(int grids[][]) {
-		//現在の盤面をコピー
-		for(int y = 0; y < 8; y++) {
-			for(int x = 0; x < 8; x++) {
-				othello.grids[y][x] = grids[y][x];
+			//grids[][]:思考する盤面
+		public int think(int grids[][]) {
+			//現在の盤面をコピー
+			for(int y = 0; y < 8; y++) {
+				for(int x = 0; x < 8; x++) {
+					othello.grids[y][x] = grids[y][x];
+
+				}
+			}
+
+			if(level == 1) {
+				return random();
+			}else{
+				//残り14手から全探索開始
+				//!このif文は怪しい...
+				if(othello.getTurn() != color) {
+					System.out.println("CHANGE TURN!");
+					othello.changeTurn();
+				}
+				if(othello.getBlackstone() + othello.getWhitestone() >= 50) {
+					return exhaustiveSearch(color, level, Integer.MIN_VALUE, Integer.MAX_VALUE);
+				}
+				else{
+					return alphabeta(color, level, Integer.MIN_VALUE, Integer.MAX_VALUE);
+				}
 			}
 		}
-
-		if(level == 1) {
-			return random();
-		}else{
-			return alphabeta(color, level, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		}
-	}
 
 
 
