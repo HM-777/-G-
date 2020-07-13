@@ -29,6 +29,12 @@ public class Player {
     	myID = id;
     	myPassword = pw;
     }
+    public String getID() {
+    	return myID;
+    }
+    public String getPass() {
+    	return myPassword;
+    }
     public void MakeAccount(String id, String pw) {  //アカウント作成
     	myID = id;
     	myPassword = pw;
