@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 public class Othello {
@@ -13,6 +14,7 @@ public class Othello {
     private  int placeable=2;//置くことが出来る
     private  int black=-1;
     private  int white=1;
+    private int garbage=3;
 
     private boolean placeableflag=false;//おける場所のフラグ
 
@@ -26,7 +28,8 @@ public class Othello {
     //白い駒の数集計用
     private  int cnt_white = 0;
 
-
+private boolean revolution_flag=false;
+Random random=new Random();
 
     // コンストラクタ
 	public Othello(int i){//i=1 special i=0 nomal
@@ -111,6 +114,11 @@ cnt_white=0;
 	}
 	public void changeTurn(){ //　手番を変更
 	turn*=-1;
+	if(turn==white) {
+		System.out.println("stone:white");
+	}else {
+		System.out.println("stone:black");
+	}
 	}
 	public boolean isGameover(){	// 対局終了を判断
 
@@ -145,16 +153,24 @@ cnt_white=0;
 	}
 
 
-	public int checkWinner(){	// 勝敗を判断
+	public int checkWinner(){	// 勝敗を判断(特殊ルールでの革命時の処理も追加)
 		int winner=10;//初期値　この値が返った場合試合が終わっていない
 		if(isGameover()==true) {
 			if(cnt_black==cnt_white) {
 				winner=0;// draw
 
 			}else if(cnt_black>cnt_white) {
+				if(revolution_flag==false)
 				winner=black; //黒勝ち
+				else {
+					winner=white;
+				}
 			}else if(cnt_black<cnt_white) {
+				if(revolution_flag==false)
 				winner=white;//白勝ち
+				else {
+					winner=black;
+				}
 			}
 		}
 		return winner;
@@ -500,7 +516,435 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 
     }
   }
+   //------------------------------特殊ルール------------------------------
+   //盤面生成
+   public void s_generategrids(int i) {
+	   //　10＝石破壊　　30＝2回行動　40＝お邪魔し石　50＝上下1マスをひっくり返す　60＝盤面反転　70＝盤面隠し　80＝革命　
+     //後々追加で
+	   if(i==0) {
+		 grids[1][6]=60;
+		 grids[5][1]=10;
+		 grids[3][1]=40;
+		 grids[6][7]=30;
+		 grids[6][5]=50;
+		 grids[1][1]=80;
+	   }else if(i==1) {
+			 grids[1][6]=80;
+			 grids[5][1]=10;
+			 grids[3][1]=40;
+			 grids[6][7]=30;
+			 grids[7][5]=60;
+			 grids[0][0]=10;
+	   }
+/*while(special<9) {
 
+			int s_x=random.nextInt(row);
+			int s_y=random.nextInt(row);
+if((s_x<2||s_y<2)||(s_x>7||s_y>7)) {
+int event=10*(random.nextInt(8)+1);
+grids[s_y][s_x]=event;
+special++;
+                                    }
+                 }*/ //ランダム生成
+
+   }
+ //おける場所探索
+   public boolean s_checkPlaceable() {
+pass_flag=true;
+
+		for(int i=0;i<row;i++) {
+			for(int j=0;j<row;j++) {
+				//空の盤面のみチェックする
+				if(grids[i][j]%10==empty||grids[i][j]%10==placeable) {
+			    s_turnLeftUp(j, i,false);
+			    s_turnUp(j, i,false);
+			    s_turnRightUp(j, i,false);
+			    s_turnLeft(j, i,false);
+			    s_turnRight(j, i,false);
+			    s_turnLeftDown(j, i,false);
+			    s_turnDown(j, i,false);
+			    s_turnRightDown(j, i,false);
+
+			    if(placeableflag==true) {//もしおける場所が見つかったならおける場所変数を入れてパスフラグを折りパスカウントをリセット
+			    	pass_flag=false;
+			    	int cash;
+			    	cash=grids[i][j]/10;
+			    	grids[i][j]=10*cash+placeable;
+			    	pass_count=0;
+			    	placeableflag=false;
+			    }else {
+			    	int cash;
+			    	cash=grids[i][j]/10;
+			    	grids[i][j]=cash*10;
+			    }
+				}
+			}
+		}
+		if(pass_flag==true) {
+			pass_count++;
+			//パスフラグがtrueのままならパスカウントを増加
+		}
+		return !pass_flag;
+	}
+	//石設置（発動イベントを戻り値）
+   public int s_setStone(int x, int y) {
+int event=-1;
+event=grids[y][x]/10;//イベントを抽出
+
+		    // 駒を配置できる場合
+		    if (grids[y][x]%10==placeable) {
+
+		        //盤面を保存する
+
+
+
+		    	grids[y][x] = turn;
+
+
+		      // ひっくり返す処理
+		      s_turnStone(x, y);
+		    //手数を増やす
+		      moves_count++;
+
+
+		    }
+		    return event;//イベントを戻り値とする。
+		 //1＝石破壊　3＝2回行動　4＝お邪魔石　5＝上下1マスを自分の石で埋める　6＝盤面反転　7＝盤面隠し　8＝革命
+		  }
+
+	//ひっくり返す処理
+   public void s_turnStone(int x, int y) {
+
+		    // 8方向の駒の配置を確認し、ひっくり返す
+
+		    s_turnLeftUp(x, y,true);
+		    s_turnUp(x, y,true);
+		    s_turnRightUp(x, y,true);
+		    s_turnLeft(x, y,true);
+		    s_turnRight(x, y,true);
+		    s_turnLeftDown(x, y,true);
+		    s_turnDown(x, y,true);
+		    s_turnRightDown(x, y,true);
+
+		  }
+
+//石破壊
+   public void destroystone(int x,int y) {
+int cash;
+cash=grids[y][x]/10;
+	   grids[y][x]=cash*10+empty;
+   }
+ //お邪魔石(一応イベントマスにおいてもイベントは消費されないようにしてる)
+   public void setgarbage(int x,int y) {
+	   int cash;
+	   cash=grids[y][x]/10;
+	   grids[y][x]=cash*10+garbage;
+	   System.out.println("中の値"+grids[y][x]);
+   }
+//盤面反転
+   public void inversion() {
+	   for(int y=0;y<row;y++) {
+		   for(int x=0;x<row;x++) {
+			   if(grids[y][x]==white)
+				   grids[y][x]=black;
+			   else if(grids[y][x]==black)
+				   grids[y][x]=white;
+
+		   }
+	   }
+   }
+//上下1マスに石を置く
+   public void set_cross(int x,int y) {//引数はsetstoneのものと同じで
+	  if(y-1>0)
+	   grids[y-1][x]=turn;
+	  if(y+1<row)
+	  grids[y+1][x]=turn;
+	  if(x+1<row)
+	  grids[y][x+1]=turn;
+	  if(x-1>0)
+	  grids[y][x-1]=turn;
+   }
+//革命
+   public void revolution() {
+	  if(revolution_flag==false)
+	   revolution_flag=true;
+	  else {
+		  revolution_flag=false;
+	  }
+   }
+   //flagは盤面に操作を反映する場合にはtrueしない場合はfalse
+		  public void s_turnLeftUp(int x, int y,boolean flag) {
+		    if (y > 1 && x > 1) {
+
+		      // となりの駒
+		      int next = grids[y - 1][x - 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x - i < 0 || y - i < 0 || grids[y - i][x - i]%10==empty||grids[y-i][x-i]%10==placeable||grids[y-i][x-i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y - i][x - i]==turn) {
+		            // 自駒の場合
+		if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		 if(flag==true) {           for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y - t][x - t] =turn;
+
+		            }
+		 }
+
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnUp(int x, int y,boolean flag) {
+		    if (y > 1) {
+
+		      // となりの駒
+		      int next = grids[y - 1][x];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (y - i < 0 || grids[y - i][x]%10==empty||grids[y-i][x]%10==placeable||grids[y-i][x]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y - i][x]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true) {       for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y - t][x] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnRightUp(int x, int y,boolean flag) {
+		    if (y > 1 && x < 6) {
+
+		      // となりの駒
+		      int next = grids[y - 1][x + 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x + i > 7 || y - i < 0 || grids[y - i][x + i]%10==empty||grids[y-i][x+i]%10==placeable||grids[y-i][x+i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y - i][x + i]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {   for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y - t][x + t] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnDown(int x, int y,boolean flag) {
+		    if (y < 6) {
+
+		      // となりの駒
+		      int next = grids[y + 1][x];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (y + i > 7 ||grids[y + i][x]%10==empty||grids[y+i][x]%10==placeable||grids[y+i][x]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y + i][x]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {       for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y + t][x] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		  public void s_turnRight(int x, int y,boolean flag) {
+		    if (x < 6) {
+
+		      // となりの駒
+		      int next = grids[y][x + 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x + i > 7 || grids[y][x + i]%10==empty||grids[y][x+i]%10==placeable||grids[y][x+i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y][x + i]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {      for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y][x + t] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnLeftDown(int x, int y,boolean flag) {
+		    if (y < 6 && x > 1) {
+
+		      // となりの駒
+		      int next = grids[y + 1][x - 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x - i < 0 || y + i > 7 || grids[y + i][x - i]%10==empty||grids[y+i][x-i]%10==placeable||grids[y+i][x-i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y + i][x - i]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {         for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y + t][x - t] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnLeft(int x, int y,boolean flag) {
+		    if (x > 1) {
+
+		      // となりの駒
+		      int next =grids[y][x - 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x - i < 0 || grids[y][x - i]%10==empty||grids[y][x-i]%10==placeable||grids[y][x-i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y][x - i]==turn) {
+		            // 自駒の場合
+		        	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {        for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		        		  grids[y][x - t] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
+
+		   public void s_turnRightDown(int x, int y,boolean flag) {
+		    if (y < 6 && x < 6) {
+
+		      // となりの駒
+		     int  next = grids[y + 1][x + 1];
+
+		      // となりの駒が裏駒の場合
+		      if (next==turn*-1) {
+
+		        // さらにその一つとなりから順に確認
+		        for (int i = 2; true; i++) {
+
+		          if (x + i > 7 || y + i > 7 || grids[y + i][x + i]%10==empty||grids[y+i][x+i]%10==placeable||grids[y+i][x+i]%10==garbage) {
+		            // 駒がない場合終了
+		            break;
+		          } else if (grids[y + i][x + i]==turn) {
+		            // 自駒の場合
+		          	  if(flag==false&&placeableflag==false) {placeableflag=true;}
+		            // あいだの駒をすべて自駒にひっくりかえす
+		        	  if(flag==true)  {         for (int t = 1; t < i; t++) {
+		              // 配列の要素を上書き
+
+		              grids[y + t][x + t] =turn;
+
+		            }
+		        	  }
+		            break;
+		          }
+		        }
+		      }
+
+		    }
+		  }
 public void draw() {
 	System.out.println("　０１２３４５６７");
 	for(int j=0;j<8;j++) {
@@ -518,6 +962,96 @@ public void draw() {
 System.out.println("");
 	}
 }
+public void s_draw() {
+	System.out.println("　０１２３４５６７");
+	for(int j=0;j<8;j++) {
+		System.out.print(" "+j);
+	for(int i=0;i<8;i++) {
+
+		if(grids[j][i]==white)
+		System.out.print("○");
+		else if(grids[j][i]==black)
+			System.out.print("●");
+		else if(grids[j][i]%10==garbage)
+			System.out.print("□");
+		else if(grids[j][i]%10==placeable)
+			System.out.print("△");
+		else if(grids[j][i]==empty)
+			System.out.print("  ");
+		else if(grids[j][i]/10!=empty&&grids[j][i]%10==empty) {
+
+		System.out.print("☆");
+	}
+
+	}
+	System.out.println("");
+}
+}
+public void s_match(int check,int x,int y) {
+	int c2;
+	int x2;int y2;
+	Scanner scan=new Scanner(System.in);
+
+
+	if(check==1) {//石破壊
+		s_draw();
+		do {
+		System.out.print("破壊する石を選択してください。\nx=");
+
+		 x2=scan.nextInt();
+		System.out.print("y=");
+		 y2=scan.nextInt();}while(grids[y2][x2]%10==placeable||grids[y2][x2]==empty);
+		destroystone(x2,y2);
+
+	}else if(check==3) {//二階行動
+changeTurn();
+changeTurn();
+s_checkPlaceable();
+		if(pass_flag==true)
+			changeTurn();
+		if(pass_flag==false) {
+		s_draw();
+		System.out.print("もう一度行動できます。石を置く場所を選択してください。\nx=");
+		 x2=scan.nextInt();
+		System.out.print("y=");
+		 y2=scan.nextInt();
+		 c2=s_setStone(x2, y2);
+		 if(c2!=0)
+		 s_match(c2,x2,y2);
+
+		}
+		}else if(check==4) {
+			checkPlaceable();
+			s_draw();
+			do {
+			System.out.print("お邪魔石を置いてください。\nx=");
+			 x2=scan.nextInt();
+				System.out.print("y=");
+				 y2=scan.nextInt();
+				 }while(grids[y2][x2]==white||grids[y2][x2]==black);
+				 setgarbage(x2,y2);
+
+		}else if(check==5) {//上下1マスを埋める
+			System.out.print("上下1マスに石を設置します。\n");
+			set_cross(x, y);
+
+		}else if(check==6) {//色反転
+			System.out.print("盤面の石の色を全て反転します\n");
+			inversion();
+
+		}else if(check==8) {//革命
+
+			revolution();
+			if(revolution_flag==true) {
+				System.out.print("以降は取得石の少ないプレイヤーの勝利となります。\n");
+			}else {
+				System.out.print("以降は取得石の多いプレイヤーの勝利となります。\n");
+			}
+
+		}
+
+}
+
 
 public static void main(String args[]) {
 
@@ -528,42 +1062,70 @@ public static void main(String args[]) {
     String pink   = "\u001b[00;35m";
     String cyan   = "\u001b[00;36m";
     String end    = "\u001b[00m";
-	Othello a=new Othello(0);
+	final Othello a=new Othello(0);
 	Othello b=new Othello(0);
 	Computer com=new Computer(7,a.white);
 	Computer com2=new Computer(1,a.black);
 	Scanner scan=new Scanner(System.in);
 
 
-
+a.s_generategrids(0);
+int check;
+int x,y;
 	while(a.isGameover()==false) {
+check=0;
+		a.s_checkPlaceable();
 
-	if(a.turn==a.black) {
-		a.checkPlaceable();
-		a.draw();
+if(a.turn==a.black) {
+
+		if(a.pass_flag==true)
+			a.changeTurn();
+		a.s_draw();
 		if(a.pass_flag==false) {
-/*}System.out.println("x=");
-int x=scan.nextInt();
-System.out.println("y=");
-int y=scan.nextInt();
-a.setStone(x, y);*/
-			int put2=com2.think(a.getGrids());
+			do {
+System.out.print("Player1\nx=");
+ x=scan.nextInt();
+System.out.print("y=");
+ y=scan.nextInt();}while(a.grids[y][x]%10!=a.placeable);
+check=a.s_setStone(x, y);
+a.s_match(check, x, y);
+a.changeTurn();
+
+
+
+
+	/*	int put2=com2.think(a.getGrids());
 a.setStone(put2%10,(put2-put2%10)/10);
 System.out.println(red+"\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
+*/
 
 
 
-	}
 
 
-	}
+	}}
 		else if(a.turn==a.white) {
-			a.checkPlaceable();
-			a.draw();
+			check=0;
+
+			if(a.pass_flag==true)
+				a.changeTurn();
+			a.s_draw();
 			if(a.pass_flag==false) {
-			int put=com.think(a.getGrids());
+
+			/*int put=com.think(a.getGrids());
 			a.setStone(put%10,(put-put%10)/10);
 			System.out.println(red+"\nalphabeta_cpu_turn\n x="+put%10+" y="+(put-put%10)/10+end);
+*/
+				do {
+				System.out.print("Player2\nx=");
+				 x=scan.nextInt();
+				System.out.print("y=");
+				 y=scan.nextInt();}while(a.grids[y][x]%10!=a.placeable);
+				check=a.s_setStone(x, y);
+				a.s_match(check,x,y);
+				a.changeTurn();
+
+
 			}
 
 			}
