@@ -43,7 +43,7 @@ public class Player {
     	return myID + myPassword;
     }
     public void setRecord(int r[]) {  //戦績情報の受付
-    	int rec = 5;
+    	int rec = 6;//0:総戦数, 1:勝, 2:負, 3:分, 4:投了, 5:レート
     	for(int i=0; i<rec; i++) {
     		myRecord[i] = r[i];
         }
