@@ -6,7 +6,7 @@ public class Computer {
 	int level;	//level:CPUの難易度 探索の深さの値？
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
 	//int childValue;	//childValue:子ノードの評価値
-	int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
+	/*int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {0, -3, 0, -1, -1, 0, -3, 0},
 							  {-1, -3, -1, -1, -1, -1, -3, -1},
@@ -14,7 +14,16 @@ public class Computer {
 							  {0, -3, 0, -1, -1, 0, -3, 0},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {30, -12, 0, -1, -1, 0, -12, 30}
-							 };	//evaluationMap:石を置いた時の評価値表
+							 };	//evaluationMap:石を置いた時の評価値表*/
+	int evaluationMap[][] = {{68, -12, 53, -8, -8, 53, -12, 68},
+			  {-12, -62, -33, -7, -7, -33, -62, -12},
+			  {53, -33, 26, 8, 8, 26, -33, 53},
+			  {-8, -7, 8, -18, -18, 8, -7, -8},
+			  {-8, -7, 8, -18, -18, 8, -7, -8},
+			  {53, -33, 26, 8, 8, 26, -33, 53},
+			  {-12, -62, -33, -7, -7, -33, -62, -12},
+			  {68, -12, 53, -8, -8, 53, -12, 68},
+			 };
 	//int board[][]; //board:盤面情報を格納する変数→othello.grids[][]に変更
 	ArrayList<Integer> canputlist_x = new ArrayList<Integer>();
 	ArrayList<Integer> canputlist_y = new ArrayList<Integer>();	//置ける場所の一覧
