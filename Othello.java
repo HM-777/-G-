@@ -15,6 +15,7 @@ public class Othello {
     private  int black=-1;
     private  int white=1;
     private int garbage=3;
+    private int release=5;
 
     private boolean placeableflag=false;//おける場所のフラグ
 
@@ -114,11 +115,11 @@ cnt_white=0;
 	}
 	public void changeTurn(){ //　手番を変更
 	turn*=-1;
-	if(turn==white) {
+	/*if(turn==white) {
 		System.out.println("stone:white");
 	}else {
 		System.out.println("stone:black");
-	}
+	}*/
 	}
 	public boolean isGameover(){	// 対局終了を判断
 
@@ -184,7 +185,7 @@ pass_flag=true;
 		for(int i=0;i<row;i++) {
 			for(int j=0;j<row;j++) {
 				//空の盤面のみチェックする
-				if(grids[i][j]==empty||grids[i][j]==placeable) {
+				if(grids[i][j]==empty||grids[i][j]==placeable||grids[i][j]==release) {
 			    turnLeftUp(j, i,false);
 			    turnUp(j, i,false);
 			    turnRightUp(j, i,false);
@@ -274,6 +275,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
  if(flag==true) {           for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y - t][x - t] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y-t+a][x-t+b]!=black&&grids[y-t+a][x-t+b]!=white)
+            			  grids[y-t+a][x-t+b]=release;
+            	  }
+              }
 
             }
  }
@@ -308,6 +315,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true) {       for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y - t][x] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y-t+a][x+b]!=black&&grids[y-t+a][x+b]!=white)
+            			  grids[y-t+a][x+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -341,6 +354,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {   for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y - t][x + t] =turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y-t+a][x+t+b]!=black&&grids[y-t+a][x+t+b]!=white)
+            			  grids[y-t+a][x+t+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -374,6 +393,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {       for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y + t][x] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y+t+a][x+b]!=black&&grids[y+t+a][x+b]!=white)
+            			  grids[y+t+a][x+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -407,6 +432,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {      for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y][x + t] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y+a][x+t+b]!=black&&grids[y+a][x+t+b]!=white)
+            			  grids[y+a][x+t+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -440,6 +471,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {         for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y + t][x - t] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y+t+a][x-t+b]!=black&&grids[y+t+a][x-t+b]!=white)
+            			  grids[y+t+a][x-t+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -473,6 +510,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {        for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y][x - t] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y+a][x-t+b]!=black&&grids[y+a][x-t+b]!=white)
+            			  grids[y+a][x-t+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -506,6 +549,12 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         	  if(flag==true)  {         for (int t = 1; t < i; t++) {
               // 配列の要素を上書き
               grids[y + t][x + t] = turn;
+              for(int a=-1;a<2;a++) {
+            	  for(int b=-1;b<2;b++) {
+            		  if(grids[y+t+a][x+t+b]!=black&&grids[y+t+a][x+t+b]!=white)
+            			  grids[y+t+a][x+t+b]=release;
+            	  }
+              }
 
             }
         	  }
@@ -628,9 +677,11 @@ event=grids[y][x]/10;//イベントを抽出
 
 		  }
 
-//石破壊
+//石破壊（一つだと地味なんで周辺1マス破壊にするかも）
    public void destroystone(int x,int y) {
 int cash;
+
+
 cash=grids[y][x]/10;
 	   grids[y][x]=cash*10+empty;
    }
@@ -653,7 +704,7 @@ cash=grids[y][x]/10;
 		   }
 	   }
    }
-//上下1マスに石を置く
+//上下1マスに石を置く（これもおもったより地味だったから上下マス全てに石配置するかも）
    public void set_cross(int x,int y) {//引数はsetstoneのものと同じで
 	  if(y-1>0)
 	   grids[y-1][x]=turn;
@@ -1055,13 +1106,7 @@ s_checkPlaceable();
 
 public static void main(String args[]) {
 
-    String red    = "\u001b[00;47m";
-    String green  = "\u001b[00;32m";
-    String yellow = "\u001b[00;33m";
-    String purple = "\u001b[00;34m";
-    String pink   = "\u001b[00;35m";
-    String cyan   = "\u001b[00;36m";
-    String end    = "\u001b[00m";
+
 	final Othello a=new Othello(0);
 	Othello b=new Othello(0);
 	Computer com=new Computer(7,a.white);
