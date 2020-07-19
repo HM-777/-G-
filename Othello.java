@@ -185,7 +185,7 @@ pass_flag=true;
 		for(int i=0;i<row;i++) {
 			for(int j=0;j<row;j++) {
 				//空の盤面のみチェックする
-				if(grids[i][j]==empty||grids[i][j]==placeable||grids[i][j]==release) {
+				if(grids[i][j]!=white&&grids[i][j]!=black) {
 			    turnLeftUp(j, i,false);
 			    turnUp(j, i,false);
 			    turnRightUp(j, i,false);
@@ -265,7 +265,7 @@ pass_flag=true;
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x - i < 0 || y - i < 0 || grids[y - i][x - i]==empty||grids[y-i][x-i]==placeable) {
+          if (x - i < 0 || y - i < 0 || grids[y - i][x - i]==empty||grids[y-i][x-i]==placeable||grids[y-i][x-i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y - i][x - i]==turn) {
@@ -277,9 +277,11 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y - t][x - t] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y-t+a)>-1&&(y-t+a)<8&&(x-t+b)>-1&&(x-t+b)<8) {
             		  if(grids[y-t+a][x-t+b]!=black&&grids[y-t+a][x-t+b]!=white)
             			  grids[y-t+a][x-t+b]=release;
-            	  }
+            		  }
+            		  }
               }
 
             }
@@ -305,7 +307,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (y - i < 0 || grids[y - i][x]==empty||grids[y-i][x]==placeable) {
+          if (y - i < 0 || grids[y - i][x]==empty||grids[y-i][x]==placeable||grids[y-i][x]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y - i][x]==turn) {
@@ -317,8 +319,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y - t][x] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y-t+a)>-1&&(y-t+a)<8&&(x+b)>-1&&(x+b)<8) {
             		  if(grids[y-t+a][x+b]!=black&&grids[y-t+a][x+b]!=white)
             			  grids[y-t+a][x+b]=release;
+            		  }
             	  }
               }
 
@@ -344,7 +348,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x + i > 7 || y - i < 0 || grids[y - i][x + i]==empty||grids[y-i][x+i]==placeable) {
+          if (x + i > 7 || y - i < 0 || grids[y - i][x + i]==empty||grids[y-i][x+i]==placeable||grids[y-i][x+i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y - i][x + i]==turn) {
@@ -356,8 +360,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y - t][x + t] =turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y-t+a)>-1&&(y-t+a)<8&&(x+t+b)>-1&&(x+t+b)<8) {
             		  if(grids[y-t+a][x+t+b]!=black&&grids[y-t+a][x+t+b]!=white)
             			  grids[y-t+a][x+t+b]=release;
+            		  }
             	  }
               }
 
@@ -383,7 +389,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (y + i > 7 ||grids[y + i][x]==empty||grids[y+i][x]==placeable) {
+          if (y + i > 7 ||grids[y + i][x]==empty||grids[y+i][x]==placeable||grids[y+i][x]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y + i][x]==turn) {
@@ -395,8 +401,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y + t][x] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y+t+a)>-1&&(y+t+a)<8&&(x+b)>-1&&(x+b)<8) {
             		  if(grids[y+t+a][x+b]!=black&&grids[y+t+a][x+b]!=white)
             			  grids[y+t+a][x+b]=release;
+            		  }
             	  }
               }
 
@@ -422,7 +430,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x + i > 7 || grids[y][x + i]==empty||grids[y][x+i]==placeable) {
+          if (x + i > 7 || grids[y][x + i]==empty||grids[y][x+i]==placeable||grids[y][x+i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y][x + i]==turn) {
@@ -434,8 +442,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y][x + t] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y+a)>-1&&(y+a)<8&&(x+t+b)>-1&&(x+t+b)<8) {
             		  if(grids[y+a][x+t+b]!=black&&grids[y+a][x+t+b]!=white)
             			  grids[y+a][x+t+b]=release;
+            		  }
             	  }
               }
 
@@ -461,7 +471,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x - i < 0 || y + i > 7 || grids[y + i][x - i]==empty||grids[y+i][x-i]==placeable) {
+          if (x - i < 0 || y + i > 7 || grids[y + i][x - i]==empty||grids[y+i][x-i]==placeable||grids[y+i][x-i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y + i][x - i]==turn) {
@@ -473,8 +483,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y + t][x - t] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y+t+a)>-1&&(y+t+a)<8&&(x-t+b)>-1&&(x-t+b)<8) {
             		  if(grids[y+t+a][x-t+b]!=black&&grids[y+t+a][x-t+b]!=white)
             			  grids[y+t+a][x-t+b]=release;
+            		  }
             	  }
               }
 
@@ -500,7 +512,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x - i < 0 || grids[y][x - i]==empty||grids[y][x-i]==placeable) {
+          if (x - i < 0 || grids[y][x - i]==empty||grids[y][x-i]==placeable||grids[y][x-i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y][x - i]==turn) {
@@ -512,8 +524,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y][x - t] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y+a)>-1&&(y+a)<8&&(x-t+b)>-1&&(x-t+b)<8) {
             		  if(grids[y+a][x-t+b]!=black&&grids[y+a][x-t+b]!=white)
             			  grids[y+a][x-t+b]=release;
+            		  }
             	  }
               }
 
@@ -539,7 +553,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
         // さらにその一つとなりから順に確認
         for (int i = 2; true; i++) {
 
-          if (x + i > 7 || y + i > 7 || grids[y + i][x + i]==empty||grids[y+i][x+i]==placeable) {
+          if (x + i > 7 || y + i > 7 || grids[y + i][x + i]==empty||grids[y+i][x+i]==placeable||grids[y+i][x+i]==release) {
             // 駒がない場合終了
             break;
           } else if (grids[y + i][x + i]==turn) {
@@ -551,8 +565,10 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
               grids[y + t][x + t] = turn;
               for(int a=-1;a<2;a++) {
             	  for(int b=-1;b<2;b++) {
+            		  if((y+t+a)>-1&&(y+t+a)<8&&(x+t+b)>-1&&(x+t+b)<8) {
             		  if(grids[y+t+a][x+t+b]!=black&&grids[y+t+a][x+t+b]!=white)
             			  grids[y+t+a][x+t+b]=release;
+            		  }
             	  }
               }
 
