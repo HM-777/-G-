@@ -1130,10 +1130,13 @@ s_checkPlaceable();
 }
 
 
-public static void main(String args[]) {
+public static void main(String args[]) {//CPU同士で対戦できるようにしてる
+int i=0;
+int alpha=0;
+int randomc=0;
+while(i<30) {//ここのiが対局数
 
-
-	final Othello a=new Othello(0);
+	 Othello a=new Othello(0);
 	Othello b=new Othello(0);
 	Computer com=new Computer(7,a.white);
 	Computer com2=new Computer(1,a.black);
@@ -1145,30 +1148,31 @@ int check;
 int x,y;
 	while(a.isGameover()==false) {
 check=0;
-		a.s_checkPlaceable();
+		a.checkPlaceable();
 
 if(a.turn==a.black) {
 
 		if(a.pass_flag==true)
 			a.changeTurn();
-		a.s_draw();
+		a.draw();
 		if(a.pass_flag==false) {
-			do {
+/*			do {
 System.out.print("Player1\nx=");
  x=scan.nextInt();
 System.out.print("y=");
  y=scan.nextInt();}while(a.grids[y][x]%10!=a.placeable);
 check=a.s_setStone(x, y);
 a.s_match(check, x, y);
-a.changeTurn();
+a.changeTurn();*/
 
 
 
 
-	/*	int put2=com2.think(a.getGrids());
+	int put2=com2.think(a.getGrids());
 a.setStone(put2%10,(put2-put2%10)/10);
-System.out.println(red+"\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+end);
-*/
+System.out.println("Game_count:"+i);
+System.out.println("\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10);
+
 
 
 
@@ -1180,21 +1184,22 @@ System.out.println(red+"\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+
 
 			if(a.pass_flag==true)
 				a.changeTurn();
-			a.s_draw();
+			a.draw();
 			if(a.pass_flag==false) {
 
-			/*int put=com.think(a.getGrids());
+			int put=com.think(a.getGrids());
 			a.setStone(put%10,(put-put%10)/10);
-			System.out.println(red+"\nalphabeta_cpu_turn\n x="+put%10+" y="+(put-put%10)/10+end);
-*/
-				do {
+			System.out.println("Game_count:"+i);
+			System.out.println("\nalphabeta_cpu_turn\n x="+put%10+" y="+(put-put%10)/10);
+
+		/*		do {
 				System.out.print("Player2\nx=");
 				 x=scan.nextInt();
 				System.out.print("y=");
 				 y=scan.nextInt();}while(a.grids[y][x]%10!=a.placeable);
 				check=a.s_setStone(x, y);
 				a.s_match(check,x,y);
-				a.changeTurn();
+				a.changeTurn();*/
 
 
 			}
@@ -1206,9 +1211,11 @@ System.out.println(red+"\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10+
 if(a.checkWinner()==a.white) {
 	System.out.println("White win");
 	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
+	alpha++;
 }else if(a.checkWinner()==a.black) {
 	System.out.println("black win");
 	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
+	randomc++;
 }else if(a.checkWinner()==0) {
 	System.out.println("draw");
 	System.out.println("white:"+a.getWhitestone()+"black:"+a.getBlackstone());
@@ -1216,6 +1223,9 @@ if(a.checkWinner()==a.white) {
 }
 
 
-}
 
+i++;
+}
+System.out.println("alpha_win:"+alpha+"random_win:"+randomc);
+}
 }
