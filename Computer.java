@@ -5,8 +5,7 @@ public class Computer {
 	//メンバ変数
 	int level;	//level:CPUの難易度 探索の深さの値？
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
-	//int childValue;	//childValue:子ノードの評価値
-	/*int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
+	int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {0, -3, 0, -1, -1, 0, -3, 0},
 							  {-1, -3, -1, -1, -1, -1, -3, -1},
@@ -14,8 +13,8 @@ public class Computer {
 							  {0, -3, 0, -1, -1, 0, -3, 0},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {30, -12, 0, -1, -1, 0, -12, 30}
-							 };	//evaluationMap:石を置いた時の評価値表*/
-	int evaluationMap[][] = {{68, -12, 53, -8, -8, 53, -12, 68},
+							 };	//evaluationMap:石を置いた時の評価値表
+	/*int evaluationMap[][] = {{68, -12, 53, -8, -8, 53, -12, 68},
 			  {-12, -62, -33, -7, -7, -33, -62, -12},
 			  {53, -33, 26, 8, 8, 26, -33, 53},
 			  {-8, -7, 8, -18, -18, 8, -7, -8},
@@ -23,14 +22,13 @@ public class Computer {
 			  {53, -33, 26, 8, 8, 26, -33, 53},
 			  {-12, -62, -33, -7, -7, -33, -62, -12},
 			  {68, -12, 53, -8, -8, 53, -12, 68},
-			 };
-	//int board[][]; //board:盤面情報を格納する変数→othello.grids[][]に変更
+			 };*/
 	ArrayList<Integer> canputlist_x = new ArrayList<Integer>();
 	ArrayList<Integer> canputlist_y = new ArrayList<Integer>();	//置ける場所の一覧
 	//int phase = 0;	//phase:序盤〜終盤に分割して思考を変える．使わないかも
 	Random random = new Random();	//random:乱数生成器
 	Othello othello = new Othello(0);	//othello:Othelloクラスのメソッドを利用
-	int kaihoudo[] = new int[7];
+	int kaihoudo[] = new int[7];	//kaihoudo:開放度
 
 	//コンストラクタ
 	public Computer(int level, int color){
@@ -46,7 +44,6 @@ public class Computer {
 		canputlist_x.clear();
 		canputlist_y.clear();
 		//盤面取得
-		//board = .getGrids();
 		//置ける場所(2)を探してcanputlistにチェックし
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
@@ -73,11 +70,11 @@ public class Computer {
 		int value ;	//ノードの評価値
 		int childValue;
 		int X = 100, Y = 100;	//評価の高い場所
-		//int kaihoudo;
 		//末端ノードなら盤面評価値を返す
 		if(depth == 0) {
-			//System.out.println(evaluateBoard(turn));
-			return evaluateBoard(turn) + 2*kaihoudo[0];
+			int k = evaluateBoard();
+			//System.out.println("E:" + k);
+			return  k+ 8*checkKakuteiseki();
 		}
 		// 自分のターンなら最小値，相手のターンなら最大値をとりあえず設定
 		if(turn == color) {
@@ -93,12 +90,10 @@ public class Computer {
 					othello.setStone(x, y);
 					kaihoudo[depth-1] = evaluateKaihoudo(turn);
 					othello.checkPlaceable();
-					//手番を変える(現在はsetStoneにchangeTurnが内包)
-					//次の評価値を求める
+					//手番を変えて次の評価値を求める
 					childValue = alphabeta(-turn, depth-1, alpha, beta);
 					//末端ノードまで来るか，子ノードの評価値が計算されているなら以下の処理へ
 					//自分のターンなら子ノードから最大値を選択
-						//バグってたらこの辺怪しい
 					if(turn == color) {
 						if(childValue >= value) {
 							//評価値がvalueより大きければ更新
@@ -134,6 +129,7 @@ public class Computer {
 			return 10*Y + X; //1つの値で返す必要があるのでこの形に．Xは(戻り値)%10,Yは((戻り値)-(戻り値)%10)/10で復元できる．
 		//それ以外はノードの評価値を返す
 		}else {
+			//開放度を各ノードで加味
 			return value + 2*kaihoudo[depth-1];
 		}
 	}
@@ -143,17 +139,12 @@ public class Computer {
 		//とりあえず単純に実装するけど高速化の必要があるかも
 		private int exhaustiveSearch(int turn, int depth, int alpha, int beta) {
 			othello.checkPlaceable();
-			//System.out.println("T:"+othello.getTurn());
-			//System.out.println("Pass:"+othello.pass_count);
 			int value;
 			int childValue;
 			int pass= 0;
 			int X = 100, Y = 100;
-			//System.out.println(depth);
 			//ゲーム終了まで進んだら，黒石と白石の数の差を返す
-			//if(othello.getBlackstone() + othello.getWhitestone() == 64 || othello.pass_count == 2) {
 			if(othello.isGameover() == true) {
-				//System.out.println("owari");
 				if(color == -1) {
 					return othello.getBlackstone() - othello.getWhitestone();
 				}else {
@@ -169,7 +160,6 @@ public class Computer {
 				for(int x = 0; x < 8; x++) {
 					if(othello.grids[y][x] == 2) {
 						pass++;
-						//System.out.println("put " + othello.getTurn());
 						othello.setStone(x, y);
 						othello.checkPlaceable();
 						childValue =  exhaustiveSearch(-turn, depth-1, alpha, beta);
@@ -200,12 +190,9 @@ public class Computer {
 					}
 				}
 			}
-			//System.out.println(depth + " " + value);
 			if(pass == 0) {
 				othello.changeTurn();
 				othello.checkPlaceable();
-				//othello.draw();
-				//System.out.println(othello.pass_count);
 				value =  exhaustiveSearch(-turn, depth, alpha, beta);
 			}
 			//先頭ノードだったら打つ場所を返す
@@ -220,23 +207,21 @@ public class Computer {
 
 	//盤面評価
 		//turn:自分の番か相手の番かを表現
-	private int evaluateBoard(int turn) {	//元々doubleだったけど現状intになりました
+	private int evaluateBoard() {
 		int evaluation = 0;	//evaluation:盤面に置かれている石とevaluation_mapから算出された盤面評価値
-		//盤面取得
-		//board[][] = .getGrids();
-		//turn=-1なら黒，=1なら白が置かれているすべての場所に対し，evaluattionMapの値で評価
+		//石が置かれているすべての場所に対し，evaluattionMapの値で評価
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
-				if(othello.grids[y][x] == turn){
+				if(othello.grids[y][x] == 1){
 					evaluation += evaluationMap[y][x];
-				}else if(othello.grids[y][x] == -turn) {
+				}else if(othello.grids[y][x] == -1) {
 					evaluation -= evaluationMap[y][x];
 				}
 			}
 		}
 		return evaluation;
 	}
-	//
+	//開放度計算
 	private int evaluateKaihoudo(int turn) {
 		int kaihoudo = 0;
 		for(int y = 0; y < 8; y++) {
@@ -252,6 +237,146 @@ public class Computer {
 			return -kaihoudo;
 		}
 	}
+	//確定石をカウント
+	private int checkKakuteiseki() {
+		int column,row,count=0;
+		/*
+		 * flag:辺が染まっているかをチェック
+		 * flag[0]:左上→右上
+		 * flag[1]:左上→左下
+		 * flag[2]:右上→右下
+		 * flag[3]:左下→右下
+		 */
+		int flag[] = {0, 0, 0, 0};
+		//左上
+		if(othello.grids[0][0] == -1 || othello.grids[0][0] == 1) {
+			column = 1;
+			row = 1;
+			if(othello.grids[0][0] == color) {
+				count++;
+			}else if(othello.grids[0][0] == -color) {
+				count--;
+			}
+			//→右上
+			while(othello.grids[0][column] == othello.grids[0][0] && column <= 6) {
+				if(othello.grids[0][column] == color) {
+					count++;
+				}else if(othello.grids[0][column] == -color) {
+					count--;
+				}
+				column++;
+			}
+			if(othello.grids[0][7] == othello.grids[0][0]) {
+				flag[0] = 1;
+			}
+			//→左下
+			while(othello.grids[row][0] == othello.grids[0][0] && row <= 6) {
+				if(othello.grids[row][0] == color) {
+					count++;
+				}else if(othello.grids[row][0] == -color) {
+					count--;
+				}
+				row++;
+			}
+			if(othello.grids[7][0] == othello.grids[0][0]) {
+				flag[1] = 1;
+			}
+
+		}
+		//右上
+		if(othello.grids[0][7] == -1 || othello.grids[0][7] == 1) {
+			column = 6;
+			row = 1;
+			if(othello.grids[0][7] == color) {
+				count++;
+			}else if(othello.grids[0][7] == -color) {
+				count--;
+			}
+			//→左上
+			while(othello.grids[0][column] == othello.grids[0][7] && column >= 1 && flag[0] == 0) {
+				if(othello.grids[0][column] == color) {
+					count++;
+				}else if(othello.grids[0][column] == -color) {
+					count--;
+				}
+				column--;
+			}
+			//→右下
+			while(othello.grids[row][7] == othello.grids[0][7] && row <= 6) {
+				if(othello.grids[row][7] == color) {
+						count++;
+				}else if(othello.grids[row][7] == -color) {
+						count--;
+				}
+					row++;
+				}
+			if(othello.grids[7][0] == othello.grids[7][7]) {
+				flag[2] = 1;
+			}
+
+		}
+		//左下
+		if(othello.grids[7][0] == -1 || othello.grids[7][0] == 1) {
+			column = 1;
+			row = 6;
+			if(othello.grids[7][0] == color) {
+				count++;
+			}else if(othello.grids[7][0] == -color) {
+				count--;
+			}
+			//→右下
+			while(othello.grids[7][column] == othello.grids[7][0] && column <= 6) {
+				if(othello.grids[7][column] == color) {
+					count++;
+				}else if(othello.grids[7][column] == -color) {
+					count--;
+				}
+				column++;
+			}
+			if(othello.grids[7][7] == othello.grids[7][0]) {
+				flag[3] = 1;
+			}
+			//→左上
+			while(othello.grids[row][0] == othello.grids[7][0] && row >= 1 && flag[1] == 0) {
+				if(othello.grids[row][0] == color) {
+					count++;
+				}else if(othello.grids[row][0] == -color) {
+					count--;
+				}
+				row--;
+			}
+		}
+		//右下
+		if(othello.grids[7][7] == -1 || othello.grids[7][7] == 1) {
+			column = 6;
+			row = 6;
+			if(othello.grids[7][7] == color) {
+				count++;
+			}else if(othello.grids[7][7] == -color) {
+				count--;
+			}
+			//→左下
+			while(othello.grids[7][column] == othello.grids[7][7] && column >= 1 && flag[3] == 0) {
+				if(othello.grids[7][column] == color) {
+					count++;
+				}else if(othello.grids[7][column] == -color) {
+					count--;
+				}
+				column--;
+			}
+			//→左上
+			while(othello.grids[row][7] == othello.grids[7][7] && row >= 1 && flag[2] == 0) {
+				if(othello.grids[row][7] == color) {
+					count++;
+				}else if(othello.grids[row][7] == -color) {
+					count--;
+				}
+				row--;
+			}
+		}
+		//System.out.println(count);
+		return count;
+	}
 
 	//Clientに呼び出されるメソッド．戻り値は座標
 			//grids[][]:思考する盤面
@@ -262,10 +387,11 @@ public class Computer {
 				othello.grids[y][x] = grids[y][x];
 			}
 		}
+		//Easy
 		if(level == 1) {
 			return random();
+		//Normal,Hard
 		}else{
-			//!このif文は怪しい...
 			if(othello.getTurn() != color) {
 				System.out.println("CHANGE TURN!");
 				othello.changeTurn();
