@@ -230,6 +230,12 @@ pass_flag=true;
       turnStone(x, y);
     //手数を増やす
       moves_count++;
+      for(int i=0;i<row;i++) {
+    	  for(int j=0;j<row;j++) {
+    		  if(grids[j][i]==placeable)
+    			  grids[j][i]=empty;
+    	  }
+      }
 
       changeTurn();//ターン変更
     }
