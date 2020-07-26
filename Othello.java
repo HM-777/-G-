@@ -600,6 +600,13 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 			 grids[6][7]=30;
 			 grids[7][5]=60;
 			 grids[0][0]=10;
+	   }else if(i==2) {
+		   grids[0][1]=70;
+		   grids[7][5]=30;
+		   grids[1][3]=40;
+		   grids[2][5]=40;
+		   grids[0][7]=10;
+
 	   }
 /*while(special<9) {
 
@@ -693,14 +700,14 @@ event=grids[y][x]/10;//イベントを抽出
 
 		  }
 
-//石破壊（一つだと地味なんで周辺1マス破壊にするかも）
+//石破壊（一つだと地味なんで周辺1マス破壊にするかも）←やっ１マス
    public void destroystone(int x,int y) {
 int cash;
 
-
 cash=grids[y][x]/10;
 	   grids[y][x]=cash*10+empty;
-   }
+
+}
  //お邪魔石(一応イベントマスにおいてもイベントは消費されないようにしてる)
    public void setgarbage(int x,int y) {
 	   int cash;
@@ -720,17 +727,20 @@ cash=grids[y][x]/10;
 		   }
 	   }
    }
-//上下1マスに石を置く（これもおもったより地味だったから上下マス全てに石配置するかも）
+//上下1マスに石を置く（これもおもったより地味だったから上下マス全てに石配置にした）
    public void set_cross(int x,int y) {//引数はsetstoneのものと同じで
-	  if(y-1>0)
-	   grids[y-1][x]=turn;
-	  if(y+1<row)
-	  grids[y+1][x]=turn;
-	  if(x+1<row)
-	  grids[y][x+1]=turn;
-	  if(x-1>0)
-	  grids[y][x-1]=turn;
-   }
+	   for(int i=-7;i<row;i++) {
+
+	   if((y+i)>-1&&(y+i)<row) {
+	   grids[y+i][x]=turn;
+	   }
+	   if((x+i)>-1&&(x+i)<row){
+		   grids[y][x+i]=turn;
+	   }
+
+		   }
+	   s_draw();
+		   }
 //革命
    public void revolution() {
 	  if(revolution_flag==false)
