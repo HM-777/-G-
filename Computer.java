@@ -3,8 +3,9 @@ import java.util.Random;
 
 public class Computer {
 	//メンバ変数
-	int level;	//level:CPUの難易度 探索の深さの値？
+	int level;	//level:CPUの難易度 探索の深さの値
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
+	int kaihoudo[] = new int[7];	//kaihoudo:開放度
 	int evaluationMap[][] = {{30, -12, 0, -1, -1, 0, -12, 30},
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {0, -3, 0, -1, -1, 0, -3, 0},
@@ -14,21 +15,10 @@ public class Computer {
 							  {-12, -15, -3, -3, -3, -3, -15, -12},
 							  {30, -12, 0, -1, -1, 0, -12, 30}
 							 };	//evaluationMap:石を置いた時の評価値表
-	/*int evaluationMap[][] = {{68, -12, 53, -8, -8, 53, -12, 68},
-			  {-12, -62, -33, -7, -7, -33, -62, -12},
-			  {53, -33, 26, 8, 8, 26, -33, 53},
-			  {-8, -7, 8, -18, -18, 8, -7, -8},
-			  {-8, -7, 8, -18, -18, 8, -7, -8},
-			  {53, -33, 26, 8, 8, 26, -33, 53},
-			  {-12, -62, -33, -7, -7, -33, -62, -12},
-			  {68, -12, 53, -8, -8, 53, -12, 68},
-			 };*/
 	ArrayList<Integer> canputlist_x = new ArrayList<Integer>();
 	ArrayList<Integer> canputlist_y = new ArrayList<Integer>();	//置ける場所の一覧
-	//int phase = 0;	//phase:序盤〜終盤に分割して思考を変える．使わないかも
 	Random random = new Random();	//random:乱数生成器
 	Othello othello = new Othello(0);	//othello:Othelloクラスのメソッドを利用
-	int kaihoudo[] = new int[7];	//kaihoudo:開放度
 
 	//コンストラクタ
 	public Computer(int level, int color){
@@ -39,7 +29,7 @@ public class Computer {
 
 	//以下メソッド
 	//ランダムに打つ
-	public int random() {
+	private int random() {
 		//リスト初期化
 		canputlist_x.clear();
 		canputlist_y.clear();
@@ -66,7 +56,7 @@ public class Computer {
 		 *alpha:αカットする値
 		 *beta:βカットする値*/
 	//あまりに時間がかかるなら打ち切り？
-	public int alphabeta(int turn, int depth, int alpha, int beta) {
+	private int alphabeta(int turn, int depth, int alpha, int beta) {
 		int value ;	//ノードの評価値
 		int childValue;
 		int X = 100, Y = 100;	//評価の高い場所
@@ -74,7 +64,7 @@ public class Computer {
 		if(depth == 0) {
 			int k = evaluateBoard();
 			//System.out.println("E:" + k);
-			return  k+ 8*checkKakuteiseki();
+			return  k - kaihoudo[0]+ 8*checkKakuteiseki();
 		}
 		// 自分のターンなら最小値，相手のターンなら最大値をとりあえず設定
 		if(turn == color) {
@@ -130,83 +120,82 @@ public class Computer {
 		//それ以外はノードの評価値を返す
 		}else {
 			//開放度を各ノードで加味
-			return value + 2*kaihoudo[depth-1];
+			return value - 2*kaihoudo[depth-1];
 		}
 	}
 
 
 	//全探索
-		//とりあえず単純に実装するけど高速化の必要があるかも
-		private int exhaustiveSearch(int turn, int depth, int alpha, int beta) {
-			othello.checkPlaceable();
-			int value;
-			int childValue;
-			int pass= 0;
-			int X = 100, Y = 100;
-			//ゲーム終了まで進んだら，黒石と白石の数の差を返す
-			if(othello.isGameover() == true) {
-				if(color == -1) {
-					return othello.getBlackstone() - othello.getWhitestone();
-				}else {
-					return othello.getWhitestone() - othello.getBlackstone();
-				}
-			}
-			if(turn == color) {
-				value = Integer.MIN_VALUE;
-			}else{
-				value = Integer.MAX_VALUE;
-			}
-			for(int y = 0; y < 8; y++) {
-				for(int x = 0; x < 8; x++) {
-					if(othello.grids[y][x] == 2) {
-						pass++;
-						othello.setStone(x, y);
-						othello.checkPlaceable();
-						childValue =  exhaustiveSearch(-turn, depth-1, alpha, beta);
-						if(turn == color) {
-							if(childValue >= value) {
-								value = childValue;
-								alpha = value;
-								X = x;
-								Y = y;
-								}
-							if(value > beta) {	//βカット
-								othello.undo();
-								return value;
-							}
-						}else {
-							if(childValue <= value) {
-									value = childValue;
-									beta = value;
-									X = x;
-									Y = y;
-								}
-							if(value < alpha) {	//αカット
-								othello.undo();
-								return value;
-							}
-						}
-						othello.undo();
-					}
-				}
-			}
-			if(pass == 0) {
-				othello.changeTurn();
-				othello.checkPlaceable();
-				value =  exhaustiveSearch(-turn, depth, alpha, beta);
-			}
-			//先頭ノードだったら打つ場所を返す
-			if(depth == level) {
-					System.out.println("zentansaku " + value);
-					return 10*Y + X; //1つの値で返す必要があるのでこの形に．Xは(戻り値)%10,Yは((戻り値)-(戻り値)%10)/10で復元できる．
-			}else {
-				return value;
+	private int exhaustiveSearch(int turn, int depth, int alpha, int beta) {
+	othello.checkPlaceable();
+		int value;
+		int childValue;
+		int pass= 0;
+		int X = 100, Y = 100;
+		//ゲーム終了まで進んだら，黒石と白石の数の差を返す
+		if(othello.isGameover() == true) {
+			if(color == -1) {
+				return othello.getBlackstone() - othello.getWhitestone();
+		}else {
+				return othello.getWhitestone() - othello.getBlackstone();
 			}
 		}
+		if(turn == color) {
+			value = Integer.MIN_VALUE;
+		}else{
+			value = Integer.MAX_VALUE;
+		}
+		for(int y = 0; y < 8; y++) {
+			for(int x = 0; x < 8; x++) {
+				if(othello.grids[y][x] == 2) {
+					pass++;
+					othello.setStone(x, y);
+					othello.checkPlaceable();
+					childValue =  exhaustiveSearch(-turn, depth-1, alpha, beta);
+					if(turn == color) {
+						if(childValue >= value) {
+							value = childValue;
+							alpha = value;
+							X = x;
+							Y = y;
+							}
+						if(value > beta) {	//βカット
+							othello.undo();
+							return value;
+						}
+					}else {
+						if(childValue <= value) {
+								value = childValue;
+								beta = value;
+								X = x;
+								Y = y;
+						}
+						if(value < alpha) {	//αカット
+							othello.undo();
+							return value;
+						}
+					}
+					othello.undo();
+					}
+			}
+		}
+		//パス時の処理
+		if(pass == 0) {
+			othello.changeTurn();
+			othello.checkPlaceable();
+			value =  exhaustiveSearch(-turn, depth, alpha, beta);
+		}
+		//先頭ノードだったら打つ場所を返す
+		if(depth == level) {
+				//System.out.println("zentansaku " + value);
+				return 10*Y + X; //1つの値で返す必要があるのでこの形に．Xは(戻り値)%10,Yは((戻り値)-(戻り値)%10)/10で復元できる．
+				}else {
+			return value;
+		}
+	}
 
 
 	//盤面評価
-		//turn:自分の番か相手の番かを表現
 	private int evaluateBoard() {
 		int evaluation = 0;	//evaluation:盤面に置かれている石とevaluation_mapから算出された盤面評価値
 		//石が置かれているすべての場所に対し，evaluattionMapの値で評価
