@@ -297,7 +297,7 @@ public class Client extends JFrame implements WindowListener{
 				MakeAccountSubDialog masd = new MakeAccountSubDialog(client, "masd");
 				masd.setLocation(w/6+370, h/6+200);
 				masd.setVisible(true);
-				connectServer("localhost", 11116);
+				connectServer("localhost", 11117);
 			} else if (theButton == bLI) {//ログインボタンクリック時
 				LoginSubDialog lsd = new LoginSubDialog(client, "lsd");
 				lsd.setLocation(w/6+370, h/6+200);
@@ -495,6 +495,7 @@ public class Client extends JFrame implements WindowListener{
 			labelID = new JLabel("ユーザIDを入力してください");
 			this.remove(labelN);
 			this.add(labelID);
+			labelID.setForeground(Color.WHITE);
 			labelID.setBounds(w/4-30, 2*h/9-20, 300, 40);
 			//ユーザID入力用テキストフィールド
 			ID = new JTextField(30);
@@ -900,8 +901,9 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
 
-	class SearchingForOpponentPanel extends JPanel{//マッチングパネル
+	class SearchingForOpponentPanel extends JPanel implements MouseListener{//マッチングパネル
 		JTextField tfMessage;//メッセージ用ラベル
+		JButton can;
 		Client client;
 		String str;
 		String mode;
@@ -919,6 +921,12 @@ public class Client extends JFrame implements WindowListener{
 			tfMessage = new JTextField("プレイヤを探しています...");
 			this.add(tfMessage);
 			tfMessage.setBounds(w/3, 3*h/7, 300, 50);
+			//キャンセルボタン
+			can = new JButton("キャンセル");
+			this.add(can);
+			can.setBounds(w*3/7, 7*h/9, 150, 35);
+			can.addMouseListener(this);//マウス操作を認識できるようにする
+			can.setActionCommand("back");//ボタンを識別するための名前を付加する
 			//対戦相手を探す
 			findOpponent fo = new findOpponent(this);
 			fo.start();
@@ -950,7 +958,7 @@ public class Client extends JFrame implements WindowListener{
 								client.mp = new MatchingPanel(client, "mp", mode);
 								client.PanelChange((JPanel)client.sfop, (JPanel)client.mp);
 								mp.repaint();
-								mp.taLog.append("対局開始！");
+								mp.taLog.append("対局開始！\n");
 							} else {
 								tfMessage.setText("対戦相手が見つかりませんでした");
 								Thread.sleep(5000);
@@ -966,6 +974,24 @@ public class Client extends JFrame implements WindowListener{
 				}
 			}
 		}
+		
+		//マウスクリック時の処理
+				public void mouseClicked(MouseEvent e) {
+					JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
+					String command = theButton.getActionCommand();//ボタンの名前を取り出す
+					System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
+					sendMessage("cancelToFindOpponent");
+					this.setVisible(false);
+					PanelChange((JPanel)this, (JPanel)client.mfnmp);
+				}
+				public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
+					setCursor(new Cursor(Cursor.HAND_CURSOR));
+				}
+				public void mouseExited(MouseEvent e) {//マウスがオブジェクトから出たときの処理
+					setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+				public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
+				public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
 
 	class MatchingPanel extends JPanel implements MouseListener{//対局画面用パネル
@@ -1175,7 +1201,7 @@ public class Client extends JFrame implements WindowListener{
 				this.add(labelPlayer2);
 				labelPlayer2.setBounds(6*w/11, 3*h/13-20, 300, 40);
 				//プレイヤ情報用ラベル
-				
+
 				if(mode.equals("special")) {
 					//特殊効果発動是非表示用ラベル
 					effectNumber=1;
@@ -1313,7 +1339,7 @@ public class Client extends JFrame implements WindowListener{
 		 * */
 
 
-		public void finishMatching(String str) {//対局を終了(str:win, lose, draw, resign, timeup)
+		public void finishMatching(String str) {//対局を終了(str:win, lose, draw, resign, timeup, )
 			timer.finish();
 			//bgm1.stop();
 			//bgm1.flush();
@@ -1322,20 +1348,27 @@ public class Client extends JFrame implements WindowListener{
 				previousRate[0] = player.getRecord()[4];
 				previousRate[1] = opponent.getRecord()[4];
 				if(mode.equals("rank")) {//ランクマッチ時
-					if(!str.equals("draw"))
-						player.getRecord()[4] = calculateRate(player.getRecord()[4], opponent.getRecord()[4], str);
-					if(str.equals("win")) opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "lose");
-					if(str.equals("lose")) opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "win");
+					if(!str.equals("draw")) {
+						if(str.equals("win")) {
+							player.getRecord()[4] = calculateRate(player.getRecord()[4], opponent.getRecord()[4], str);
+							opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "lose");
+						}
+						else {
+							player.getRecord()[4] = calculateRate(player.getRecord()[4], opponent.getRecord()[4], "lose");
+							opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "win");
+						}
+					}
 				}
+				sendMessage("noticeEndMatching");
 				sendMessage(str);
 				if(!str.equals("draw"))
 					sendMessage(String.valueOf(player.getRecord()[4]));
 				sendMessage("end");
 			}
-			if(str.equals("timeup"))
-				client.emsd = new EndMatchingSubDialog(client, "emsd", "lose");//対戦終了時ダイアログ作成
-			else
+			if(str.equals("win") || str.equals("draw"))
 				client.emsd = new EndMatchingSubDialog(client, "emsd", str);//対戦終了時ダイアログ作成
+			else
+				client.emsd = new EndMatchingSubDialog(client, "emsd", "lose");//対戦終了時ダイアログ作成
 			emsd.setLocation(client.w/6+350, client.h/6+200);
 			emsd.setVisible(true);
 		}
@@ -1949,43 +1982,48 @@ public class Client extends JFrame implements WindowListener{
 			this.add(bCan);
 			bCan.setBounds(22*w/56, 8*h/11, 120, 40);
 			bCan.addMouseListener(this);//マウス操作を認識できるようにする
+
 			//再戦を希望する
-			tryToRematch();
+			new tryToRematch().start();
 		}
 		//メソッド
-		public void tryToRematch() {
-			sendMessage("hopeToRematch");
-			sendMessage("end");
+		class tryToRematch extends Thread{
+			public void run() {
+				sendMessage("Rematch");
+				sendMessage("end");
 
-			client.flag = false;
-			client.result = false;
-			cancelFlag = false;
+				client.flag = false;
+				client.result = false;
+				cancelFlag = false;
 
-			while(!cancelFlag) {
-				try {
-					if(client.flag) {
-						if(client.result) {
-							cont.remove(mp);
-							client.mp = new MatchingPanel(client, "mp", client.mp.getMode());
-							client.mp.setVisible(true);
-							cont.add(mp);
-							dispose();
-						} else {
-							tfMessage.setText("相手が再戦を希望しませんでした");
-							Thread.sleep(5000);
-							client.emsd.setVisible(true);
-							dispose();
+				while(!cancelFlag) {
+					try {
+						if(client.flag) {
+							if(client.result) {
+								cont.remove(mp);
+								client.mp = new MatchingPanel(client, "mp", client.mp.getMode());
+								client.mp.setVisible(true);
+								cont.add(mp);
+								mp.repaint();
+								dispose();
+							} else {
+								tfMessage.setText("相手が再戦を希望しませんでした");
+								Thread.sleep(5000);
+								client.emsd.setVisible(true);
+								dispose();
+							}
+							break;
 						}
-						break;
+						Thread.sleep(1000);
 					}
-					Thread.sleep(1000);
+					catch(InterruptedException e) {}
 				}
-				catch(InterruptedException e) {}
 			}
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
 			cancelFlag = true;
+			sendMessage("cancelToRematch");
 			dispose();//このダイアログを破棄
 			client.emsd.setVisible(true);
 		}
@@ -2334,7 +2372,7 @@ public class Client extends JFrame implements WindowListener{
 						Thread.sleep(500);
 						flag = true;
 					}
-					else if(inputLine.equals("sendRematchingResult")) {//目的が再戦集計結果の送信だったら
+					else if(inputLine.equals("sendRematchResult")) {//目的が再戦集計結果の送信だったら
 						inputLine = br.readLine();
 						if(inputLine.equals("succeeded")) result = true;
 						else result = false;
@@ -2388,13 +2426,16 @@ public class Client extends JFrame implements WindowListener{
 
 
 
-	public void windowClosing() {
-		try {socket.close();}
-		catch(IOException e) {e.printStackTrace();}
-	 }
+
 	public void windowOpened(WindowEvent e) {}
-	public void windowClosing(WindowEvent e) {}
-	public void windowClosed(WindowEvent e) {}
+	public void windowClosing(WindowEvent e) {
+		try {socket.close();}
+		catch(IOException ioe) {System.out.println("接続解除に失敗しました");}
+	}
+	public void windowClosed(WindowEvent e) {
+		try {socket.close();}
+		catch(IOException ioe) {System.out.println("接続解除に失敗しました");}
+		}
 	public void windowIconified(WindowEvent e) {}
 	public void windowDeiconified(WindowEvent e) {}
 	public void windowActivated(WindowEvent e) {}
