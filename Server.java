@@ -39,8 +39,8 @@ public class Server{
 	//コンストラクタ
 	public Server(int port) { //待ち受けポートを引数とする
 		this.port = port; //待ち受けポートを渡す
-		out = new PrintWriter [2]; //データ送信用オブジェクトを2クライアント分用意
-		receiver = new Receiver [2]; //データ受信用オブジェクトを2クライアント分用意
+		out = new PrintWriter [100]; //データ送信用オブジェクトを2クライアント分用意
+		receiver = new Receiver [100]; //データ受信用オブジェクトを2クライアント分用意
 		online = new boolean[100]; //オンライン状態管理用配列を用意
 		MatchingList[0] = -1;
 	    MatchingList[1] = -1;
