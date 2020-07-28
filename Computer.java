@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Computer {
+	//定義
+	int w_kaihoudo = 2;
+	int w_kakuteiseki = 8;
 	//メンバ変数
 	int level;	//level:CPUの難易度 探索の深さの値
 	int color;	//color:-1なら先手(黒)，1なら後手(白)
@@ -62,9 +65,9 @@ public class Computer {
 		int X = 100, Y = 100;	//評価の高い場所
 		//末端ノードなら盤面評価値を返す
 		if(depth == 0) {
-			int k = evaluateBoard();
+			//int k = evaluateBoard();
 			//System.out.println("E:" + k);
-			return  k - kaihoudo[0]+ 8*checkKakuteiseki();
+			return  evaluateBoard() - w_kaihoudo*kaihoudo[0]+ w_kakuteiseki*checkKakuteiseki();
 		}
 		// 自分のターンなら最小値，相手のターンなら最大値をとりあえず設定
 		if(turn == color) {
@@ -120,7 +123,7 @@ public class Computer {
 		//それ以外はノードの評価値を返す
 		}else {
 			//開放度を各ノードで加味
-			return value - 2*kaihoudo[depth-1];
+			return value - w_kaihoudo*kaihoudo[depth-1];
 		}
 	}
 
@@ -381,8 +384,9 @@ public class Computer {
 			return random();
 		//Normal,Hard
 		}else{
+			//一番最初だけこの処理が必要
 			if(othello.getTurn() != color) {
-				System.out.println("CHANGE TURN!");
+				//System.out.println("CHANGE TURN!");
 				othello.changeTurn();
 			}
 			//levelがhardなら残り14手から全探索開始
