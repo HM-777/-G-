@@ -1,10 +1,10 @@
 public class Player {
 
-    private String myName = ""; //プレイヤ名
-    private String myColor = ""; //先手後手情報(白黒)
-    private String myID = "";  //プレイヤーID
-    private String myPassword = "";  //パスワード
-    private int myRecord[] = null;  //戦績情報
+    private String myName = "a"; //プレイヤ名
+    private String myColor = "a"; //先手後手情報(白黒)
+    private String myID = "a";  //プレイヤーID
+    private String myPassword = "a";  //パスワード
+    private int myRecord[] = new int[6];  //戦績情報
     private int myPlayerNo;
     private int opponentPlayerNo;
 
