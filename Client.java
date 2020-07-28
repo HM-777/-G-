@@ -947,12 +947,10 @@ public class Client extends JFrame implements WindowListener{
 					try {
 						if(client.flag) {
 							if(client.result) {
-								client.sfop.setVisible(false);
-								client.cont.remove(sfop);
 								client.mp = new MatchingPanel(client, "mp", mode);
-								//client.PanelChange((JPanel)client.sfop, (JPanel)client.mp);
-								client.cont.add(mp, BorderLayout.CENTER);
-								client.mp.setVisible(true);
+								client.PanelChange((JPanel)client.sfop, (JPanel)client.mp);
+								mp.repaint();
+								mp.taLog.append("対局開始！");
 							} else {
 								tfMessage.setText("対戦相手が見つかりませんでした");
 								Thread.sleep(5000);
@@ -961,6 +959,7 @@ public class Client extends JFrame implements WindowListener{
 							}
 							break;
 						}
+						//System.out.println("待機中");
 						Thread.sleep(1000);
 					}
 					catch(InterruptedException e) {}
@@ -1064,7 +1063,6 @@ public class Client extends JFrame implements WindowListener{
 				dispValue[4] = 5;
 				dispValue[5] = 360;
 			}
-			updateDisp(9,9);
 			JLabel horizontalNumber;
 			JLabel verticalNumber;
 			for(int i=1; i<9; i++) {
@@ -1119,11 +1117,12 @@ public class Client extends JFrame implements WindowListener{
 			taLog.setEditable(false);
 			taLog.setLineWrap(true);
 			taLog.setWrapStyleWord(true);
-			this.add(taLog);
+			//this.add(taLog);
 			JScrollPane scroll = new JScrollPane(taLog);
 			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scroll.setBounds(6*w/11-20, 7*h/13-5, 330, 200);
 			this.add(scroll);
+			//taLog.append("開始しました\n");
 			//残り時間表示用ラベル
 			timer = new Timer(this);
 			timer.addTo(this);
@@ -1158,7 +1157,6 @@ public class Client extends JFrame implements WindowListener{
 				tfTurn.setEditable(false);
 				tfTurn.setBounds(w/5-30, 3*h/4+53, 160, 40);//境界を設定
 				this.add(tfTurn);//手番情報ラベルをパネルに追加
-				//プレイヤ情報用ラベル
 				labelPlayer1 = new JLabel(player.getName() + " " + "1500");
 				labelPlayer1.setFont(new Font("PixelMplus10", Font.ITALIC, 25));
 				labelPlayer1.setForeground(new Color(255,255,0));
@@ -1176,6 +1174,8 @@ public class Client extends JFrame implements WindowListener{
 				labelPlayer2.setForeground(new Color(255,255,0));
 				this.add(labelPlayer2);
 				labelPlayer2.setBounds(6*w/11, 3*h/13-20, 300, 40);
+				//プレイヤ情報用ラベル
+				
 				if(mode.equals("special")) {
 					//特殊効果発動是非表示用ラベル
 					effectNumber=1;
@@ -1219,6 +1219,7 @@ public class Client extends JFrame implements WindowListener{
 			osd = new OptionSubDialog(client, "osd");
 			osd.setLocation(client.w/6+430, client.h/6+250);
 			osd.setVisible(false);
+			updateDisp(9,9);
 		}
 
 		//メソッド
@@ -2180,7 +2181,6 @@ public class Client extends JFrame implements WindowListener{
 			sfop.setVisible(true);
 		} else if(jpT.getName().equals("mp")) {
 			cont.add(mp, BorderLayout.CENTER);
-			mp.setBounds(200,200,w,h);
 			mp.setVisible(true);
 		}
 	}
@@ -2331,6 +2331,7 @@ public class Client extends JFrame implements WindowListener{
 						else if(inputLine.equals("failed")) {//対戦相手が見つからなかったら
 							result = false;
 						}
+						Thread.sleep(500);
 						flag = true;
 					}
 					else if(inputLine.equals("sendRematchingResult")) {//目的が再戦集計結果の送信だったら
