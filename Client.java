@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -70,6 +71,9 @@ public class Client extends JFrame implements WindowListener{
 	class MenuPanel extends JPanel implements MouseListener{//スタート画面用パネル
 		JLabel title;
 		JLabel title2;
+		JLabel title3;
+		JLabel title4;
+		JLabel background;
 		JButton bN, bL, bOption;//ネットワーク対局、ローカル対局選択用ボタン
 		Client client;
 		String str;
@@ -83,6 +87,8 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w, h);
 			this.setLayout(null);
 			this.setBackground(new Color(130, 0, 170));
+
+			/*
 			//タイトル1
 			title = new JLabel("REVERSI");
 			title.setFont(new Font("PixelMplus10", Font.PLAIN, 140));
@@ -95,25 +101,55 @@ public class Client extends JFrame implements WindowListener{
 			title2.setForeground(Color.RED);
 			this.add(title2);
 			title2.setBounds(w/5-14, h/8, 600, 200);
+			//タイトル1
+			title = new JLabel("WORK WORK");
+			title.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
+			title.setHorizontalAlignment(JLabel.CENTER);
+			title.setForeground(Color.GREEN);
+			this.add(title);
+			title.setBounds(w/5-165, h/8-20, 800, 120);
+			//タイトル2
+			title2 = new JLabel("WORK WORK");
+			title2.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
+			title2.setHorizontalAlignment(JLabel.CENTER);
+			title2.setForeground(Color.RED);
+			this.add(title2);
+			title2.setBounds(w/5-170, h/8-20, 800, 120);
+			//タイトル3
+			title3 = new JLabel("HACK OTHELLO");
+			title3.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
+			title3.setHorizontalAlignment(JLabel.CENTER);
+			title3.setForeground(Color.GREEN);
+			this.add(title3);
+			title3.setBounds(w/5-165, h/8+80, 800, 120);
+			//タイトル4
+			title4 = new JLabel("HACK OTHELLO");
+			title4.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
+			title4.setHorizontalAlignment(JLabel.CENTER);
+			title4.setForeground(Color.RED);
+			this.add(title4);
+			title4.setBounds(w/5-170, h/8+80, 800, 120);
+			 */
+
 			//ネットワーク対局選択用ボタン
 			bN = new JButton("ネットワーク対局");
 			this.add(bN); //ネットワーク対局選択用ボタンをパネルに追加
-			bN.setBackground(Color.GREEN);
+			bN.setBackground(Color.BLACK);
 			bN.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
-			bN.setBounds(w/3+30, h/2+40, 200, 40);
+			bN.setBounds(w/3+30, h/2+60, 200, 40);
 			bN.addMouseListener(this);//マウス操作を認識できるようにする
 			bN.setActionCommand("network");//ボタンを識別するための名前を付加する
 			//ローカル対局選択用ボタン
 			bL = new JButton("ローカル対局");
 			this.add(bL);//ローカル対局選択用ボタンをパネルに追加
 			bL.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
-			bL.setBounds(w/3+30, h/2+100, 200, 40);
+			bL.setBounds(w/3+30, h/2+120, 200, 40);
 			bL.addMouseListener(this);//マウス操作を認識できるようにする
 			bL.setActionCommand("local");//ボタンを識別するための名前を付加する
-			//設定ボタン
-
-			//設定ダイアログを定義
-
+			//背景の設定
+			background = new JLabel(new ImageIcon(new File("title.gif").getAbsolutePath()));
+			this.add(background);
+			background.setBounds(0,0,w,h);
 		}
 		//パネル名の取得
 		public String getName() {
@@ -146,7 +182,7 @@ public class Client extends JFrame implements WindowListener{
 	}
 
 	class ChooseLevelPanel extends JPanel implements MouseListener{//難易度選択画面
-		JLabel labelT;//タイトル用ラベル
+		JLabel labelT,labelT2;//タイトル用ラベル
 		JButton bEasy;//Easyボタン
 		JButton bNormal;//Normalボタン
 		JButton bHard;//Hardボタン
@@ -167,30 +203,35 @@ public class Client extends JFrame implements WindowListener{
 			this.setVisible(true);
 			//タイトル用ラベル
 			labelT = new JLabel("LEVEL");
-			labelT.setFont(new Font("PixelMplus10", Font.PLAIN, 50));
+			labelT.setFont(new Font("PixelMplus10", Font.PLAIN, 70));
 			labelT.setForeground(Color.YELLOW);
-			labelT.setBackground(Color.BLACK);
 			this.add(labelT);
-			labelT.setBounds(24*w/50-35, h/11+20, 300, 40);
+			labelT.setBounds(20*w/50, h/11+20, 300, 50);
+			//タイトル用ラベル
+			labelT2 = new JLabel("LEVEL");
+			labelT2.setFont(new Font("PixelMplus10", Font.PLAIN, 70));
+			labelT2.setForeground(Color.BLUE);
+			this.add(labelT2);
+			labelT2.setBounds(20*w/50-5, h/11+20, 300, 50);
 			//Easyボタン
 			bEasy = new JButton("Easy");
 			this.add(bEasy);
-			bEasy.setFont(new Font("PixelMplus10", Font.PLAIN, 15));
-			bEasy.setBounds(2*w/5-20, 3*h/11+20, 200, 50);
+			bEasy.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
+			bEasy.setBounds(2*w/5-20, 3*h/11+30, 200, 50);
 			bEasy.addMouseListener(this);//マウス操作を認識できるようにする
 			bEasy.setActionCommand("easy");//ボタンを識別するための名前を付加する
 			//Normalボタン
 			bNormal = new JButton("Normal");
 			this.add(bNormal);
-			bNormal.setFont(new Font("PixelMplus10", Font.PLAIN, 15));
-			bNormal.setBounds(2*w/5-20, 5*h/11+20, 200, 50);
+			bNormal.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
+			bNormal.setBounds(2*w/5-20, 5*h/11+30, 200, 50);
 			bNormal.addMouseListener(this);//マウス操作を認識できるようにする
 			bNormal.setActionCommand("normal");//ボタンを識別するための名前を付加する
 			//Hardボタン
 			bHard = new JButton("Hard");
 			this.add(bHard);
-			bHard.setFont(new Font("PixelMplus10", Font.PLAIN, 15));
-			bHard.setBounds(2*w/5-20, 7*h/11+20, 200, 50);
+			bHard.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
+			bHard.setBounds(2*w/5-20, 7*h/11+30, 200, 50);
 			bHard.addMouseListener(this);//マウス操作を認識できるようにする
 			bHard.setActionCommand("hard");//ボタンを識別するための名前を付加する
 			//戻るボタン
@@ -297,12 +338,12 @@ public class Client extends JFrame implements WindowListener{
 				MakeAccountSubDialog masd = new MakeAccountSubDialog(client, "masd");
 				masd.setLocation(w/6+370, h/6+200);
 				masd.setVisible(true);
-				connectServer("localhost", 11117);
+				connectServer("localhost", 11139);
 			} else if (theButton == bLI) {//ログインボタンクリック時
 				LoginSubDialog lsd = new LoginSubDialog(client, "lsd");
 				lsd.setLocation(w/6+370, h/6+200);
 				lsd.setVisible(true);
-				//connectServer("localhost", 11112);
+				connectServer("localhost", 11118);
 			} else {
 				osd.setVisible(true);
 			}
@@ -335,34 +376,41 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w,h);
 			setTitle("アカウント作成");
 			this.setLayout(null);
-			setResizable(false);Container contentPane = getContentPane();
-		    contentPane.setBackground(new Color(50,50,120));
+			setResizable(false);
+			Container contentPane = getContentPane();
+		    contentPane.setBackground(new Color(30,30,30));
 			//名前入力用ラベル
 			labelN = new JLabel("名前を入力してください");
+			labelN.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(labelN);
 			labelN.setForeground(Color.WHITE);
 			labelN.setBounds(w/4-30, 2*h/9-20, 300, 40);
 			//名前入力用テキストフィールド
 			name = new JTextField(30);
+			name.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(name);
 			name.setBounds(w/4-30, 3*h/9-20, 300, 40);
 			//パスワード入力用ラベル
 			labelP = new JLabel("パスワードを入力してください");
+			labelP.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(labelP);
 			labelP.setForeground(Color.WHITE);
 			labelP.setBounds(w/4-30, 4*h/9-20, 300, 40);
 			//パスワードフィールド
 			pass = new JPasswordField(30);
+			pass.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(pass);
 			pass.setBounds(w/4-30, 5*h/9-20, 300, 40);
 			//OKボタン
 			bOK = new JButton("OK");
+			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			this.add(bOK);
 			bOK.setBounds(w/3-20, 13*h/18, 90, 30);
 			bOK.addMouseListener(this);//マウス操作を認識できるようにする
 			bOK.setActionCommand("ok");//ボタンを識別するための名前を付加する
 			//キャンセルボタン
 			bCan = new JButton("キャンセル");
+			bCan.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
 			this.add(bCan);
 			bCan.setBounds(7*w/12-20, 13*h/18, 90, 30);
 			bCan.addMouseListener(this);//マウス操作を認識できるようにする
@@ -442,16 +490,23 @@ public class Client extends JFrame implements WindowListener{
 			this.setLayout(null);
 			setResizable(false);
 		    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			Container contentPane = getContentPane();
+		    contentPane.setBackground(new Color(30,30,30));
 			//メッセージ用ラベル
 			labelM = new JLabel("アカウントを作成しました");
+			labelM.setFont(new Font("PixelMplus10", Font.PLAIN, 15));
+			labelM.setForeground(Color.WHITE);
 			this.add(labelM);
-			labelM.setBounds(w/3, 2*h/9, 300, 40);
+			labelM.setBounds(w/3-10, 2*h/9-10, 300, 40);
 			//ユーザID表示用ラベル
 			labelID = new JLabel("ユーザID");
+			labelID.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
+			labelID.setForeground(Color.WHITE);
 			this.add(labelID);
 			labelID.setBounds(w/4-35, 3*h/9, 300, 40);
 			//ユーザID表示用テキストフィールド
 			ID = new JTextField("30");
+			ID.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(ID);
 			ID.setBounds(w/4-35, 4*h/9, 300, 40);
 			ID.setText(player.getID());
@@ -459,10 +514,14 @@ public class Client extends JFrame implements WindowListener{
 			//注意用ラベル
 			labelC1 = new JLabel("ユーザIDとパスワードは次回");
 			labelC2 = new JLabel("ログイン時に必要になります");
+			labelC1.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
+			labelC2.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(labelC1);
 			this.add(labelC2);
 			labelC1.setBounds(w/3, 5*h/9, 300, 40);
 			labelC2.setBounds(w/3, 11*h/18, 300, 40);
+			labelC1.setForeground(Color.RED);
+			labelC2.setForeground(Color.RED);
 			//OKボタン
 			bOK = new JButton("OK");
 			this.add(bOK);
@@ -638,10 +697,12 @@ public class Client extends JFrame implements WindowListener{
 	class MenuForNetworkMatchingPanel extends JPanel implements MouseListener{//ネットワーク対局用メニュー画面パネル
 		JLabel labelID;//ID用ラベル
 		JLabel labelR;//レート用ラベル
+		JLabel labelMode1,labelMode2;//MODEラベル
 		JButton bRank;//ランクマッチボタン
 		JButton bSpecial;//スペシャルマッチボタン
 		JButton bInfo;//戦績・ランキング閲覧ボタン
 		JButton bBack;//戻るボタン
+		JTextArea ta;
 		Client client;
 		String str;
 		int w = 750;
@@ -653,34 +714,67 @@ public class Client extends JFrame implements WindowListener{
 			//ウィンドウ設定
 			this.setSize(w, h);
 			this.setLayout(null);
+			this.setBackground(new Color(130, 0, 170));
+			//ID&レート用ラベル
+			ta = new JTextArea("  プレイヤID："+player.getID() + "\n  レーティング："+String.valueOf(player.getRecord()[5]));
+			ta.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
+			ta.setForeground(Color.WHITE);
+			ta.setMargin(new Insets(10, 20, 10, 10));
+			ta.setBackground(Color.BLACK);
+			this.add(ta);
+			ta.setBounds(6*w/9+50, h/20, 160, 35);
+			ta.setBorder(new LineBorder(new Color(250,250,250), 2, false));
+			//ta.setVerticalAlignment(JTextArea.CENTER);
+			/*
 			//ID用ラベル
 			labelID = new JLabel("プレイヤID："+player.getID());
+			labelID.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
+			labelID.setForeground(new Color(0,155,0));
 			this.add(labelID);
-			labelID.setBounds(6*w/9, h/20, 300, 30);
+			labelID.setBounds(6*w/9+50, h/20, 300, 30);
 			//レート用ラベル
 			labelR = new JLabel("レーティング："+String.valueOf(player.getRecord()[5]));
+			labelR.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
+			labelR.setForeground(new Color(0,155,0));
 			this.add(labelR);
-			labelR.setBounds(6*w/9, h*1/10, 300, 30);
+			labelR.setBounds(6*w/9+50, h*1/10, 300, 30);
+			 * */
+			//MODEラベル1
+			labelMode1 = new JLabel("MODE");
+			labelMode1.setFont(new Font("PixelMplus10", Font.PLAIN, 70));
+			labelMode1.setForeground(Color.YELLOW);
+			this.add(labelMode1);
+			labelMode1.setBounds(20*w/50+13, h/11+40, 300, 80);
+			//MODEラベル2
+			labelMode1 = new JLabel("MODE");
+			labelMode1.setFont(new Font("PixelMplus10", Font.PLAIN, 70));
+			labelMode1.setForeground(Color.BLUE);
+			this.add(labelMode1);
+			labelMode1.setBounds(20*w/50+10, h/11+40, 300, 80);
 			//ランクマッチボタン
 			bRank = new JButton("ランクマッチ");
+			bRank.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bRank);
-			bRank.setBounds(11*w/30 +5, 2*h/5-30, 200, 50);
+			bRank.setBounds(11*w/30 +5, 2*h/5+10, 200, 50);
 			bRank.addMouseListener(this);//マウス操作を認識できるようにする
 			bRank.setActionCommand("rank");//ボタンを識別するための名前を付加する
 			//スペシャルマッチボタン
 			bSpecial = new JButton("スペシャルマッチ");
+			bSpecial.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bSpecial);
-			bSpecial.setBounds(11*w/30+5, 3*h/5-30, 200, 50);
+			bSpecial.setBounds(11*w/30+5, 3*h/5, 200, 50);
 			bSpecial.addMouseListener(this);//マウス操作を認識できるようにする
 			bSpecial.setActionCommand("special");//ボタンを識別するための名前を付加する
 			//戦績・ランキング閲覧ボタン
 			bInfo = new JButton("戦績・ランキング");
+			bInfo.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bInfo);
 			bInfo.setBounds(7*w/10+15, 8*h/9, 200, 35);
 			bInfo.addMouseListener(this);//マウス操作を認識できるようにする
 			bInfo.setActionCommand("info");//ボタンを識別するための名前を付加する
 			//戻るボタン
 			bBack = new JButton("戻る");
+			bBack.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bBack);
 			bBack.setBounds(10, 8*h/9, 150, 35);
 			bBack.addMouseListener(this);//マウス操作を認識できるようにする
@@ -792,6 +886,8 @@ public class Client extends JFrame implements WindowListener{
 		JTextArea taRecord;//戦績表示テキストエリア
 		JLabel labelTitle3;//ランキング用ラベル
 		JLabel labelRanking;//ランキングラベル
+		JLabel labelTitle4;//勝率用ラベル
+		JLabel labelRatio;
 		JTextArea taRanking;//ランキング表示テキストエリア
 		JButton bBack;//戻るボタン
 		Client client;
@@ -805,22 +901,56 @@ public class Client extends JFrame implements WindowListener{
 			//ウィンドウ設定
 			this.setSize(w, h);
 			this.setLayout(null);
+			this.setBackground(new Color(130, 0, 170));
 			//総戦績用ラベル
 			labelTitle1 = new JLabel("総戦績");
+			labelTitle1.setHorizontalAlignment(JTextField.CENTER);
+			labelTitle1.setBorder(new LineBorder(Color.RED, 2, false));
+			//labelTitle1.setForeground(new Color(130,200,250));
+			labelTitle1.setForeground(Color.WHITE);
+			labelTitle1.setFont(new Font("PixelMplus10", Font.BOLD, 17));
 			this.add(labelTitle1);
-			labelTitle1.setBounds(30, 1*h/12, 300, 30);
+			labelTitle1.setBounds(30, 1*h/12, 80, 30);
 			//戦績ラベル
-			labelScore = new JLabel("*********");
+			labelScore = new JLabel(player.getRecord()[0] + "戦 " + player.getRecord()[1] + "勝 "
+					+ player.getRecord()[2] + "負 " + player.getRecord()[3] + "分");
+			labelScore.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
+			labelScore.setForeground(Color.WHITE);
 			this.add(labelScore);
-			labelScore.setBounds(30, 2*h/12, 300, 30);
+			labelScore.setBounds(60, 2*h/12, 300, 30);
+			//勝率用ラベル
+			labelTitle4 = new JLabel("勝率");
+			//labelTitle4.setForeground(new Color(130,200,250));
+			labelTitle4.setForeground(Color.WHITE);
+			labelTitle4.setHorizontalAlignment(JTextField.CENTER);
+			labelTitle4.setBorder(new LineBorder(Color.RED, 2, false));
+			labelTitle4.setFont(new Font("PixelMplus10", Font.BOLD, 17));
+			this.add(labelTitle4);
+			labelTitle4.setBounds(30, 3*h/12, 80, 30);
+			//勝率ラベル
+			if(player.getRecord()[0] != 0)
+				labelRatio = new JLabel(player.getRecord()[1]/player.getRecord()[0]*100 + "%");
+			else
+				labelRatio = new JLabel("0%");
+			labelRatio.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
+			labelRatio.setForeground(Color.WHITE);
+			this.add(labelRatio);
+			labelRatio.setBounds(60, 4*h/12, 300, 30);
 			//投了数用ラベル
 			labelTitle2 = new JLabel("投了数");
+			//labelTitle2.setForeground(new Color(130,200,250));
+			labelTitle2.setForeground(Color.WHITE);
+			labelTitle2.setHorizontalAlignment(JTextField.CENTER);
+			labelTitle2.setBorder(new LineBorder(Color.RED, 2, false));
+			labelTitle2.setFont(new Font("PixelMplus10", Font.BOLD, 17));
 			this.add(labelTitle2);
-			labelTitle2.setBounds(30, 3*h/12, 300, 30);
+			labelTitle2.setBounds(30, 5*h/12, 80, 30);
 			//投了数ラベル
-			labelResignation = new JLabel("*********");
+			labelResignation = new JLabel(player.getRecord()[4] + "回");
+			labelResignation.setForeground(Color.WHITE);
+			labelResignation.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
 			this.add(labelResignation);
-			labelResignation.setBounds(30, 4*h/12, 300, 30);
+			labelResignation.setBounds(60, 6*h/12, 300, 30);
 			/*
 			//戦績表示テキストエリア
 			taRecord = new JTextArea("**********", 100, 50);
@@ -833,30 +963,34 @@ public class Client extends JFrame implements WindowListener{
 			 */
 			//ランキング用ラベル
 			labelTitle3 = new JLabel("ランキング");
+			//labelTitle3.setForeground(new Color(130,200,250));
+			labelTitle3.setForeground(Color.WHITE);
+			labelTitle3.setHorizontalAlignment(JTextField.CENTER);
+			labelTitle3.setBorder(new LineBorder(Color.RED, 2, false));
+			labelTitle3.setFont(new Font("PixelMplus10", Font.BOLD, 17));
 			this.add(labelTitle3);
-			labelTitle3.setBounds(30, 5*h/12, 300, 30);
+			labelTitle3.setBounds(30, 7*h/12, 100, 30);
 			//ランク表示ラベル
+			/*
 			labelRanking = new JLabel("*************");
 			this.add(labelRanking);
 			labelRanking.setBounds(30, 6*h/12, 300, 30);
+			 */
 			//ランキング表示テキストエリア
-			taRanking = new JTextArea(String.format(" ",5) + String.format("rate", 7) + "name", 300, 400);
+			taRanking = new JTextArea("", 300, 400);
+			taRanking.setForeground(Color.GREEN);
+			taRanking.append(String.format("%-11s"," ") + String.format("%-10s", "rate") + "name");
+			taRanking.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
+			//taRanking.setForeground(Color.WHITE);
+			taRanking.setBackground(Color.BLACK);
 			taRanking.setLineWrap(true);
 			taRanking.setWrapStyleWord(true);
-			/*
-
-			 */
-			flag = false;
-			sendMessage("getRecord");
-			while(!flag){
-				try{Thread.sleep(1000);}
-				catch(InterruptedException ie){ie.printStackTrace();}
-				System.out.println("waiting");
-			}
+			taRanking.setEditable(false);
 			JScrollPane spRanking = new JScrollPane(taRanking);
 			spRanking.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			this.add(spRanking);
 			spRanking.setBounds(30+w/2, 1*h/18, 320, 430);
+			sendMessage("getRecord");
 			//sendMessage("getRanking");
 			//戻るボタン
 			bBack = new JButton("戻る");
@@ -864,6 +998,7 @@ public class Client extends JFrame implements WindowListener{
 			bBack.setBounds(10, 8*h/9, 150, 35);
 			bBack.addMouseListener(this);//マウス操作を認識できるようにする
 			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
+
 		}
 		//パネル名の取得
 		public String getName() {
@@ -876,9 +1011,25 @@ public class Client extends JFrame implements WindowListener{
 		//ユーザのランクの設定（recieverで用いる）
 		public void setRank(String str) {
 			labelRanking = new JLabel(str + "位（" + player.getRecord()[5] + "）");
+			labelRanking.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
+			labelRanking.setForeground(Color.WHITE);
 			this.add(labelRanking);
-			labelRanking.setBounds(30+w/2, 2*h/12, 300, 40);
+			labelRanking.setBounds(60, 8*h/12, 300, 40);
 		}
+		//ランキング情報設定用スレッド
+		/*
+		class Rank extends Thread{
+			public void run() {
+				flag = false;
+				sendMessage("getRecord");
+				while(!flag){
+					try{Thread.sleep(1000);}
+					catch(InterruptedException ie){ie.printStackTrace();}
+					System.out.println("waiting");
+				}
+			}
+		}
+		 * */
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
 			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
@@ -901,7 +1052,7 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
 
-	class SearchingForOpponentPanel extends JPanel implements MouseListener{//マッチングパネル
+	class SearchingForOpponentPanel extends JPanel{//マッチングパネル
 		JTextField tfMessage;//メッセージ用ラベル
 		JButton can;
 		Client client;
@@ -920,13 +1071,16 @@ public class Client extends JFrame implements WindowListener{
 			//メッセージ用ラベル
 			tfMessage = new JTextField("プレイヤを探しています...");
 			this.add(tfMessage);
-			tfMessage.setBounds(w/3, 3*h/7, 300, 50);
+			tfMessage.setHorizontalAlignment(JTextField.CENTER);
+			tfMessage.setBounds(w/3-20, 3*h/7, 300, 50);
+			/*
 			//キャンセルボタン
 			can = new JButton("キャンセル");
 			this.add(can);
-			can.setBounds(w*3/7, 7*h/9, 150, 35);
+			can.setBounds(w*3/7-20, 7*h/9, 150, 35);
 			can.addMouseListener(this);//マウス操作を認識できるようにする
 			can.setActionCommand("back");//ボタンを識別するための名前を付加する
+			 */
 			//対戦相手を探す
 			findOpponent fo = new findOpponent(this);
 			fo.start();
@@ -974,7 +1128,7 @@ public class Client extends JFrame implements WindowListener{
 				}
 			}
 		}
-		
+		/*
 		//マウスクリック時の処理
 				public void mouseClicked(MouseEvent e) {
 					JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
@@ -992,6 +1146,8 @@ public class Client extends JFrame implements WindowListener{
 				}
 				public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
 				public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
+		 * */
+
 	}
 
 	class MatchingPanel extends JPanel implements MouseListener{//対局画面用パネル
@@ -1017,7 +1173,7 @@ public class Client extends JFrame implements WindowListener{
 		JTextField tfEffect;//特殊効果の表示ラベル
 		int effectNumber;
 		JTextArea taLog;//ログ
-		ImageIcon blackIcon, whiteIcon, boardIcon, placeableIcon, unplaceableIcon, eventIcon, hiddenIcon; //アイコン
+		ImageIcon blackIcon, whiteIcon, boardIcon, placeableIcon, unplaceableIcon, eventIcon, eventPlaceableIcon, hiddenIcon, explosionBlackIcon, explosionWhiteIcon; //アイコン
 		//Clip se;//SE
 		int previousRate[] = new int[2];
 		int cpuOperation;
@@ -1042,10 +1198,17 @@ public class Client extends JFrame implements WindowListener{
 			}
 			if(mode.equals("rank") || mode.equals("special")){//ネットワーク対局の場合
 				if(mode.equals("rank")) othello = new Othello(0);//ランクマッチの場合
-				else othello = new Othello(1);//スペシャルマッチの場合
+				else {
+					othello = new Othello(1);//スペシャルマッチの場合
+					othello.s_generategrids(0);
+				}
 
-				if(player.getColor().equals("black"))//手番が後手なら
-					othello.checkPlaceable();
+				if(player.getColor().equals("black")) {//手番が後手なら
+					if(mode.equals("rank"))
+						othello.checkPlaceable();
+					else
+						othello.s_checkPlaceable();
+				}
 			}
 			else {//ローカル対局の場合
 				player = new Player("0","0","0");
@@ -1070,6 +1233,14 @@ public class Client extends JFrame implements WindowListener{
 			blackIcon = new ImageIcon(new File("Black.jpg").getAbsolutePath());
 			boardIcon = new ImageIcon(new File("GreenFrame.jpg").getAbsolutePath());
 			placeableIcon = new ImageIcon(new File("Placeable.jpg").getAbsolutePath());
+			if(mode.equals("special")) {
+				unplaceableIcon = new ImageIcon(new File("IrreversibleStone.jpg").getAbsolutePath());
+				eventIcon = new ImageIcon(new File("Event.jpg").getAbsolutePath());
+				eventPlaceableIcon = new ImageIcon(new File("EventPlaceable.jpg").getAbsolutePath());
+				hiddenIcon = new ImageIcon(new File("Hidden.jpg").getAbsolutePath());
+				explosionBlackIcon = new ImageIcon(new File("explosionBlack2.gif").getAbsolutePath());
+				explosionWhiteIcon = new ImageIcon(new File("explosionWhite2.gif").getAbsolutePath());
+			}
 			//オセロ盤面の初期化
 			buttonArray = new JButton[row][row];//ボタンの配列を作成
 			dispValue = new int[6];
@@ -1345,24 +1516,29 @@ public class Client extends JFrame implements WindowListener{
 			//bgm1.flush();
 			if(mode.equals("rank") || mode.equals("special")) {//ネットワーク対局時
 				//confirmer.finish();
-				previousRate[0] = player.getRecord()[4];
-				previousRate[1] = opponent.getRecord()[4];
+				previousRate[0] = player.getRecord()[5];
+				previousRate[1] = opponent.getRecord()[5];
 				if(mode.equals("rank")) {//ランクマッチ時
 					if(!str.equals("draw")) {
+						int[] r = new int[6];
 						if(str.equals("win")) {
-							player.getRecord()[4] = calculateRate(player.getRecord()[4], opponent.getRecord()[4], str);
-							opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "lose");
+							r = player.getRecord();
+							r[5] = calculateRate(previousRate[1], previousRate[0], str);
+							player.setRecord(r);
+							r = opponent.getRecord();
+							r[5] = calculateRate(previousRate[1], previousRate[0], "lose");
+							opponent.setRecord(r);
 						}
 						else {
-							player.getRecord()[4] = calculateRate(player.getRecord()[4], opponent.getRecord()[4], "lose");
-							opponent.getRecord()[4] = calculateRate(opponent.getRecord()[4], previousRate[0], "win");
+							player.getRecord()[5] = calculateRate(player.getRecord()[5], opponent.getRecord()[5], "lose");
+							opponent.getRecord()[5] = calculateRate(previousRate[1], previousRate[0], "win");
 						}
 					}
 				}
 				sendMessage("noticeEndMatching");
 				sendMessage(str);
 				if(!str.equals("draw"))
-					sendMessage(String.valueOf(player.getRecord()[4]));
+					sendMessage(String.valueOf(player.getRecord()[5]));
 				sendMessage("end");
 			}
 			if(str.equals("win") || str.equals("draw"))
@@ -1374,10 +1550,16 @@ public class Client extends JFrame implements WindowListener{
 		}
 
 		public int calculateRate(int rate1, int rate2, String result) { //レート計算
-			if(result.equals("lose") || result.equals("timeup") || result.equals("resign")) {//敗北時
-				return rate1 - (int)(16+0.04*(rate1-rate2));
+			if(result.equals("lose")) {//敗北時
+				if(!((rate2-rate1)>=400))
+					return rate1 - (int)(16+0.04*(rate1-rate2));
+				else
+					return rate1;
 			} else {//勝利時
-				return rate1 + (int)(16+0.04*(rate2-rate1));
+				if(!((rate1-rate2)>=400))
+					return rate1 + (int)(16+0.04*(rate2-rate1));
+				else
+					return rate1;
 			}
 		}
 
@@ -1405,90 +1587,132 @@ public class Client extends JFrame implements WindowListener{
 
 			}
 			else {
-				if(!flagEvent)
+				if(!flagEvent) {
+					othello.s_checkPlaceable();
 					event = othello.s_setStone(x,y);
+				}
 				switch(event) {
 					case 1://破壊
 						if(flagEvent) {
-							othello.destroystone(x,y);
-							othello.changeTurn();
-							//破壊アニメーション
-							taLog.append("相手が (" + String.valueOf(x+1) + ", " + String.valueOf(x+1) + ") 付近を破壊しました\n");
-							othello.s_checkPlaceable();
-							updateDisp(8,8);
+							if(othello.getGrids()[y][x]==-1) {
+								othello.destroystone(x,y);
+								othello.changeTurn();//自分のターンにする
+								othello.s_checkPlaceable();
+								updateDisp(8,8);
+								buttonArray[y][x].setIcon(explosionBlackIcon);
+							}
+							else {
+								othello.destroystone(x,y);
+								othello.changeTurn();//自分のターンにする
+								othello.s_checkPlaceable();
+								updateDisp(8,8);
+								buttonArray[y][x].setIcon(explosionWhiteIcon);
+							}
 							flagEvent = false;
 							event = 0;
+							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を破壊しました\n");
+							if(othello.s_checkPlaceable()) { //自分がおけるなら
+								timer.stop(false);
+							}
+							else //置けないなら
+								othello.changeTurn();//相手のターンにする
 						}
 						else {
+							flagEvent = true;
 							othello.changeTurn();
 							updateDisp(x,y);
-							flagEvent = true;
+							othello.changeTurn();
 						}
 						break;
 					case 3://二階行動
-						othello.changeTurn();
+						othello.changeTurn();//自分のターンにする
 						updateDisp(x,y);
-						othello.changeTurn();
-						if(!othello.s_checkPlaceable()) {
-							othello.changeTurn();
+						othello.changeTurn();//相手のターンに戻す
+						event = 0;
+						if(!othello.s_checkPlaceable()) {//相手が置けないなら
+							othello.changeTurn();//自分のターンにして
 							othello.s_checkPlaceable();
+							timer.stop(false);
 							updateDisp(8,8);
+							if(effectNumber==1) tfEffect.setText(" ");
+							else tfEffect.setText("革命");
 						} else nikaiFlag=true;
 						break;
 					case 4://邪魔石
 						if(flagEvent) {
 							othello.setgarbage(x, y);
 							othello.changeTurn();
-							othello.s_checkPlaceable();
-							updateDisp(8,8);
-							taLog.append("相手が (" + String.valueOf(x+1) + ", " + String.valueOf(x+1) + ") にお邪魔石を置きました\n");
 							flagEvent = false;
 							event = 0;
+							updateDisp(8,8);
+							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") にお邪魔石を置きました\n");
+							if(othello.s_checkPlaceable()) {//自分がおけるなら
+								updateDisp(8,8);
+								timer.stop(false);
+							}
+							else//置けないなら
+								othello.changeTurn();//相手のターンにする
 						}
 						else {
-							othello.changeTurn();
-							updateDisp(x,y);
 							flagEvent = true;
+							othello.changeTurn();//自分のターンにする
+							updateDisp(x,y);
+							othello.changeTurn();//相手のターンに戻す
 						}
 						break;
 					case 5://上下１マスに石を置く
 						othello.set_cross(x,y);
 						othello.changeTurn();
-						othello.s_checkPlaceable();
+						event = 0;
 						updateDisp(8,8);
-						taLog.append("相手が (" + String.valueOf(x+1) + ", " + String.valueOf(x+1) + ") を中心に十字形で白を置きました\n");
+						taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を中心に石をクロス置きしました\n");
+						if(othello.s_checkPlaceable()) {
+							timer.stop(false);
+							updateDisp(8,8);
+						}
+						else
+							othello.changeTurn();
 						break;
 					case 6://盤面を反転させる
 						othello.inversion();
 						othello.changeTurn();
-						othello.s_checkPlaceable();
+						event = 0;
 						updateDisp(x,y);
 						taLog.append("盤面が反転されました\n");
+						if(othello.s_checkPlaceable()) {
+							updateDisp(8,8);
+							timer.stop(false);
+						}
+						else
+							othello.changeTurn();
 						break;
 					case 8://革命
 						othello.revolution();
 						othello.changeTurn();
-						othello.s_checkPlaceable();
 						updateDisp(x,y);
+						event = 0;
+						if(othello.s_checkPlaceable()) {
+							updateDisp(8,8);
+							timer.stop(false);
+						}
+						else
+							othello.changeTurn();
 						break;
 					default:
 						othello.changeTurn();
-						othello.s_checkPlaceable();
 						updateDisp(x,y);
 						if(nikaiFlag) {
 							nikaiFlag=false;
 							if(effectNumber==1) tfEffect.setText(" ");
 							else tfEffect.setText("革命");
 						}
+						if(othello.s_checkPlaceable()) {
+							updateDisp(8,8);
+							timer.stop(false);
+						}
+						else
+							othello.changeTurn();
 				}
-
-				if(event!=1 && event!=4) event = 0;
-				else othello.changeTurn();
-
-				if(!othello.s_checkPlaceable() && event!=1 && event!=3 && event!=4) {//自分がおけない場合
-					othello.changeTurn();
-				}
-
 
 				if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 					if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
@@ -1512,11 +1736,11 @@ public class Client extends JFrame implements WindowListener{
 						if(player.getColor().equals("black"))
 							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n");
 						else
-							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n");
+							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n");
 						break;
 					case -1:
 						if(player.getColor().equals("white"))
-							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に黒を置きました\n");
+							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n");
 						else
 							taLog.append("相手が (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") に白を置きました\n");
 				}
@@ -1528,14 +1752,22 @@ public class Client extends JFrame implements WindowListener{
 			for(int j=0; j<row; j++) {
 				int yy = dispValue[0] + j*dispValue[1];
 				for(int i=0; i<row; i++) {
-					if(x!=9 && y!=9) this.remove(buttonArray[j][i]);
+					if(x!=9 && y!=9)
+						this.remove(buttonArray[j][i]);
 					if(othello.getGrids()[j][i] == 1){ buttonArray[j][i] = new JButton(whiteIcon);}//盤面状態に応じたアイコンを設定
-					if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackIcon);}//盤面状態に応じたアイコンを設定
-					if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
-					if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
+					else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackIcon);}//盤面状態に応じたアイコンを設定
+					else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
+					else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i] = new JButton(unplaceableIcon);}
+					else if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
 						if(PLACABLE) buttonArray[j][i] = new JButton(placeableIcon);
 						else buttonArray[j][i] = new JButton(boardIcon);
 					}
+					else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i] = new JButton(eventIcon);}
+					else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==2) {
+						if(PLACABLE) buttonArray[j][i] = new JButton(eventPlaceableIcon);
+						else buttonArray[j][i] = new JButton(eventIcon);
+					}
+
 					int xx = dispValue[0] + i*dispValue[1];
 					this.add(buttonArray[j][i]);
 					buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
@@ -1551,9 +1783,9 @@ public class Client extends JFrame implements WindowListener{
 				switch(event) {
 					case 3:
 						if(effectNumber==1)
-							tfEffect.setText("二階行動");
+							tfEffect.setText("二回行動");
 						else
-							tfEffect.setText("革命, 二階行動");
+							tfEffect.setText("革命, 二回行動");
 						break;
 					case 8:
 						tfEffect.setText("革命");
@@ -1611,93 +1843,151 @@ public class Client extends JFrame implements WindowListener{
 
 				}
 				//スペシャルマッチ時
-				else if(mode.equals("special") && (othello.getGrids()[y][x]%10 == 2 || event != 0)) {
+				else if(mode.equals("special") && (othello.getGrids()[y][x]%10 == 2 || flagEvent == true)) {
 					//1: 破壊 3:二階行動 4:お邪魔石 5:上下ヒトマスを自分のに 6:盤面を反転させる (7:盤面を隠す) 8:革命
 					if(!flagEvent)
 						event = othello.s_setStone(x,y);
+					othello.s_draw();
 					switch(event){
 						case 1://破壊
-							if(flagEvent) {
-								othello.destroystone(x,y);
+							if(flagEvent && (othello.getGrids()[y][x]==-1||othello.getGrids()[y][x]==1)) {
+								if(othello.getGrids()[y][x]==-1) {//黒なら
+									othello.destroystone(x,y);
+									updateDisp(8,8);
+									System.out.println(othello.getGrids()[y][x]);
+									taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を破壊しました\n");
+									buttonArray[y][x].setIcon(explosionBlackIcon);
+								}
+								else {//白なら
+									othello.destroystone(x,y);
+									updateDisp(8,8);
+									System.out.println(othello.getGrids()[y][x]);
+									taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") 付近を破壊しました\n");
+									buttonArray[y][x].setIcon(explosionWhiteIcon);
+								}
 								othello.changeTurn();
 								flagEvent = false;
 								event = 0;
-								//破壊アニメーションまたはupdateDisp(8,8);
-								taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") 付近を破壊しました\n");
+								sendMessage("sendOperation");
+								sendMessage(String.valueOf(x));
+								sendMessage(String.valueOf(y));
+								sendMessage("end");
+								timer.stop(true);
 							}
 							else {
 								flagEvent = true;
 								othello.changeTurn();
 								updateDisp(x,y);
+								taLog.append("任意のマスの石を破壊できます\n");
+								othello.changeTurn();//自分のターンにする
+								sendMessage("sendOperation");
+								sendMessage(String.valueOf(x));
+								sendMessage(String.valueOf(y));
+								sendMessage("end");
 							}
 							break;
 						case 3://二階行動
 							othello.changeTurn();
 							updateDisp(x,y);
-							othello.changeTurn();
-							if(othello.s_checkPlaceable()) {
+							othello.changeTurn();//自分のターンに戻す
+							event = 0;
+							sendMessage("sendOperation");
+							sendMessage(String.valueOf(x));
+							sendMessage(String.valueOf(y));
+							sendMessage("end");
+							if(othello.s_checkPlaceable()) {//もし置けるなら
 								updateDisp(8,8);
 								nikaiFlag = true;
+							} else {//置けないなら
+								taLog.append("置けるマスがなく二回行動に失敗しました\n");
+								othello.changeTurn();
+								if(effectNumber==1) tfEffect.setText(" ");
+								else tfEffect.setText("革命");
+								timer.stop(true);
 							}
-							else othello.changeTurn();
 							break;
 						case 4://お邪魔石
 							if(flagEvent) {
-								othello.setgarbage(x, y);
-								othello.changeTurn();
-								flagEvent = false;
-								event = 0;
-								updateDisp(8,8);
-								taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") にお邪魔石を置きました\n");
+								if(othello.getGrids()[y][x]%10!=-1 && othello.getGrids()[y][x]%10!=1) {//石が置かれていないのを確認して
+									othello.setgarbage(x, y);
+									othello.changeTurn();
+									flagEvent = false;
+									event = 0;
+									updateDisp(8,8);
+									taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") にお邪魔石を置きました\n");
+									sendMessage("sendOperation");
+									sendMessage(String.valueOf(x));
+									sendMessage(String.valueOf(y));
+									sendMessage("end");
+									timer.stop(true);
+								}
 							}
 							else {
 								flagEvent = true;
 								othello.changeTurn();
 								updateDisp(x,y);
+								taLog.append("任意のマスを置けなくできます\n");
+								othello.changeTurn();//自分のターンに戻す
+								sendMessage("sendOperation");
+								sendMessage(String.valueOf(x));
+								sendMessage(String.valueOf(y));
+								sendMessage("end");
 							}
 							break;
 						case 5://上下１マスに石を置く
 							othello.set_cross(x,y);
-							othello.changeTurn();
+							othello.changeTurn();//相手のターンにする
+							event = 0;
 							updateDisp(8,8);
-							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を中心に十字形で黒を置きました\n");
+							taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を中心に石をクロス置きしました\n");
+							sendMessage("sendOperation");
+							sendMessage(String.valueOf(x));
+							sendMessage(String.valueOf(y));
+							sendMessage("end");
+							timer.stop(true);
 							break;
 						case 6://盤面を反転させる
 							othello.inversion();
 							othello.changeTurn();
+							event = 0;
 							updateDisp(x,y);
 							taLog.append("盤面が反転されました\n");
+							sendMessage("sendOperation");
+							sendMessage(String.valueOf(x));
+							sendMessage(String.valueOf(y));
+							sendMessage("end");
+							timer.stop(true);
 							break;
 						case 8://革命
 							othello.revolution();
 							othello.changeTurn();
 							updateDisp(x,y);
+							event = 0;
+							sendMessage("sendOperation");
+							sendMessage(String.valueOf(x));
+							sendMessage(String.valueOf(y));
+							sendMessage("end");
+							timer.stop(true);
 							break;
-						default:
-							othello.changeTurn();
+						default://イベントマスでなかったら
+							othello.changeTurn();//相手のターンにする
+							event = 0;
 							updateDisp(x,y);
+							sendMessage("sendOperation");
+							sendMessage(String.valueOf(x));
+							sendMessage(String.valueOf(y));
+							sendMessage("end");
 							if(nikaiFlag) {
 								nikaiFlag = false;
 								if(effectNumber==1) tfEffect.setText(" ");
 								else tfEffect.setText("革命");
 							}
+							timer.stop(true);
 					}
 
-					if(event!=1 && event!=4) event = 0;
-					else othello.changeTurn();
 
-					/*サーバに操作情報を送信
-					sendMessage("sendOperation");
-					sendMessage(String.valueOf(x));
-					sendMessage(String.valueOf(y));
-					sendMessage("end");
-					 */
 
-					if(!othello.s_checkPlaceable() && event!=1 && event!=3 && event!=4) {//相手がおけない場合
-						othello.changeTurn();
-						othello.s_checkPlaceable();
-						updateDisp(8,8);
-					}
+
 
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
@@ -1706,6 +1996,14 @@ public class Client extends JFrame implements WindowListener{
 							finishMatching("draw");
 						else
 							finishMatching("lose");
+					}
+
+					if(event==0 && nikaiFlag==false && !othello.s_checkPlaceable()) {//相手がおけない場合
+						System.out.println("check");
+						othello.changeTurn();
+						othello.s_checkPlaceable();
+						updateDisp(8,8);
+						timer.stop(false);
 					}
 
 					if((othello.getTurn() == -1 && player.getColor().equals("black")) || (othello.getTurn() == 1 && player.getColor().equals("white")))
@@ -1957,7 +2255,7 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
 
-	class TotalizingSubDialog extends JDialog implements MouseListener{//再戦希望集計中パネル
+	class TotalizingSubDialog extends JDialog{//再戦希望集計中パネル
 		JTextField tfMessage;//メッセージラベル
 		JButton bCan;//キャンセルボタン
 		Client client;
@@ -1977,11 +2275,13 @@ public class Client extends JFrame implements WindowListener{
 			tfMessage = new JTextField("再戦希望を集計中です...");
 			this.add(tfMessage);
 			tfMessage.setBounds(w*3/8, 5*h/11, 300, 40);
+			/*
 			//キャンセルボタン
 			bCan = new JButton("キャンセル");
 			this.add(bCan);
 			bCan.setBounds(22*w/56, 8*h/11, 120, 40);
 			bCan.addMouseListener(this);//マウス操作を認識できるようにする
+			 */
 
 			//再戦を希望する
 			new tryToRematch().start();
@@ -1990,7 +2290,6 @@ public class Client extends JFrame implements WindowListener{
 		class tryToRematch extends Thread{
 			public void run() {
 				sendMessage("Rematch");
-				sendMessage("end");
 
 				client.flag = false;
 				client.result = false;
@@ -2021,6 +2320,7 @@ public class Client extends JFrame implements WindowListener{
 			}
 		}
 
+		/*
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
 			cancelFlag = true;
 			sendMessage("cancelToRematch");
@@ -2031,6 +2331,8 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseExited(MouseEvent e) {setCursor(new Cursor(Cursor.DEFAULT_CURSOR));}//マウスがオブジェクトから出たときの処理
 		public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
+		 * */
+
 	}
 
 	class EndMatchingSubDialog extends JDialog implements MouseListener{//対局終了時ダイアログ
@@ -2078,23 +2380,31 @@ public class Client extends JFrame implements WindowListener{
 				if(player.getColor().equals("black")) {
 					labelPlayer1 = new JLabel(player.getName() + " ● " + othello.getBlackstone());
 					labelPlayer2 = new JLabel(opponent.getName() + " ● " + othello.getWhitestone());
+					labelPlayer2.setForeground(Color.WHITE);
 				}
 				else {
-					labelPlayer1 = new JLabel(opponent.getName() + " ● " + othello.getWhitestone());
-					labelPlayer2 = new JLabel(player.getName() + " ● " + othello.getBlackstone());
+					labelPlayer1 = new JLabel(player.getName() + " ● " + othello.getWhitestone());
+					labelPlayer1.setForeground(Color.WHITE);
+					labelPlayer2 = new JLabel(opponent.getName() + " ● " + othello.getBlackstone());
 				}
 				//プレイヤ1情報用ラベル
 				labelPlayer1.setBounds(2*w/7, 2*h/7, 300, 30);
 				this.add(labelPlayer1);
 				//プレイヤ1のレート用ラベル
-				labelRate1 = new JLabel(player.getRecord()[4] + "(" + (mp.getPreviousRate()[0] - player.getRecord()[4]) + ")*");//ここでcalculateRate()メソッドを使う
+				if((player.getRecord()[4] - mp.getPreviousRate()[0])<0)
+					labelRate1 = new JLabel(player.getRecord()[5] + " ( " + (player.getRecord()[5] - mp.getPreviousRate()[0]) + " )");
+				else
+					labelRate1 = new JLabel(player.getRecord()[5] + " ( +" + (player.getRecord()[5] - mp.getPreviousRate()[0]) + " )");
 				this.add(labelRate1);
 				labelRate1.setBounds(2*w/7, 3*h/7, 300, 30);
 				//プレイヤ2情報用ラベル
 				labelPlayer2.setBounds(2*w/7, 4*h/7, 300, 30);
 				this.add(labelPlayer2);
 				//プレイヤ2のレート用ラベル
-				labelRate2 = new JLabel(opponent.getRecord()[4] + "(" + (mp.getPreviousRate()[1] - opponent.getRecord()[4]) + ")*");//ここでcalculateRate()メソッドを使う
+				if((opponent.getRecord()[4] - mp.getPreviousRate()[1])<0)
+					labelRate2 = new JLabel(opponent.getRecord()[5] + " ( " + (opponent.getRecord()[5] - mp.getPreviousRate()[1]) + ")");
+				else
+					labelRate2 = new JLabel(opponent.getRecord()[5] + " ( +" + (opponent.getRecord()[5] - mp.getPreviousRate()[1]) + ")");
 				this.add(labelRate2);
 				labelRate2.setBounds(2*w/7, 5*h/7, 300, 30);
 			}
@@ -2106,12 +2416,12 @@ public class Client extends JFrame implements WindowListener{
 				//プレイヤ2情報用ラベル
 				labelPlayer2 = new JLabel("   cpu" + " ● " + othello.getWhitestone());
 				labelPlayer2.setBounds(2*w/7+40, 4*h/7-10, 300, 30);
+				labelPlayer2.setForeground(Color.WHITE);
 				this.add(labelPlayer2);
 			}
 
 			labelPlayer1.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
 			labelPlayer2.setFont(new Font("PixelMplus10", Font.PLAIN, 20));
-			labelPlayer2.setForeground(Color.WHITE);
 			//再戦希望ボタン
 			bRematch = new JButton("再戦");
 			this.add(bRematch);
@@ -2251,12 +2561,6 @@ public class Client extends JFrame implements WindowListener{
 			receiver = new Receiver(socket); //受信用オブジェクトの準備
 			receiver.start();//受信用オブジェクト(スレッド)起動
 			System.out.println("接続されました。");
-			/*
-			sendMessage("makeAccount");
-			sendMessage("name");
-			sendMessage("password");
-			sendMessage("");
-			 * */
 		} catch (UnknownHostException e) {
 			System.err.println("ホストのIPアドレスが判定できません: " + e);
 			System.exit(-1);
@@ -2387,17 +2691,15 @@ public class Client extends JFrame implements WindowListener{
 					}
 					else if(inputLine.equals("sendRecord")) {
 						int i= 1;
-						inputLine = br.readLine();
 						System.out.println(inputLine);
 						while(!(inputLine = br.readLine()).equals("rate")) {
 							System.out.println(inputLine);
-							//rrp.setRanking(String.format(String.valueOf(i++) + ".", 5) + inputLine);
-							rrp.setRanking(String.valueOf(i++) + inputLine);
+							rrp.setRanking(" " + String.format("%-10s", String.valueOf(i++) + ".") + inputLine);
 						}
 						System.out.println(inputLine);
 						inputLine=br.readLine();
 						System.out.println(inputLine);
-						//rrp.setRank(inputLine);
+						rrp.setRank(inputLine);
 						flag = true;
 					}
 					else if(inputLine.equals("noticeEndMatching")) {
