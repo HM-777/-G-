@@ -49,7 +49,6 @@ Random random=new Random();
 		grids[4][3] = black;
 		if (i==1) {
 
-
 		}
 
 	}
@@ -599,6 +598,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 		 grids[6][7]=30;
 		 grids[6][5]=50;
 		 grids[1][1]=80;
+		 grids[4][0]=70;
 	   }else if(i==1) {
 			 grids[1][6]=80;
 			 grids[5][1]=10;
@@ -1040,7 +1040,7 @@ public void draw() {
 		if(grids[j][i]==placeable)
 			System.out.print("△");
 		if(grids[j][i]==empty)
-			System.out.print("  ");
+			System.out.print("□");
 	}
 System.out.println("");
 	}
@@ -1056,11 +1056,11 @@ public void s_draw() {
 		else if(grids[j][i]==black)
 			System.out.print("●");
 		else if(grids[j][i]%10==garbage)
-			System.out.print("□");
+			System.out.print("×");
 		else if(grids[j][i]%10==placeable)
 			System.out.print("△");
 		else if(grids[j][i]==empty)
-			System.out.print("  ");
+			System.out.print("□");
 		else if(grids[j][i]/10!=empty&&grids[j][i]%10==empty) {
 
 		System.out.print("☆");
@@ -1107,7 +1107,7 @@ s_checkPlaceable();
 			checkPlaceable();
 			s_draw();
 			do {
-			System.out.print("お邪魔石を置いてください。\nx=");
+			System.out.print("どの色も設置不可となる石を置いてください(空マスに限る)。\nx=");
 			 x2=scan.nextInt();
 				System.out.print("y=");
 				 y2=scan.nextInt();
