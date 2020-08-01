@@ -613,6 +613,15 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 		   grids[2][5]=40;
 		   grids[0][7]=10;
 
+	   }else if(i==3) {
+			 grids[6][6]=80;
+			 grids[1][1]=10;
+			 grids[4][1]=50;
+			 grids[0][7]=80;
+			 grids[7][3]=60;
+			 grids[5][0]=10;
+	   }else if(i==4) {
+
 	   }
 /*while(special<9) {
 
@@ -683,7 +692,14 @@ event=grids[y][x]/10;//イベントを抽出
 		      s_turnStone(x, y);
 		    //手数を増やす
 		      moves_count++;
-
+for(int i=0;i<row;i++) {//おける場所表示を消す
+	for(int j=0;j<row;j++) {
+		if(grids[j][i]%10==placeable) {
+			int cash=grids[j][i]/10;
+			grids[j][i]=cash*10+empty;
+		}
+	}
+}
 
 		    }
 		    return event;//イベントを戻り値とする。
@@ -1086,7 +1102,7 @@ public void s_match(int check,int x,int y) {
 		 y2=scan.nextInt();}while(grids[y2][x2]%10==placeable||grids[y2][x2]==empty);
 		destroystone(x2,y2);
 
-	}else if(check==3) {//二階行動
+	}else if(check==3) {//二回行動
 changeTurn();
 changeTurn();
 s_checkPlaceable();
@@ -1140,6 +1156,7 @@ public static void main(String args[]) {//CPU同士で対戦できるように�
 int i=0;
 int alpha=0;
 int randomc=0;
+
 while(i<30) {//ここのiが対局数
 
 	 Othello a=new Othello(0);
