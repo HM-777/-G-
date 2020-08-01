@@ -30,6 +30,7 @@ public class Server{
     int[] SpecialList = new int[2];//スペシャル戦マッチングルーム
     int[] ReMatchingList = new int[2];//再戦マッチングルーム
     boolean flagMatched=false;//ルームが埋まってるか
+    boolean flagSpecialMatched=false;
     boolean flagReMatched=false;
     private Player[] player=new Player[1000000];
 
@@ -93,7 +94,7 @@ public class Server{
 
 					}
 				    else if(inputLine.equals("login")) {//目的が「ログイン認証要請」
-				    	player[playerNo] = Playerslist.get(id);
+				    	//player[playerNo] = Playerslist.get(id);
 						i=0;
 						String user[] = new String[2];
 
@@ -118,32 +119,50 @@ public class Server{
 						String mode= br.readLine();//rank or special
 						sendMessage("sendFindingResult",player[playerNo].getMyPlayerNo());
 						flagMatched=false;
+						flagSpecialMatched=false;
 
 						System.out.println("待機中");
 						if(mode.equals("rank")) {
 							addMatchingList(player[playerNo].getMyPlayerNo(),"rank");//(player,src)
 							//この中で{sendFindingResult,succeeded,先手後手,相手のname,rate}を返す
+							int t = 60;
+							while(flagMatched == false){
+								try {
+									Thread.sleep(1000);
+									t--;
+
+								}catch(InterruptedException e){
+
+								}
+								if(t == 0) {
+									removeMatchingList();
+
+									sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
+									break;
+								}
+							}
 						}else {//special
 							addMatchingList(player[playerNo].getMyPlayerNo(),"special");
 							//この中で{sendFindingResult,succeeded,先手後手,相手のname,rate}を返す
-						}
-						int t = 60;
-						while(flagMatched == false){
-							try {
-								Thread.sleep(1000);
-								t--;
+							int t = 60;
+							while(flagSpecialMatched == false){
+								try {
+									Thread.sleep(1000);
+									t--;
 
-							}catch(InterruptedException e){
+								}catch(InterruptedException e){
 
+								}
+								if(t == 0) {
+									removeSpecialList();
+
+									sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
+									break;
+								}
 							}
-							if(t == 0) {
-								removeMatchingList();
-
-								sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
-								break;
-							}
 						}
-						removeMatchingList();//MatchingListから外す
+
+						//removeMatchingList();//MatchingListから外す
 						sendMessage("end",player[playerNo].getMyPlayerNo());
 
 					}
@@ -202,7 +221,7 @@ public class Server{
 					}
 
 					else if(inputLine.equals("Rematch")) {//目的が「再戦」
-						String mode=br.readLine();
+						//String mode=br.readLine();
 						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
 						System.out.println("待機中");
 						addReMatchingList(player[playerNo].getMyPlayerNo());
@@ -347,6 +366,10 @@ public class Server{
 	    	MatchingList[0] = -1;
 	    }
 
+	    public void removeSpecialList() {
+	    	SpecialList[0] = -1;
+	    }
+
 	    public void removeReMatchingList() {
 	    	ReMatchingList[0] = -1;
 	    }
@@ -417,7 +440,7 @@ public class Server{
     		   player[SpecialList[1]].setOpponentPlayerNo(SpecialList[0]);
 
 
-    		   flagMatched = true;
+    		   flagSpecialMatched = true;
     		   sendMessage("succeeded",SpecialList[0]);
     		   sendMessage("succeeded",SpecialList[1]);
     		   sendColor(SpecialList[0],SpecialList[1]);
@@ -471,7 +494,7 @@ public class Server{
 	}
 
 	public static void main(String[] args){
-		Server server = new Server(1235); //待ち受けポート1112番でサーバオブジェクトを準備
+		Server server = new Server(1236); //待ち受けポート1112番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
