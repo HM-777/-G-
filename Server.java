@@ -90,12 +90,9 @@ public class Server{
 								break;
 							}
 						}
-						//System.out.println(playerNo);
-						//player[playerNo].setMyPlayerNo(playerNo);
-						if(user[0]!=null && user[1]!=null) {
 						registerUser(user[0],user[1]);//[0]name,[1]password
 						//{sendAccountInfo,name,password,id,end}を返す
-						}
+
 					}
 				    else if(inputLine.equals("login")) {//目的が「ログイン認証要請」
 				    	player[playerNo] = Playerslist.get(id);
@@ -133,7 +130,7 @@ public class Server{
 						}
 						new OpponentFinder().start();
 
-						removeMatchingList();//MatchingListから外す
+						//removeMatchingList();//MatchingListから外す
 
 						//スレッドでend送ってくれるから
 						//sendMessage("end",player[playerNo].getMyPlayerNo());//end送信
@@ -195,7 +192,7 @@ public class Server{
 					else if(inputLine.equals("Rematch")) {//目的が「再戦」
 						String mode=br.readLine();
 						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
-						addReMatchingList(player[playerNo].getMyPlayerNo(),mode);
+						addReMatchingList(player[playerNo].getMyPlayerNo());
 
 						new ReOpponentFinder().start();//スレッドで
 						//sendMessage("end",player[playerNo].getMyPlayerNo());
@@ -222,11 +219,12 @@ public class Server{
 			public void run() {
 				int t = 60;
 				//flagReMatched = false;
+				System.out.println("待機中");
 				while(flagReMatched == false){
 					try {
 						Thread.sleep(1000);
 						t--;
-						System.out.println("待機中");
+
 					}catch(InterruptedException e){
 
 					}
@@ -246,11 +244,12 @@ public class Server{
 			public void run() {
 				int t = 60;
 				//flagReMatched = false;
+				System.out.println("待機中");
 				while(flagMatched == false){
 					try {
 						Thread.sleep(1000);
 						t--;
-						System.out.println("待機中");
+
 					}catch(InterruptedException e){
 
 					}
@@ -271,7 +270,7 @@ public class Server{
 
 
 		// メソッド
-		public void registerUser(String name,String password) {//ユーザ情報の登録,IDを与えてサーバで保存する
+		public void registerUser(String name,String password) {//ユーザ情報の登録
 	    	Random rand = new Random();
 	        int num = rand.nextInt(90000000) + 10000000;
 	        id = num;//ランダム文字列でIDを与える
@@ -283,7 +282,6 @@ public class Server{
 	        r[5]=1500;
 	        player[playerNo].setRecord(r);
 	        Playerslist.put( Integer.toString(id), player[playerNo]);//HashMapの Playerslistにkeyはid,valueはPlayerクラス
-	        //System.out.println(player[playerNo].getRecord()[5]);
 	        Ratelist.put( Integer.toString(id), player[playerNo].getRecord()[5]);
 
 	        player[playerNo].setMyPlayerNo(playerNo);
@@ -427,7 +425,7 @@ public class Server{
     		   player[MatchingList[1]].setOpponentPlayerNo(MatchingList[0]);
 
 
-    		   flagMatched = true;//ルームいっぱい
+    		   flagMatched = true;//ルームが埋まっている
     		   sendMessage("succeeded",MatchingList[0]);
     		   sendMessage("succeeded",MatchingList[1]);
     		   sendColor(MatchingList[0],MatchingList[1]);
@@ -467,32 +465,31 @@ public class Server{
     	}
     }
 
-	public void addReMatchingList(int playerNo,String str) {
-		if(str .equals ("rematch")) {
+	public void addReMatchingList(int playerNo) {//再戦リスト
 
-    	    if(ReMatchingList[0] == -1) {//playerがいないなら
-    		    ReMatchingList[0] = playerNo;
-    	    }
-    	    else {
-    	    	ReMatchingList[1] = playerNo;
+	    if(ReMatchingList[0] == -1) {//playerがいないなら
+		    ReMatchingList[0] = playerNo;
+	    }
+	    else {
+	    	ReMatchingList[1] = playerNo;
 
-    		   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
-    		   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
+		   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
+		   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
 
 
-    		   flagReMatched = true;
-    		   sendMessage("succeeded",ReMatchingList[0]);
-    		   sendMessage("succeeded",ReMatchingList[1]);
-    		   sendColor(ReMatchingList[0],ReMatchingList[1]);
-    		   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
-    		   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
-    		   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
-    		   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
+		   flagReMatched = true;
+		   sendMessage("succeeded",ReMatchingList[0]);
+		   sendMessage("succeeded",ReMatchingList[1]);
+		   sendColor(ReMatchingList[0],ReMatchingList[1]);
+		   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
+		   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
+		   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
+		   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
 
-    		   ReMatchingList[0] = -1;
-    		   ReMatchingList[1] = -1;
-    	    }
-		}
+		   ReMatchingList[0] = -1;
+		   ReMatchingList[1] = -1;
+	    }
+
 	}
 
     public void sendColor(int p1,int p2){ //先手後手情報(白黒)の送信
@@ -506,8 +503,8 @@ public class Server{
 		System.out.println(playerNo + "にメッセージ " + msg + " を送信しました");
 	}
 
-	public static void main(String[] args){ //main
-		Server server = new Server(1112); //待ち受けポート1112番でサーバオブジェクトを準備
+	public static void main(String[] args){
+		Server server = new Server(1235); //待ち受けポート1112番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
