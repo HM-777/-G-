@@ -122,6 +122,7 @@ public class Server{
 						//player[playerNo] = Playerslist.get(id);
 						String mode= br.readLine();//rank or special
 						sendMessage("sendFindingResult",player[playerNo].getMyPlayerNo());
+						flagMatched=false;
 
 						if(mode.equals("rank")) {
 							addMatchingList(player[playerNo].getMyPlayerNo(),"rank");//(player,src)
@@ -130,26 +131,12 @@ public class Server{
 							addMatchingList(player[playerNo].getMyPlayerNo(),"special");
 							//この中で{sendFindingResult,succeeded,先手後手,相手のname,rate}を返す
 						}
+						new OpponentFinder().start();
 
-						int t = 60;//時間内(60s)で相手が見つからない時
-						while(flagMatched == false){
-							try {
-								Thread.sleep(1000);
-								t--;
-								System.out.println("待機中");
-							}catch(InterruptedException e){
+						removeMatchingList();//MatchingListから外す
 
-							}
-							if(t == 0) {
-								removeMatchingList(playerNo);//MatchingListから外す
-
-								sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
-								break;
-							}
-
-						}
-						sendMessage("end",player[playerNo].getMyPlayerNo());//end送信
-
+						//スレッドでend送ってくれるから
+						//sendMessage("end",player[playerNo].getMyPlayerNo());//end送信
 					}
 
 					else if(inputLine.equals("sendOperation")) {//目的が「操作情報の送信」
@@ -210,25 +197,18 @@ public class Server{
 						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
 						addReMatchingList(player[playerNo].getMyPlayerNo(),mode);
 
-						int t = 30;
-						while(flagReMatched == false){
-							try {
-								Thread.sleep(1000);
-								t--;
-							}catch(InterruptedException e){
-
-							}
-							if(t == 0) {
-								removeReMatchingList(playerNo);
-
-								sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
-								break;
-							}
-
-						}
-						sendMessage("end",player[playerNo].getMyPlayerNo());
-
+						new ReOpponentFinder().start();//スレッドで
+						//sendMessage("end",player[playerNo].getMyPlayerNo());
 					}
+					else if(inputLine.equals("cancelToRematch")){//再戦のキャンセル
+						flagMatched=true;
+						removeMatchingList();
+					}
+					else if(inputLine.equals("cancelToFindOpponent")){//対戦相手とのマッチングのキャンセル
+						flagReMatched=true;
+						removeReMatchingList();
+					}
+
 
 				}
 			} catch (IOException e){ // 接続が切れたとき
@@ -237,6 +217,58 @@ public class Server{
 				printStatus(playerNo); //接続状態を出力する
 			}
 		}
+
+		class ReOpponentFinder extends Thread{
+			public void run() {
+				int t = 60;
+				//flagReMatched = false;
+				while(flagReMatched == false){
+					try {
+						Thread.sleep(1000);
+						t--;
+						System.out.println("待機中");
+					}catch(InterruptedException e){
+
+					}
+					if(t == 0) {
+						removeReMatchingList();
+
+						sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
+						break;
+					}
+
+				}
+				sendMessage("end",player[playerNo].getMyPlayerNo());
+			}
+		}
+
+		class OpponentFinder extends Thread{
+			public void run() {
+				int t = 60;
+				//flagReMatched = false;
+				while(flagMatched == false){
+					try {
+						Thread.sleep(1000);
+						t--;
+						System.out.println("待機中");
+					}catch(InterruptedException e){
+
+					}
+					if(t == 0) {
+						removeMatchingList();
+
+						sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
+						break;
+					}
+
+				}
+				sendMessage("end",player[playerNo].getMyPlayerNo());
+			}
+		}
+
+
+
+
 
 		// メソッド
 		public void registerUser(String name,String password) {//ユーザ情報の登録,IDを与えてサーバで保存する
@@ -298,7 +330,7 @@ public class Server{
 			if(online[playerNo]=true) {
 				System.out.println("接続中");
 			}else {
-				System.out.println("接続なし");
+				System.out.println("接続が切れました");
 			}
 		}
 
@@ -334,11 +366,10 @@ public class Server{
 	           if(Integer.parseInt(entry.getKey()) == id) {
 	        	   rank=count;
 	           }
-	           sendMessage(String.format(String.valueOf ( Playerslist.get( entry.getKey() ).getRecord()[5] ),7) + Playerslist.get(entry.getKey()).getName(),player[playerNo].getMyPlayerNo());
+	           sendMessage(String.format("%10s",String.valueOf ( Playerslist.get( entry.getKey() ).getRecord()[5] )) + Playerslist.get(entry.getKey()).getName(),player[playerNo].getMyPlayerNo());
 	           //レートと名前送信
-	           sendMessage("rate",player[playerNo].getMyPlayerNo());
-
 	        }
+	        sendMessage("rate",player[playerNo].getMyPlayerNo());
 	        sendMessage(String.valueOf(rank),player[playerNo].getMyPlayerNo());
 	        sendMessage("end",player[playerNo].getMyPlayerNo());
 	    }
@@ -347,11 +378,11 @@ public class Server{
 	    	opponentplayerNo = n;
 	    }
 
-	    public void removeMatchingList(int playerNo) {
+	    public void removeMatchingList() {
 	    	MatchingList[0] = -1;
 	    }
 
-	    public void removeReMatchingList(int playerNo) {
+	    public void removeReMatchingList() {
 	    	ReMatchingList[0] = -1;
 	    }
 
@@ -411,7 +442,7 @@ public class Server{
     	    }
     	}else if(str .equals ("special")){
 
-    	    if(SpecialList[0] != -1) {
+    	    if(SpecialList[0] == -1) {
     	    	SpecialList[0] = playerNo;
     	    }
     	    else {
@@ -439,11 +470,8 @@ public class Server{
 	public void addReMatchingList(int playerNo,String str) {
 		if(str .equals ("rematch")) {
 
-    	    if(ReMatchingList[0] != -1) {//playerがいないなら
+    	    if(ReMatchingList[0] == -1) {//playerがいないなら
     		    ReMatchingList[0] = playerNo;
-    	    }
-    	    if(ReMatchingList[0] != -1) {
-    	    	ReMatchingList[0] = playerNo;
     	    }
     	    else {
     	    	ReMatchingList[1] = playerNo;
