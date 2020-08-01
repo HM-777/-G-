@@ -595,7 +595,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 		 grids[1][6]=60;
 		 grids[5][1]=10;
 		 grids[3][1]=40;
-		 grids[6][7]=30;
+		 grids[5][7]=30;
 		 grids[6][5]=50;
 		 grids[1][1]=80;
 		 grids[4][0]=70;
