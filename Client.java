@@ -65,7 +65,7 @@ public class Client extends JFrame implements WindowListener{
 	private boolean BGM = true;
 	private boolean SE = true;
 	private boolean PLACABLE = true;
-	static Clip bgm1= createClip(new File("宮田大翔 - Irreversible (original) (1).wav"));
+	static Clip bgm1= createClip(new File("宮田大翔 - Irreversible (original).wav"));
 	static Font font;
 
 	//パネル・ダイアログ（内部クラス）
@@ -1330,18 +1330,18 @@ public class Client extends JFrame implements WindowListener{
 			blackIcon = new ImageIcon(new File("Black.jpg").getAbsolutePath());
 			boardIcon = new ImageIcon(new File("GreenFrame.jpg").getAbsolutePath());
 			placeableIcon = new ImageIcon(new File("Placeable.jpg").getAbsolutePath());
-			hiddenIcon = new ImageIcon(new File("Hidden.jpg").getAbsolutePath());
+			hiddenIcon = new ImageIcon(new File("Hidden.jpg").getAbsolutePath());//雲
 			if(mode.equals("special")) {
-				unplaceableIcon = new ImageIcon(new File("IrreversibleStone.jpg").getAbsolutePath());
-				eventIcon = new ImageIcon(new File("Event.jpg").getAbsolutePath());
-				eventPlaceableIcon = new ImageIcon(new File("EventPlaceable.jpg").getAbsolutePath());
-				explosionBlackIcon = new ImageIcon(new File("explosionBlack2.gif").getAbsolutePath());
-				explosionWhiteIcon = new ImageIcon(new File("explosionWhite2.gif").getAbsolutePath());
-				explosionUnplaceableIcon = new ImageIcon(new File("explosionIrreversibleSquare.gif").getAbsolutePath());
-				blackHackunIcon = new ImageIcon(new File("BlackHackun.jpg").getAbsolutePath());
-				whiteHackunIcon = new ImageIcon(new File("GrayHackun.jpg").getAbsolutePath());
-				blackHackunExplosionIcon = new ImageIcon(new File("explosionBlack (1).gif").getAbsolutePath());
-				whiteHackunExplosionIcon = new ImageIcon(new File("explosionWhite (1).gif").getAbsolutePath());
+				unplaceableIcon = new ImageIcon(new File("IrreversibleStone.jpg").getAbsolutePath());//お邪魔石
+				eventIcon = new ImageIcon(new File("Event.jpg").getAbsolutePath());//イベントマス
+				eventPlaceableIcon = new ImageIcon(new File("EventPlaceable.jpg").getAbsolutePath());//イベントマスかつ置ける
+				explosionBlackIcon = new ImageIcon(new File("explosionBlack2.gif").getAbsolutePath());//黒石破壊
+				explosionWhiteIcon = new ImageIcon(new File("explosionWhite2.gif").getAbsolutePath());//白石破壊
+				explosionUnplaceableIcon = new ImageIcon(new File("explosionIrreversibleSquare.gif").getAbsolutePath());//お邪魔石破壊
+				blackHackunIcon = new ImageIcon(new File("BlackHackun.jpg").getAbsolutePath());//親ハックン
+				whiteHackunIcon = new ImageIcon(new File("GrayHackun.jpg").getAbsolutePath());//子ハックン
+				blackHackunExplosionIcon = new ImageIcon(new File("explosionBlack (1).gif").getAbsolutePath());//親ハックン破壊
+				whiteHackunExplosionIcon = new ImageIcon(new File("explosionWhite (1).gif").getAbsolutePath());//子ハックン破壊
 			}
 			//オセロ盤面の初期化
 			buttonArray = new JButton[row][row];//ボタンの配列を作成
