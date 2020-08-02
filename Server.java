@@ -347,7 +347,7 @@ public class Server{
 	        // 7. ループで要素順に値を取得する
 	        for(Entry<String, Integer> entry : list_entries) {
 	           count++;
-	           if(Integer.parseInt(entry.getKey()) == id) {
+	           if(Integer.parseInt(entry.getKey()) == Integer.parseInt( player[playerNo].getID() )) {
 	        	   rank=count;
 	           }
 	           sendMessage(String.format("%-10s",String.valueOf ( Playerslist.get( entry.getKey() ).getRecord()[5] )) + Playerslist.get(entry.getKey()).getName(),player[playerNo].getMyPlayerNo());
