@@ -168,7 +168,11 @@ public class Server{
 							addMatchingList(player[playerNo].getMyPlayerNo(),"special");
 							//この中で{sendFindingResult,succeeded,先手後手,相手のname,rate}を返す
 							int t = 60;
-							while(flagSpecialMatched == false){
+							while(true){
+                if(flagSpecialMatched == true){
+									matchingFlag=true;
+									break;
+								}
 								try {
 									Thread.sleep(1000);
 									t--;
@@ -253,7 +257,11 @@ public class Server{
 						int t = 10;
 						//flagReMatched = false;
 
-						while(flagReMatched == false){
+						while(true){
+              if(flagReMatched == true){
+                matchingFlag=true;
+                break;
+              }
 							try {
 								Thread.sleep(1000);
 								t--;
@@ -527,7 +535,7 @@ public class Server{
 	}
 
 	public static void main(String[] args){
-		Server server = new Server(11165); //待ち受けポート1112番でサーバオブジェクトを準備
+		Server server = new Server(11169); //待ち受けポート1112番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
