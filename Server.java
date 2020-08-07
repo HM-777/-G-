@@ -18,7 +18,7 @@ import java.util.Random;
 public class Server{
 	private static final java.lang.String String = null;
 	private int port;
-	private boolean [] online; //オンライン状態管理用配列
+//	private boolean online;
 	private PrintWriter[] out; //データ送信用オブジェクト
 	private Receiver [] receiver; //データ受信用オブジェクト
     HashMap <String,Player> Playerslist = new HashMap <String,Player>();
@@ -40,7 +40,6 @@ public class Server{
 		this.port = port; //待ち受けポートを渡す
 		out = new PrintWriter [100]; //データ送信用オブジェクトを2クライアント分用意
 		receiver = new Receiver [100]; //データ受信用オブジェクトを2クライアント分用意
-		online = new boolean[2]; //オンライン状態管理用配列を用意
 		MatchingList[0] = -1;
 	    MatchingList[1] = -1;
 	    SpecialList[0] = -1;
@@ -91,11 +90,12 @@ public class Server{
 							r[5]=player[playerNo].getRecord()[5] - (int)(16+0.04*(player[playerNo].getRecord()[5]-player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]));
 							player[playerNo].setRecord(r);
 						}
-						online[playerNo]=false;
+//						online[id]=false;
+						Playerslist.get(id).setOnline(false);
 						List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
 					    for(Entry<String, Player> entry : list) {
-					      if(online[entry.getValue().getMyPlayerNo()])
+					      if(Playerslist.get(id).getOnline())
 					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
 					      else
 					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
@@ -290,7 +290,7 @@ public class Server{
 				}
 			} catch (IOException e){ // 接続が切れたとき
 				System.err.println("プレイヤ " + playerNo + "との接続が切れました．");
-				online[playerNo] = false; //プレイヤの接続状態を更新する
+				Playerslist.get(id).setOnline(false);
 				printStatus(playerNo); //接続状態を出力する
 			}
 		}
@@ -323,21 +323,28 @@ public class Server{
 			    	player[playerNo] = Playerslist.get(id);//idをkeyとするplayer(value)を呼び出す
 			    	player[playerNo].setMyPlayerNo(playerNo);//playerNoをセットする
 
-			    	if(online[playerNo] == true) {
-			    		sendMessage("failed",player[playerNo].getMyPlayerNo());
-			    	}else{
-			    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
-			    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
-			    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
-			    		forwardUser(playerNo);//下の「ユーザ情報の送信」メソッド
-			    		sendMessage("end",player[playerNo].getMyPlayerNo());
-			    	}else{
-			    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
-			    		sendMessage("failed",player[playerNo].getMyPlayerNo());
-			    		sendMessage("end",player[playerNo].getMyPlayerNo());
-			    	}
-		    	}
+			    	List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
+				    for(Entry<String, Player> entry : list) {
+				      if(Playerslist.get(id).getOnline())
+				          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+				      else
+				          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+				    }
+				    if(Playerslist.get(id).getOnline() == true) {
+				    	sendMessage("failed",player[playerNo].getMyPlayerNo());
+				    }else {
+				    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
+				    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
+				    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
+				    		forwardUser(playerNo);//下の「ユーザ情報の送信」メソッド
+				    		sendMessage("end",player[playerNo].getMyPlayerNo());
+				    	}else{
+				    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
+				    		sendMessage("failed",player[playerNo].getMyPlayerNo());
+				    		sendMessage("end",player[playerNo].getMyPlayerNo());
+		    	    }
+				    }
 		    }
 
 		 public void forwardUser(int playerNo) {//ユーザ情報の送信
@@ -354,7 +361,7 @@ public class Server{
 
 
 		public void printStatus(int playerNo){ //クライアント接続状態の確認
-			if(online[playerNo]=true) {
+			if(Playerslist.get(id).getOnline()) {
 				System.out.println("接続中");
 			}else {
 				System.out.println("接続が切れました");
@@ -458,9 +465,8 @@ public class Server{
 		    		   player[SpecialList[0]].setOpponentPlayerNo(SpecialList[1]);//相手のplayerNo
 		    		   player[SpecialList[1]].setOpponentPlayerNo(SpecialList[0]);
 
-
 		    		   flagSpecialMatched = true;
-							 matchingFlag=true;
+		    		   matchingFlag=true;
 		    		   sendMessage("succeeded",SpecialList[0]);
 		    		   sendMessage("succeeded",SpecialList[1]);
 		    		   sendColor(SpecialList[0],SpecialList[1]);
@@ -515,21 +521,14 @@ public class Server{
 			while (true) {
 				Socket socket = ss.accept();//新規接続を受け付ける
 				int playerNo =i;//プレイヤ識別番号,ログインで毎回違う
-				online[playerNo]=true;//接続中
+//				online[id]=true;
 				System.out.println("プレイヤ" + playerNo + "と接続しました。");
 				out[playerNo]  = new PrintWriter(socket.getOutputStream(), true);//データ送信オブジェクトを用意
 				receiver[playerNo] = new Receiver(socket,playerNo);//データ受信オブジェクト(スレッド)を用意
 				receiver[playerNo] .start();//データ送信オブジェクト(スレッド)を起動
 				receiver[i]=new Receiver(socket,playerNo);
 				i++;
-			    List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
-			    for(Entry<String, Player> entry : list) {
-			      if(online[entry.getValue().getMyPlayerNo()])
-			          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
-			      else
-			          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
-			    }
 			}
 
 
