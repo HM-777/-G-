@@ -40,7 +40,7 @@ public class Server{
 		this.port = port; //待ち受けポートを渡す
 		out = new PrintWriter [100]; //データ送信用オブジェクトを2クライアント分用意
 		receiver = new Receiver [100]; //データ受信用オブジェクトを2クライアント分用意
-		online = new boolean[100]; //オンライン状態管理用配列を用意
+		online = new boolean[2]; //オンライン状態管理用配列を用意
 		MatchingList[0] = -1;
 	    MatchingList[1] = -1;
 	    SpecialList[0] = -1;
@@ -92,6 +92,7 @@ public class Server{
 							r[5]=player[playerNo].getRecord()[5] - (int)(16+0.04*(player[playerNo].getRecord()[5]-player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]));
 							player[playerNo].setRecord(r);
 						}
+						online[playerNo]=false;
 						break;
 					}
 
@@ -169,7 +170,7 @@ public class Server{
 							//この中で{sendFindingResult,succeeded,先手後手,相手のname,rate}を返す
 							int t = 60;
 							while(true){
-                if(flagSpecialMatched == true){
+								if(flagSpecialMatched == true){
 									matchingFlag=true;
 									break;
 								}
@@ -258,10 +259,10 @@ public class Server{
 						//flagReMatched = false;
 
 						while(true){
-              if(flagReMatched == true){
-                matchingFlag=true;
-                break;
-              }
+			              if(flagReMatched == true){
+			                matchingFlag=true;
+			                break;
+			              }
 							try {
 								Thread.sleep(1000);
 								t--;
@@ -312,19 +313,24 @@ public class Server{
 
 
 		 public void confirmData(String id,String password) {//合致データの確認
-		    	//System.out.println(playerNo);
-		    	player[playerNo] = Playerslist.get(id);//idをkeyとするplayer(value)を呼び出す
-		    	player[playerNo].setMyPlayerNo(playerNo);//playerNoをセットする
-
-		    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
-		    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
-		    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
-		    		forwardUser(playerNo);//下の「ユーザ情報の送信」メソッド
-		    		sendMessage("end",player[playerNo].getMyPlayerNo());
-		    	}else{
-		    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
+		    	if(online[playerNo] == true) {
 		    		sendMessage("failed",player[playerNo].getMyPlayerNo());
-		    		sendMessage("end",player[playerNo].getMyPlayerNo());
+		    	}else{
+
+
+			    	player[playerNo] = Playerslist.get(id);//idをkeyとするplayer(value)を呼び出す
+			    	player[playerNo].setMyPlayerNo(playerNo);//playerNoをセットする
+
+			    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
+			    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
+			    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
+			    		forwardUser(playerNo);//下の「ユーザ情報の送信」メソッド
+			    		sendMessage("end",player[playerNo].getMyPlayerNo());
+			    	}else{
+			    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
+			    		sendMessage("failed",player[playerNo].getMyPlayerNo());
+			    		sendMessage("end",player[playerNo].getMyPlayerNo());
+			    	}
 		    	}
 
 		    }
@@ -349,7 +355,6 @@ public class Server{
 				System.out.println("接続が切れました");
 			}
 		}
-
 
 
 		public void forwardMessage(int x,int y){ //操作情報の転送
