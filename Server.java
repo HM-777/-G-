@@ -309,14 +309,7 @@ public class Server{
 	    	Random rand = new Random();
 	        int num = rand.nextInt(90000000) + 10000000;
 	        id = num;//ランダム文字列でIDを与える
-	        List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
-		    for(Entry<String, Player> entry : list) {
-		      if(entry.getValue().getOnline())
-		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
-		      else
-		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
-		    }
 	        player[playerNo] = new Player(name, Integer.toString(id), password);
 	        int[]r=new int[6];
 	        for(int a=0;a<5;a++) {
@@ -333,6 +326,16 @@ public class Server{
 			sendMessage(Integer.toString(id),player[playerNo].getMyPlayerNo());
 			sendMessage(password,player[playerNo].getMyPlayerNo());
 			sendMessage("end",player[playerNo].getMyPlayerNo());
+
+			List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
+	        Playerslist.get(player[playerNo].getID()).setOnline(true);
+
+		    for(Entry<String, Player> entry : list) {
+		      if(entry.getValue().getOnline())
+		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+		      else
+		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+		    }
 	    }
 
 
