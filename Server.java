@@ -91,11 +91,11 @@ public class Server{
 							player[playerNo].setRecord(r);
 						}
 //						online[id]=false;
-						Playerslist.get(id).setOnline(false);
+						Playerslist.get(player[playerNo].getID()).setOnline(false);
 						List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
 					    for(Entry<String, Player> entry : list) {
-					      if(Playerslist.get(id).getOnline())
+					      if(Playerslist.get(player[playerNo].getID()).getOnline())
 					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
 					      else
 					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
@@ -291,7 +291,7 @@ public class Server{
 				}
 			} catch (IOException e){ // 接続が切れたとき
 				System.err.println("プレイヤ " + playerNo + "との接続が切れました．");
-				Playerslist.get(id).setOnline(false);
+				Playerslist.get(player[playerNo].getID()).setOnline(false);
 				printStatus(playerNo); //接続状態を出力する
 			}
 		}
