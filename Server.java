@@ -320,14 +320,12 @@ public class Server{
 
 
 		 public void confirmData(String id,String password) {//合致データの確認
-		    	if(online[playerNo] == true) {
-		    		sendMessage("failed",player[playerNo].getMyPlayerNo());
-		    	}else{
-
-
 			    	player[playerNo] = Playerslist.get(id);//idをkeyとするplayer(value)を呼び出す
 			    	player[playerNo].setMyPlayerNo(playerNo);//playerNoをセットする
 
+			    	if(online[playerNo] == true) {
+			    		sendMessage("failed",player[playerNo].getMyPlayerNo());
+			    	}else{
 			    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
 			    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
 			    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
