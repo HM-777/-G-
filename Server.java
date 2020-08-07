@@ -78,7 +78,6 @@ public class Server{
 					System.out.println(playerNo + "から" + inputLine + "を受け取りました。");
 
 					if(inputLine==null){
-						System.out.println("ループを抜けます");
 						if(matchingFlag){
 							matchingFlag=false;
 							sendMessage("noticeEndMatching",player[playerNo].getOpponentPlayerNo());
@@ -93,6 +92,14 @@ public class Server{
 							player[playerNo].setRecord(r);
 						}
 						online[playerNo]=false;
+						List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
+
+					    for(Entry<String, Player> entry : list) {
+					      if(online[entry.getValue().getMyPlayerNo()])
+					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+					      else
+					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+					    }
 						break;
 					}
 
@@ -517,6 +524,14 @@ public class Server{
 				receiver[playerNo] .start();//データ送信オブジェクト(スレッド)を起動
 				receiver[i]=new Receiver(socket,playerNo);
 				i++;
+			    List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
+
+			    for(Entry<String, Player> entry : list) {
+			      if(online[entry.getValue().getMyPlayerNo()])
+			          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+			      else
+			          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+			    }
 			}
 
 
@@ -542,14 +557,7 @@ public class Server{
 	public static void main(String[] args){
 		Server server = new Server(11169); //待ち受けポート1112番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
-    while(true){
-    List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
-    for(Entry<String, Player> entry : list) {
-      if(online[entry.getMyPlayerNo()])
-          System.out.println();
-      else
-          System.out.println();
-    }
-}
+
+
 	}
 }
