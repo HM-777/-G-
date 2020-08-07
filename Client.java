@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.NumberFormat;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -88,49 +89,6 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w, h);
 			this.setLayout(null);
 			this.setBackground(new Color(130, 0, 170));
-
-			/*
-			//タイトル1
-			title = new JLabel("REVERSI");
-			title.setFont(new Font("PixelMplus10", Font.PLAIN, 140));
-			title.setForeground(Color.GREEN);
-			this.add(title);
-			title.setBounds(w/5-5, h/8, 600, 200);
-			//タイトル2
-			title2 = new JLabel("REVERSI");
-			title2.setFont(new Font("PixelMplus10", Font.PLAIN, 140));
-			title2.setForeground(Color.RED);
-			this.add(title2);
-			title2.setBounds(w/5-14, h/8, 600, 200);
-			//タイトル1
-			title = new JLabel("WORK WORK");
-			title.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
-			title.setHorizontalAlignment(JLabel.CENTER);
-			title.setForeground(Color.GREEN);
-			this.add(title);
-			title.setBounds(w/5-165, h/8-20, 800, 120);
-			//タイトル2
-			title2 = new JLabel("WORK WORK");
-			title2.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
-			title2.setHorizontalAlignment(JLabel.CENTER);
-			title2.setForeground(Color.RED);
-			this.add(title2);
-			title2.setBounds(w/5-170, h/8-20, 800, 120);
-			//タイトル3
-			title3 = new JLabel("HACK OTHELLO");
-			title3.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
-			title3.setHorizontalAlignment(JLabel.CENTER);
-			title3.setForeground(Color.GREEN);
-			this.add(title3);
-			title3.setBounds(w/5-165, h/8+80, 800, 120);
-			//タイトル4
-			title4 = new JLabel("HACK OTHELLO");
-			title4.setFont(new Font("PixelMplus10", Font.PLAIN, 100));
-			title4.setHorizontalAlignment(JLabel.CENTER);
-			title4.setForeground(Color.RED);
-			this.add(title4);
-			title4.setBounds(w/5-170, h/8+80, 800, 120);
-			 */
 
 			//ネットワーク対局選択用ボタン
 			bN = new JButton("ネットワーク対局");
@@ -233,7 +191,7 @@ public class Client extends JFrame implements WindowListener{
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
 			if(e.getSource() == bOK) {//OKボタンクリック時
-				if(connectServer(ip.getText(), 11157)) {//正常処理
+				if(connectServer(ip.getText(), 11184)) {//正常処理
 					client.otlp = new OptionToLoginPanel(client, "otlp");
 					client.mnp.setVisible(false);
 					client.PanelChange((JPanel)mnp, (JPanel)client.otlp);
@@ -451,6 +409,7 @@ public class Client extends JFrame implements WindowListener{
 			setTitle("アカウント作成");
 			this.setLayout(null);
 			setResizable(false);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(50,50,80));
 			//名前入力用ラベル
@@ -518,7 +477,7 @@ public class Client extends JFrame implements WindowListener{
 			JLabel labelError = new JLabel("失敗しました");
 			labelError.setForeground(Color.GREEN);
 			this.add(labelError);
-			labelError.setBounds(w/3, h/9, 300, 20);
+			labelError.setBounds(w/3+30, 6*h/9-10, 300, 20);
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
@@ -530,7 +489,7 @@ public class Client extends JFrame implements WindowListener{
 					JLabel labelError = new JLabel("入力に誤りがあります");
 					labelError.setForeground(Color.GREEN);
 					this.add(labelError);
-					labelError.setBounds(w/3, h/9, 300, 20);
+					labelError.setBounds(w/3+10, 6*h/9-10, 300, 20);
 				}
 			} else {//キャンセルボタンクリック時
 				dispose();
@@ -561,6 +520,7 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w,h);
 			this.setLayout(null);
 			setResizable(false);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
 		    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(50,50,80));
@@ -714,6 +674,7 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w,h);
 			this.setLayout(null);
 			setResizable(false);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
 		    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(50,50,80));
@@ -804,6 +765,7 @@ public class Client extends JFrame implements WindowListener{
 			ta.setForeground(Color.WHITE);
 			ta.setMargin(new Insets(10, 20, 10, 10));
 			ta.setBackground(Color.BLACK);
+			ta.setEditable(false);
 			this.add(ta);
 			ta.setBounds(6*w/9+50, h/20, 160, 35);
 			ta.setBorder(new LineBorder(new Color(250,250,250), 2, false));
@@ -1018,7 +980,7 @@ public class Client extends JFrame implements WindowListener{
 			labelTitle4.setBounds(30, 3*h/12, 80, 30);
 			//勝率ラベル
 			if(player.getRecord()[0] != 0)
-				labelRatio = new JLabel(player.getRecord()[1]/player.getRecord()[0]*100 + "%");
+				labelRatio = new JLabel(NumberFormat.getPercentInstance().format((float)player.getRecord()[1]/player.getRecord()[0]));
 			else
 				labelRatio = new JLabel("0%");
 			labelRatio.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
@@ -1161,6 +1123,7 @@ public class Client extends JFrame implements WindowListener{
 			this.setBackground(new Color(130, 0, 170));
 			//メッセージ用ラベル
 			tfMessage = new JTextField("プレイヤを探しています...");
+			tfMessage.setFont(new Font("PixelMplus10", Font.BOLD, 13));
 			this.add(tfMessage);
 			tfMessage.setEditable(false);
 			tfMessage.setHorizontalAlignment(JTextField.CENTER);
@@ -1340,8 +1303,8 @@ public class Client extends JFrame implements WindowListener{
 				explosionUnplaceableIcon = new ImageIcon(new File("explosionIrreversibleSquare.gif").getAbsolutePath());//お邪魔石破壊
 				blackHackunIcon = new ImageIcon(new File("BlackHackun.jpg").getAbsolutePath());//親ハックン
 				whiteHackunIcon = new ImageIcon(new File("GrayHackun.jpg").getAbsolutePath());//子ハックン
-				blackHackunExplosionIcon = new ImageIcon(new File("explosionBlack (1).gif").getAbsolutePath());//親ハックン破壊
-				whiteHackunExplosionIcon = new ImageIcon(new File("explosionWhite (1).gif").getAbsolutePath());//子ハックン破壊
+				blackHackunExplosionIcon = new ImageIcon(new File("explosionBlack.gif").getAbsolutePath());//親ハックン破壊
+				whiteHackunExplosionIcon = new ImageIcon(new File("explosionWhite.gif").getAbsolutePath());//子ハックン破壊
 			}
 			//オセロ盤面の初期化
 			buttonArray = new JButton[row][row];//ボタンの配列を作成
@@ -1919,7 +1882,7 @@ public class Client extends JFrame implements WindowListener{
 							updateDisp(x,y);
 						if(nikaiFlag) {
 							nikaiFlag=false;
-							if(effectNumber==1) tfEffect.setText(" ");
+							if(effectNumber==1) tfEffect.setText("発動中特殊効果なし");
 							else tfEffect.setText("発動中：革命");
 						}
 						if(othello.s_checkPlaceable()) {
@@ -2023,8 +1986,8 @@ public class Client extends JFrame implements WindowListener{
 			}
 
 			if(x!=9 && y!=9) {
-				tfBlackNumber.setText("黒　" + othello.getBlackstone() + "枚");
-				tfWhiteNumber.setText("白　" + othello.getWhitestone() + "枚");
+				tfBlackNumber.setText("●　" + othello.getBlackstone() + "枚");
+				tfWhiteNumber.setText("●　" + othello.getWhitestone() + "枚");
 			}
 			if(event != 0) {
 				switch(event) {
@@ -2095,13 +2058,13 @@ public class Client extends JFrame implements WindowListener{
 				}
 				//スペシャルマッチ時
 				else if(mode.equals("special") && (othello.getGrids()[y][x]%10 == 2 || flagEvent == true)) {
-					//1: 破壊 3:二階行動 4:お邪魔石 5:上下ヒトマスを自分のに 6:盤面を反転させる (7:盤面を隠す) 8:革命
+					//1: 破壊 3:二階行動 4:お邪魔石 5:上下ヒトマスを自分のに 6:盤面を反転させる 7:盤面を隠す 8:革命
 					if(!flagEvent)
 						event = othello.s_setStone(x,y);
 					othello.s_draw();
 					switch(event){
 						case 1://破壊
-							if(flagEvent && (othello.getGrids()[y][x]==-1||othello.getGrids()[y][x]==1||othello.getGrids()[y][x]==3)) {
+							if(flagEvent && (othello.getGrids()[y][x]==-1||othello.getGrids()[y][x]==1||othello.getGrids()[y][x]==3) ) {
 								if(othello.getGrids()[y][x]==-1) {//黒なら
 									othello.destroystone(x,y);
 									updateDisp(8,8);
@@ -2116,7 +2079,7 @@ public class Client extends JFrame implements WindowListener{
 									taLog.append("あなたが (" + String.valueOf(x+1) + "," + String.valueOf(8-y) + ") を破壊しました\n");
 									buttonArray[y][x].setIcon(whiteHackunExplosionIcon);
 								}
-								else {
+								else if(othello.getGrids()[y][x]==3){
 									othello.destroystone(x,y);
 									updateDisp(8,8);
 									System.out.println(othello.getGrids()[y][x]);
@@ -2135,8 +2098,9 @@ public class Client extends JFrame implements WindowListener{
 									se = createClip(new File("bomb1.wav"));
 									se.start();//SEを流す
 								}
+
 							}
-							else {
+							else if(flagEvent == false){
 								flagEvent = true;
 								othello.changeTurn();
 								updateDisp(x,y);
@@ -2283,7 +2247,7 @@ public class Client extends JFrame implements WindowListener{
 							sendMessage("end");
 							if(nikaiFlag) {
 								nikaiFlag = false;
-								if(effectNumber==1) tfEffect.setText(" ");
+								if(effectNumber==1) tfEffect.setText("発動中特殊効果なし");
 								else tfEffect.setText("発動中：革命");
 							}
 							timer.stop(true);
@@ -2358,12 +2322,8 @@ public class Client extends JFrame implements WindowListener{
 				}
 			}
 		}
-		public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
-			setCursor(new Cursor(Cursor.HAND_CURSOR));
-		}
-		public void mouseExited(MouseEvent e) {//マウスがオブジェクトから出たときの処理
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		}
+		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}
+		public void mouseExited(MouseEvent e) {setCursor(new Cursor(Cursor.DEFAULT_CURSOR));}
 		public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
@@ -2518,7 +2478,8 @@ public class Client extends JFrame implements WindowListener{
 				client.PLACABLE = true;
 				radioON3.setSelected(true);
 				radioOFF3.setSelected(false);
-				mp.updateDisp(8, 8);
+				if((player.getColor().equals("black")&&othello.getTurn()==-1) || (player.getColor().equals("white")&&othello.getTurn()==1))
+					mp.updateDisp(8, 8);
 			}
 			else if(e.getSource() == radioOFF3) {//置ける場所表示のOFFボタン
 				client.PLACABLE = false;
@@ -2575,6 +2536,7 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
+			setVisible(false);
 			if((JButton)e.getComponent() == bOK) //OKボタンクリック時
 				mp.finishMatching("resign");
 			dispose();//このダイアログを破棄
@@ -2601,11 +2563,12 @@ public class Client extends JFrame implements WindowListener{
 			this.setSize(w, h);
 			this.setLayout(null);
 			setResizable(false);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(50,50,80));
 			//メッセージ用ラベル
 			tfMessage = new JTextField("再戦希望を集計中です...");
-			tfMessage.setForeground(Color.WHITE);
+			tfMessage.setEditable(false);
 			tfMessage.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			tfMessage.setHorizontalAlignment(JTextField.CENTER);
 			this.add(tfMessage);
@@ -2648,7 +2611,7 @@ public class Client extends JFrame implements WindowListener{
 								dispose();
 							} else {
 								tfMessage.setText("相手が再戦を希望しませんでした");
-								Thread.sleep(5000);
+								Thread.sleep(2500);
 								client.emsd.setVisible(true);
 								dispose();
 							}
@@ -2699,6 +2662,7 @@ public class Client extends JFrame implements WindowListener{
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(243,152,0));
 		    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
 			//結果用ラベル
 			if(result.equals("win")) {
 				labelResult = new JLabel("YOU WON!");
@@ -2815,8 +2779,10 @@ public class Client extends JFrame implements WindowListener{
 				dispose();//破棄
 				client.mp.setVisible(false);//対局パネルの非表示
 
-				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) //ネットワーク対局なら
+				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {//ネットワーク対局なら
+					mfnmp = new MenuForNetworkMatchingPanel(client, "mfnmp");
 					client.PanelChange((JPanel)client.mp, (JPanel)client.mfnmp);//ネットワーク対局用メニュー画面へ遷移
+				}
 				else //ローカル対局なら
 					client.PanelChange((JPanel)client.mp, (JPanel)client.clp);//レベル選択画面へ遷移
 			}
