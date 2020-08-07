@@ -125,6 +125,7 @@ public class Server{
 						i=0;
 						String user[] = new String[2];
 
+
 						while(true) {
 							inputLine = br.readLine();
 							if(!inputLine.equals("end")) {
@@ -300,6 +301,14 @@ public class Server{
 	    	Random rand = new Random();
 	        int num = rand.nextInt(90000000) + 10000000;
 	        id = num;//ランダム文字列でIDを与える
+	        List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
+
+		    for(Entry<String, Player> entry : list) {
+		      if(Playerslist.get(id).getOnline())
+		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+		      else
+		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+		    }
 	        player[playerNo] = new Player(name, Integer.toString(id), password);
 	        int[]r=new int[6];
 	        for(int a=0;a<5;a++) {
@@ -325,15 +334,11 @@ public class Server{
 
 			    	List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
-				    for(Entry<String, Player> entry : list) {
-				      if(Playerslist.get(id).getOnline())
-				          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
-				      else
-				          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
-				    }
+
 				    if(Playerslist.get(id).getOnline() == true) {
 				    	sendMessage("failed",player[playerNo].getMyPlayerNo());
 				    }else {
+				    	Playerslist.get(id).setOnline(true);
 				    	if(player[playerNo].getPass().equals(password)) {//そのidのpassが一致してた時
 				    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
 				    		sendMessage("succeeded",player[playerNo].getMyPlayerNo());
@@ -343,7 +348,13 @@ public class Server{
 				    		sendMessage("sendLoginResult",player[playerNo].getMyPlayerNo());
 				    		sendMessage("failed",player[playerNo].getMyPlayerNo());
 				    		sendMessage("end",player[playerNo].getMyPlayerNo());
-		    	    }
+				    	}
+				    	for(Entry<String, Player> entry : list) {
+						      if(Playerslist.get(id).getOnline())
+						          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+						      else
+						          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+						    }
 				    }
 		    }
 
