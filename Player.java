@@ -7,6 +7,7 @@ public class Player {
     private int myRecord[] = new int[6];  //戦績情報
     private int myPlayerNo;
     private int opponentPlayerNo;
+    private boolean myOnline;
 
     public Player(String NAME,String ID, String PASSWORD) {  //コンストラクタ
     	this.myName = NAME;
@@ -18,6 +19,12 @@ public class Player {
     }
     public String getName(){ // プレイヤ名を取得
     	return myName;
+    }
+    public boolean getOnline(){ // 接続状態を取得
+    	return myOnline;
+    }
+    public void setOnline(boolean o){ // 接続状態の受付
+    	myOnline=o;
     }
     public void setColor(String c){ // 先手後手情報の受付
         myColor = c;
