@@ -542,5 +542,14 @@ public class Server{
 	public static void main(String[] args){
 		Server server = new Server(11169); //待ち受けポート1112番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
+    while(true){
+    List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
+    for(Entry<String, Player> entry : list) {
+      if(online[entry.getMyPlayerNo()])
+          System.out.println();
+      else
+          System.out.println();
+    }
+}
 	}
 }
