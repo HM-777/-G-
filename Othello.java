@@ -33,7 +33,7 @@ private boolean revolution_flag=false;
 Random random=new Random();
 
     // コンストラクタ
-	public Othello(int i){//i=1 special i=0 nomal
+	public Othello(int i){
 
 		turn = black; //黒が先手
 
@@ -129,7 +129,7 @@ cnt_white=0;
 
 	    for(int i=0;i<8;i++) {
 	    	for(int j=0;j<8;j++) {
-	    		if(grids[i][j]==empty||grids[i][j]==placeable) {//
+	    		if(grids[i][j]%10==empty||grids[i][j]%10==placeable) {//
 	    			existempty=false;//空か置くこと可能ならばゲーム継続可能
 	    		}else if(grids[i][j]==black) {
 	    			cnt_black++;//黒石のカウント
@@ -587,7 +587,7 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
     }
   }
    //------------------------------特殊ルール------------------------------
-   //盤面生成
+   //盤面生成(引数0～9の値に応じてであらかじめ作成された盤面を生成)
    public void s_generategrids(int i) {
 	   //　10＝石破壊　　30＝2回行動　40＝お邪魔し石　50＝上下1マスをひっくり返す　60＝盤面反転　70＝盤面隠し　80＝革命　
      //後々追加で
@@ -621,8 +621,46 @@ if(flag==false&&placeableflag==false) {placeableflag=true;}
 			 grids[7][3]=60;
 			 grids[5][0]=10;
 	   }else if(i==4) {
-
+			 grids[7][3]=50;
+			 grids[0][4]=50;
+			 grids[4][1]=60;
+			 grids[1][7]=30;
+			 grids[7][5]=60;
+			 grids[5][6]=10;
+	   }else if(i==5) {
+			 grids[6][7]=10;
+			 grids[1][0]=10;
+			 grids[6][1]=10;
+			 grids[0][4]=40;
+			 grids[7][1]=60;
+			 grids[5][0]=70;
+	   }else if(i==6){
+			 grids[6][6]=80;
+			 grids[1][1]=10;
+			 grids[6][1]=50;
+			 grids[1][7]=80;
+			 grids[7][5]=60;
+			 grids[2][0]=10;
+	   }else if(i==7) {
+			 grids[2][7]=70;
+			 grids[0][3]=70;
+			 grids[0][1]=50;
+			 grids[6][7]=40;
+			 grids[7][5]=60;
+	   }else if(i==8) {
+			 grids[6][5]=40;
+			 grids[0][0]=40;
+			 grids[4][0]=40;
+			 grids[6][7]=10;
+			 grids[7][2]=80;
+	   }else if (i==9) {
+			 grids[7][3]=80;
+			 grids[0][4]=80;
+			 grids[4][1]=10;
+			 grids[1][7]=70;
+			 grids[7][5]=60;
 	   }
+
 /*while(special<9) {
 
 			int s_x=random.nextInt(row);
@@ -722,7 +760,7 @@ for(int i=0;i<row;i++) {//おける場所表示を消す
 
 		  }
 
-//石破壊（一つだと地味なんで周辺1マス破壊にするかも）←やっ１マス
+//石破壊
    public void destroystone(int x,int y) {
 int cash;
 
