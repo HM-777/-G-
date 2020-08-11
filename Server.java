@@ -29,9 +29,11 @@ public class Server{
     int[] MatchingList = new int[2];//レート戦マッチングルーム
     int[] SpecialList = new int[2];//スペシャル戦マッチングルーム
     int[] ReMatchingList = new int[2];//再戦マッチングルーム
+    int[] ReSpecialList = new int[2];//再戦マッチングルーム
     boolean flagMatched=false;//ルームが埋まってるか
     boolean flagSpecialMatched=false;
     boolean flagReMatched=false;
+    boolean flagReSpecialMatched=false;
     private Player[] player=new Player[1000000];
 
 
@@ -46,6 +48,9 @@ public class Server{
 	    SpecialList[1] = -1;
 	    ReMatchingList[0] = -1;
 	    ReMatchingList[1] = -1;
+	    ReSpecialList[0] = -1;
+	    ReSpecialList[1] = -1;
+
 	}
 
 	// データ受信用 スレッド(内部クラス)
@@ -96,9 +101,9 @@ public class Server{
 
 					    for(Entry<String, Player> entry : list) {
 					      if(entry.getValue().getOnline())
-					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+					          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続中");
 					      else
-					          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+					          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続なし");
 					    }
 						break;
 					}
@@ -148,6 +153,8 @@ public class Server{
 						sendMessage("sendFindingResult",player[playerNo].getMyPlayerNo());
 						flagMatched=false;
 						flagSpecialMatched=false;
+						flagReMatched=false;
+						flagReSpecialMatched=false;
 
 						System.out.println("待機中");
 						if(mode.equals("rank")) {
@@ -244,6 +251,14 @@ public class Server{
 						value.setRecord(r);
 						Playerslist.replace(id, value);//レート更新完了
 
+//						int[] r = new int [6];
+//						r=player[playerNo].getRecord();
+//						r[0]++;
+//						r[2]++;
+//						r[4]++;
+//						r[5]=player[playerNo].getRecord()[5] - (int)(16+0.04*(player[playerNo].getRecord()[5]-player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]));
+//						player[playerNo].setRecord(r);
+
 						if(user[0].equals("timeup") || user[0].equals("resign")) {//相手に投了、時間切れ送信
 							sendMessage("noticeEndMatching",player[playerNo].getOpponentPlayerNo());
 							sendMessage(user[0],player[playerNo].getOpponentPlayerNo());
@@ -257,11 +272,11 @@ public class Server{
 						sendGrade();
 					}
 
-					else if(inputLine.equals("Rematch")) {//目的が「再戦」
+					else if(inputLine.equals("rankRematch")) {//目的が「再戦」
 						//String mode=br.readLine();
 						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
 						System.out.println("待機中");
-						addReMatchingList(player[playerNo].getMyPlayerNo());
+						addReMatchingList(player[playerNo].getMyPlayerNo(),"rank");
 
 						int t = 10;
 						//flagReMatched = false;
@@ -280,6 +295,37 @@ public class Server{
 							}
 							if(t == 0) {
 								removeReMatchingList();
+
+								sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
+								break;
+							}
+
+						}
+						sendMessage("end",player[playerNo].getMyPlayerNo());
+					}
+					else if(inputLine.equals("specialRematch")) {//目的が「再戦」
+						//String mode=br.readLine();
+						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
+						System.out.println("待機中");
+						addReMatchingList(player[playerNo].getMyPlayerNo(),"special");
+
+						int t = 10;
+						//flagReMatched = false;
+
+						while(true){
+			              if(flagReSpecialMatched == true){
+			                matchingFlag=true;
+			                break;
+			              }
+							try {
+								Thread.sleep(1000);
+								t--;
+
+							}catch(InterruptedException e){
+
+							}
+							if(t == 0) {
+								removeReSpecialList();
 
 								sendMessage("failed",player[playerNo].getMyPlayerNo());//failed送信
 								break;
@@ -332,9 +378,9 @@ public class Server{
 
 		    for(Entry<String, Player> entry : list) {
 		      if(entry.getValue().getOnline())
-		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+		          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続中");
 		      else
-		          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+		          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続なし");
 		    }
 	    }
 
@@ -361,9 +407,9 @@ public class Server{
 				    	}
 				    	for(Entry<String, Player> entry : list) {
 						      if(entry.getValue().getOnline())
-						          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続中");
+						          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続中");
 						      else
-						          System.out.println(entry.getValue().getID()+entry.getValue().getName()+":接続なし");
+						          System.out.println(entry.getValue().getID()+" "+entry.getValue().getName()+":接続なし");
 						    }
 				    }
 		    }
@@ -438,6 +484,10 @@ public class Server{
 	    	ReMatchingList[0] = -1;
 				matchingFlag=false;
 	    }
+	    public void removeReSpecialList() {
+	    	ReSpecialList[0] = -1;
+				matchingFlag=false;
+	    }
 
 			public void addMatchingList(int playerNo,String str) {//対戦リスト
 		    	if(str.equals ("rank")) {
@@ -453,7 +503,7 @@ public class Server{
 
 
 		    		   flagMatched = true;//ルームが埋まっている
-							 matchingFlag=true;
+					   matchingFlag=true;
 		    		   sendMessage("succeeded",MatchingList[0]);
 		    		   sendMessage("succeeded",MatchingList[1]);
 		    		   sendColor(MatchingList[0],MatchingList[1]);
@@ -487,38 +537,68 @@ public class Server{
 		    		   sendMessage(player[SpecialList[0]].getName(),SpecialList[1]);//1も同じように送る？
 		    		   sendMessage(Integer.toString(player[SpecialList[0]].getRecord()[5]),SpecialList[1]);
 
+		    		   Random rand = new Random();//0から3までの乱数
+			   	       int n1 = rand.nextInt(4);
+			   	       int n2 = rand.nextInt(4);
+				   	   sendMessage(Integer.toString(n1),SpecialList[0]);
+				   	   sendMessage(Integer.toString(n2),SpecialList[1]);
+
 		    		   SpecialList[0] = -1;
 		    		   SpecialList[1] = -1;
 		    	    }
 		    	}
 		    }
 
-			public void addReMatchingList(int playerNo) {//再戦リスト
+			public void addReMatchingList(int playerNo,String str) {//再戦リスト
+				if(str.equals ("rank")) {
+					if(ReMatchingList[0] == -1) {//playerがいないなら
+					    ReMatchingList[0] = playerNo;
+				    }
+				    else {
+				    	ReMatchingList[1] = playerNo;
 
-			    if(ReMatchingList[0] == -1) {//playerがいないなら
-				    ReMatchingList[0] = playerNo;
-			    }
-			    else {
-			    	ReMatchingList[1] = playerNo;
-
-				   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
-				   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
+					   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
+					   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
 
 
-				   flagReMatched = true;
-				   matchingFlag=true;
-				   sendMessage("succeeded",ReMatchingList[0]);
-				   sendMessage("succeeded",ReMatchingList[1]);
-				   sendColor(ReMatchingList[0],ReMatchingList[1]);
-				   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
-				   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
-				   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
-				   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
+					   flagReMatched = true;
+					   matchingFlag=true;
+					   sendMessage("succeeded",ReMatchingList[0]);
+					   sendMessage("succeeded",ReMatchingList[1]);
+					   sendColor(ReMatchingList[0],ReMatchingList[1]);
+					   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
+					   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
+					   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
+					   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
 
-				   ReMatchingList[0] = -1;
-				   ReMatchingList[1] = -1;
-			    }
+					   ReMatchingList[0] = -1;
+					   ReMatchingList[1] = -1;
+				    }
+				}else if(str .equals ("special")) {
+					if(ReSpecialList[0] == -1) {//playerがいないなら
+						ReSpecialList[0] = playerNo;
+				    }
+				    else {
+				    	ReSpecialList[1] = playerNo;
 
+					   player[ReSpecialList[0]].setOpponentPlayerNo(ReSpecialList[1]);//相手のplayerNo
+					   player[ReSpecialList[1]].setOpponentPlayerNo(ReSpecialList[0]);
+
+
+					   flagReSpecialMatched = true;
+					   matchingFlag=true;
+					   sendMessage("succeeded",ReSpecialList[0]);
+					   sendMessage("succeeded",ReSpecialList[1]);
+					   sendColor(ReSpecialList[0],ReSpecialList[1]);
+					   sendMessage(player[ReSpecialList[1]].getName(),ReSpecialList[0]);
+					   sendMessage(Integer.toString(player[ReSpecialList[1]].getRecord()[5]),ReSpecialList[0]);
+					   sendMessage(player[ReSpecialList[0]].getName(),ReSpecialList[1]);
+					   sendMessage(Integer.toString(player[ReSpecialList[0]].getRecord()[5]),ReSpecialList[1]);
+
+					   ReSpecialList[0] = -1;
+					   ReSpecialList[1] = -1;
+				    }
+				}
 			}
 
 	}
