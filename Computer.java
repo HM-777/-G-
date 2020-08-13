@@ -372,7 +372,7 @@ public class Computer {
 
 	//Clientに呼び出されるメソッド．戻り値は座標
 			//grids[][]:思考する盤面
-	public int think(int grids[][]) {
+	public int seek(int grids[][]) {
 		//現在の盤面をコピー
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {
