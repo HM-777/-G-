@@ -25,6 +25,7 @@ public class ClientDriver extends JFrame{
 	private Receiver receiver;
 	private MatchingPanel mp = new MatchingPanel();
 	private Container cont;
+	//private int port = 12119;
 
 	class MatchingPanel extends JPanel implements MouseListener{
 		Player player;
@@ -199,7 +200,7 @@ public class ClientDriver extends JFrame{
 			this.add(ok);
 		}
 		public void mouseClicked(MouseEvent e) {
-			if(connectServer(tf.getText(),12116)) {
+			if(connectServer(tf.getText(),12119)) {
 				dispose();
 			}
 		}

@@ -53,7 +53,7 @@ public class Client extends JFrame implements WindowListener{
 	private MatchingPanel mp;//対局パネル
 	private Player player;//プレイヤ
 	private Player opponent;//相手
-	Othello othello;
+	private Othello othello;
 	private EndMatchingSubDialog emsd;
 	private Container cont; // コンテナ
 	private PrintWriter out;//データ送信用オブジェクト
@@ -63,6 +63,8 @@ public class Client extends JFrame implements WindowListener{
 	private int h = 500;
 	private boolean flag;//通信時に使用
 	private boolean result;//通信時に使用
+	private boolean specialFlag;//スペシャルマッチか否か
+	private int specialNumber;
 	private boolean BGM = true;
 	private boolean SE = true;
 	private boolean PLACABLE = true;
@@ -71,12 +73,8 @@ public class Client extends JFrame implements WindowListener{
 
 	//パネル・ダイアログ（内部クラス）
 	class MenuPanel extends JPanel implements MouseListener{//スタート画面用パネル
-		JLabel title;
-		JLabel title2;
-		JLabel title3;
-		JLabel title4;
-		JLabel background;
-		JButton bN, bL, bOption;//ネットワーク対局、ローカル対局選択用ボタン
+		JLabel background;//背景用ラベル
+		JButton bN, bL;//ネットワーク対局、ローカル対局選択用ボタン
 		Client client;
 		String str;
 		int w = 750;
@@ -92,19 +90,19 @@ public class Client extends JFrame implements WindowListener{
 
 			//ネットワーク対局選択用ボタン
 			bN = new JButton("ネットワーク対局");
-			this.add(bN); //ネットワーク対局選択用ボタンをパネルに追加
+			this.add(bN);
 			bN.setBackground(Color.BLACK);
 			bN.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bN.setBounds(w/3+30, h/2+60, 200, 40);
-			bN.addMouseListener(this);//マウス操作を認識できるようにする
-			bN.setActionCommand("network");//ボタンを識別するための名前を付加する
+			bN.addMouseListener(this);
+			bN.setActionCommand("ネットワーク対局");
 			//ローカル対局選択用ボタン
 			bL = new JButton("ローカル対局");
-			this.add(bL);//ローカル対局選択用ボタンをパネルに追加
+			this.add(bL);
 			bL.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bL.setBounds(w/3+30, h/2+120, 200, 40);
-			bL.addMouseListener(this);//マウス操作を認識できるようにする
-			bL.setActionCommand("local");//ボタンを識別するための名前を付加する
+			bL.addMouseListener(this);
+			bL.setActionCommand("ローカル対局");
 			//背景の設定
 			background = new JLabel(new ImageIcon(new File("title.gif").getAbsolutePath()));
 			this.add(background);
@@ -116,19 +114,15 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
+			JButton theButton = (JButton)e.getComponent();
 			if(theButton == bN) {//ネットワーク対局ボタンクリック時
 				ConnectSubDialog csd = new ConnectSubDialog(client, "csd");
 				csd.setVisible(true);
 				csd.setLocation(w/6+370, h/6+200);
-			} else if(theButton == bL) {//ローカル対局ボタンクリック時
+			} else {//ローカル対局ボタンクリック時
 				this.setVisible(false);
 				client.clp = new ChooseLevelPanel(client, "clp");
 				client.PanelChange((JPanel)this, (JPanel)client.clp);
-			} else {//設定ボタンクリック時
-				osd.setVisible(true);
 			}
 		}
 		public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
@@ -142,10 +136,10 @@ public class Client extends JFrame implements WindowListener{
 	}
 
 	class ConnectSubDialog extends JDialog implements MouseListener {
-		JButton bOK, bCan;
-		JLabel message;
-		JLabel error;
-		JTextField ip;
+		JButton bOK, bCan;//OKボタン、キャンセルボタン
+		JLabel message;//メッセージラベル
+		JLabel error;//エラーラベル
+		JTextField ip;//ipアドレス入力テキストフィールド
 		Client client;
 		String str;
 		int w = 480;
@@ -154,16 +148,16 @@ public class Client extends JFrame implements WindowListener{
 		ConnectSubDialog(Client c, String s){
 			client = c;
 			str = s;
-			this.setSize(w,h);
+			setSize(w,h);
 			setTitle("サーバに接続");
-			this.setLayout(null);
+			setLayout(null);
 			setResizable(false);
+			setModalityType(ModalityType.APPLICATION_MODAL);
+			setLocation(client.w/6+370, client.h/6+200);
 			Container contentPane = getContentPane();
 		    contentPane.setBackground(new Color(255,240,197));
 			//メッセージラベル
 			message = new JLabel("IPアドレスを入力してください");
-			//message.setForeground(new Color(243,152,0));
-			//message.setForeground(new Color(50, 0, 150));
 			message.setForeground(new Color(255,0,0));
 			message.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
 			this.add(message);
@@ -178,28 +172,29 @@ public class Client extends JFrame implements WindowListener{
 			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			this.add(bOK);
 			bOK.setBounds(w/3-20, 13*h/18, 90, 30);
-			bOK.addMouseListener(this);//マウス操作を認識できるようにする
-			bOK.setActionCommand("ok");//ボタンを識別するための名前を付加する
+			bOK.addMouseListener(this);
+			bOK.setActionCommand("OK");
 			//キャンセルボタン
 			bCan = new JButton("キャンセル");
 			bCan.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
 			this.add(bCan);
 			bCan.setBounds(7*w/12-20, 13*h/18, 90, 30);
-			bCan.addMouseListener(this);//マウス操作を認識できるようにする
-			bCan.setActionCommand("cancel");//ボタンを識別するための名前を付加する
+			bCan.addMouseListener(this);
+			bCan.setActionCommand("キャンセル");
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
-			if(e.getSource() == bOK) {//OKボタンクリック時
-				if(connectServer(ip.getText(), 11184)) {//正常処理
+			JButton theButton = (JButton)e.getComponent();
+			if(theButton == bOK) {//OKボタンクリック時
+				if(connectServer(ip.getText(), 11194)) {//正常処理
 					client.otlp = new OptionToLoginPanel(client, "otlp");
 					client.mnp.setVisible(false);
 					client.PanelChange((JPanel)mnp, (JPanel)client.otlp);
 					dispose();
 				} else {//エラー時
+					System.out.println("接続に失敗しました。");
 					error = new JLabel("接続に失敗しました");
 					error.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
-					//error.setForeground(Color.GREEN);
 					this.add(error);
 					error.setBounds(w/4+80, 5*h/9-10, 300, 40);
 				}
@@ -219,7 +214,6 @@ public class Client extends JFrame implements WindowListener{
 		JButton bNormal;//Normalボタン
 		JButton bHard;//Hardボタン
 		JButton bBack;//戻るボタン
-		JButton bOption;//設定ボタン
 		Client client;
 		String str;
 		int w = 750;
@@ -250,33 +244,29 @@ public class Client extends JFrame implements WindowListener{
 			this.add(bEasy);
 			bEasy.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
 			bEasy.setBounds(2*w/5-20, 3*h/11+30, 200, 50);
-			bEasy.addMouseListener(this);//マウス操作を認識できるようにする
-			bEasy.setActionCommand("easy");//ボタンを識別するための名前を付加する
+			bEasy.addMouseListener(this);
+			bEasy.setActionCommand("Easy");
 			//Normalボタン
 			bNormal = new JButton("Normal");
 			this.add(bNormal);
 			bNormal.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
 			bNormal.setBounds(2*w/5-20, 5*h/11+30, 200, 50);
-			bNormal.addMouseListener(this);//マウス操作を認識できるようにする
-			bNormal.setActionCommand("normal");//ボタンを識別するための名前を付加する
+			bNormal.addMouseListener(this);
+			bNormal.setActionCommand("Normal");
 			//Hardボタン
 			bHard = new JButton("Hard");
 			this.add(bHard);
 			bHard.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
 			bHard.setBounds(2*w/5-20, 7*h/11+30, 200, 50);
-			bHard.addMouseListener(this);//マウス操作を認識できるようにする
-			bHard.setActionCommand("hard");//ボタンを識別するための名前を付加する
+			bHard.addMouseListener(this);
+			bHard.setActionCommand("Hard");
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
 			bBack.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bBack.setBounds(10, 8*h/9, 150, 35);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
-			//設定ボタン
-
-			//設定ダイアログを定義
-
+			bBack.addMouseListener(this);
+			bBack.setActionCommand("戻る");
 		}
 		//パネル名の取得
 		public String getName() {
@@ -284,9 +274,7 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
+			JButton theButton = (JButton)e.getComponent();
 			this.setVisible(false);
 			if(theButton == bBack) {//戻るボタンクリック時
 				client.PanelChange((JPanel)this, (JPanel)client.mnp);
@@ -299,9 +287,8 @@ public class Client extends JFrame implements WindowListener{
 			} else if(theButton == bHard){//Hardボタンクリック時
 				client.mp = new MatchingPanel(client, "mp", "hard");
 				client.PanelChange((JPanel)this, (JPanel)client.mp);
-			} else {
-				osd.setVisible(true);
 			}
+			client.mp.taLog.append("対局開始！\n");
 		}
 		public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
 			setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -314,8 +301,7 @@ public class Client extends JFrame implements WindowListener{
 	}
 
 	class OptionToLoginPanel extends JPanel implements MouseListener{//アカウント作成またはログイン用パネル
-		JButton bMA, bLI,bBack;//アカウント、ログイン選択用ボタン
-		JButton bOption;//設定ボタン
+		JButton bMA, bLI,bBack;//アカウント、ログイン、戻るボタン
 		Client client;
 		String str;
 		int w = 750;
@@ -330,29 +316,25 @@ public class Client extends JFrame implements WindowListener{
 			this.setBackground(new Color(130, 0, 170));
 			//アカウント作成用ボタン
 			bMA = new JButton("アカウント作成");
-			this.add(bMA); //アカウント作成用ボタンをパネルに追加
+			this.add(bMA);
 			bMA.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bMA.setBounds(w/3+40, h/3, 200, 50);
-			bMA.addMouseListener(this);//マウス操作を認識できるようにする
-			bMA.setActionCommand("makeAccount");//ボタンを識別するための名前を付加する
+			bMA.addMouseListener(this);
+			bMA.setActionCommand("アカウント作成");
 			//ログイン用ボタン
 			bLI = new JButton("ログイン");
-			this.add(bLI);//ログイン用ボタンをパネルに追加
+			this.add(bLI);
 			bLI.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bLI.setBounds(w/3+40, h/3+80, 200, 50);
-			bLI.addMouseListener(this);//マウス操作を認識できるようにする
-			bLI.setActionCommand("login");//ボタンを識別するための名前を付加する
+			bLI.addMouseListener(this);
+			bLI.setActionCommand("ログイン");
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
 			bBack.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			bBack.setBounds(10, 8*h/9, 150, 35);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
-			//設定ボタン
-
-			//設定ダイアログを定義
-
+			bBack.addMouseListener(this);
+			bBack.setActionCommand("戻る");
 		}
 		//パネル名の取得
 		public String getName() {
@@ -360,9 +342,7 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
+			JButton theButton = (JButton)e.getComponent();
 			if(theButton == bBack) {//戻るボタンクリック時
 				this.setVisible(false);
 				client.PanelChange((JPanel)this, (JPanel)client.mnp);
@@ -439,23 +419,23 @@ public class Client extends JFrame implements WindowListener{
 			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			this.add(bOK);
 			bOK.setBounds(w/3-20, 13*h/18, 90, 30);
-			bOK.addMouseListener(this);//マウス操作を認識できるようにする
-			bOK.setActionCommand("ok");//ボタンを識別するための名前を付加する
+			bOK.addMouseListener(this);
+			bOK.setActionCommand("OK");
 			//キャンセルボタン
 			bCan = new JButton("キャンセル");
 			bCan.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
 			this.add(bCan);
 			bCan.setBounds(7*w/12-20, 13*h/18, 90, 30);
-			bCan.addMouseListener(this);//マウス操作を認識できるようにする
-			bCan.setActionCommand("cancel");//ボタンを識別するための名前を付加する
+			bCan.addMouseListener(this);
+			bCan.setActionCommand("キャンセル");
 
 		}
 		//メソッド
 		public void makeAccount(String name, String password) {//アカウントの作成
-			sendMessage("makeAccount");//目的宣言
+			sendMessage("makeAccount");
 			sendMessage(name);
 			sendMessage(password);
-			sendMessage("end");//終了サイン
+			sendMessage("end");
 
 			client.flag = false;//receiverがログイン認証結果をサーバから受け取ったらtrueにする
 			client.result = false;//ログイン認証結果が成功ならRecieverのrunメソッドでtrue
@@ -481,7 +461,8 @@ public class Client extends JFrame implements WindowListener{
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
-			if(e.getSource() == bOK) {//OKボタンクリック時
+			JButton theButton = (JButton)e.getComponent();
+			if(theButton == bOK) {//OKボタンクリック時
 				String passwordstr = new String(pass.getPassword());
 				if((name.getText() != null) && !passwordstr.isEmpty()) {//正常処理
 					makeAccount(name.getText(),passwordstr);
@@ -559,8 +540,7 @@ public class Client extends JFrame implements WindowListener{
 			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			this.add(bOK);
 			bOK.setBounds(w*2/5, 7*h/9, 90, 30);
-			bOK.addMouseListener(this);//マウス操作を認識できるようにする
-			bOK.setActionCommand("ok");//ボタンを識別するための名前を付加する
+			bOK.addMouseListener(this);
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
@@ -610,23 +590,24 @@ public class Client extends JFrame implements WindowListener{
 			client.result = false;//ログイン認証結果が成功ならRecieverのrunメソッドでtrue
 			int i = 0;
 
-			while(++i<=10) {//10秒間認証結果を待つ
+			while(++i<=5) {
 				try {
 					Thread.sleep(1000);
-					if(client.flag) {//認証結果が送られてきたら
-						client.flag = false;//flagをfalseに戻して
+					if(client.flag) {
+						client.flag = false;
 						return client.result;//結果（成功ならtrue,失敗ならfalse）を返す
 					}
 				}
 				catch(InterruptedException e) {System.out.println("失敗");}
 			}
-			return client.result;//10秒待っても来なかったら一応falseを返す
+			return client.result;//5秒待っても来なかった場合にもfalseを返す
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
-			if(e.getSource() == bOK) {//OKボタンクリック時
+			JButton theButton = (JButton)e.getComponent();
+			if(theButton == bOK) {//OKボタンクリック時
 				String passwordstr = new String(pass.getPassword());
-				if((name.getText() != null) && !passwordstr.isEmpty()) {//入力に抜けがなければ
+				if((name.getText() != null) && !passwordstr.isEmpty()) {//入力に抜けがない場合
 					if(login(ID.getText(), passwordstr)){//ログイン成功時
 						dispose();
 						SucceededToLoginSubDialog stlsd = new SucceededToLoginSubDialog(client, "stlsd");
@@ -638,15 +619,6 @@ public class Client extends JFrame implements WindowListener{
 						ftlsd.setLocation(client.w/4+370, client.h/4+200);
 						ftlsd.setVisible(true);
 					}
-
-					/*
-					dispose();//このダイアログを破棄
-					SucceededToLoginSubDialog stlsd = new SucceededToLoginSubDialog(client, "stlsd");//成功時のダイアログを作成
-					stlsd.setLocation(client.w/4+370, client.h/4+200);
-					stlsd.setVisible(true);
-					 * */
-					//テスト用処理
-
 				} else {//入力に抜けがある場合
 					dispose();//破棄
 					FailedToLoginSubDialog ftlsd = new FailedToLoginSubDialog(client, "ftlsd");//失敗時のダイアログを作成
@@ -689,17 +661,14 @@ public class Client extends JFrame implements WindowListener{
 			this.add(bOK);
 			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			bOK.setBounds(2*w/5-10, 3*h/5, 90, 30);
-			bOK.addMouseListener(this);//マウス操作を認識できるようにする
-			bOK.setActionCommand("ok");//ボタンを識別するための名前を付加する
+			bOK.addMouseListener(this);
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			if(e.getSource() == bOK) {
-				dispose();
-				client.otlp.setVisible(false);
-				client.mfnmp = new MenuForNetworkMatchingPanel(client, "mfnmp");
-				client.PanelChange((JPanel)client.otlp, (JPanel)client.mfnmp);
-			}
+			dispose();
+			client.otlp.setVisible(false);
+			client.mfnmp = new MenuForNetworkMatchingPanel(client, "mfnmp");
+			client.PanelChange((JPanel)client.otlp, (JPanel)client.mfnmp);
 		}
 		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}//マウスがオブジェクトに入ったときの処理
 		public void mouseExited(MouseEvent e) {setCursor(new Cursor(Cursor.DEFAULT_CURSOR));}//マウスがオブジェクトから出たときの処理
@@ -727,7 +696,6 @@ public class Client extends JFrame implements WindowListener{
 			bRetry.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			bRetry.setBounds(2*w/5-20, 3*h/5, 90, 30);
 			bRetry.addMouseListener(this);//マウス操作を認識できるようにする
-			bRetry.setActionCommand("retry");//ボタンを識別するための名前を付加する
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
@@ -769,21 +737,6 @@ public class Client extends JFrame implements WindowListener{
 			this.add(ta);
 			ta.setBounds(6*w/9+50, h/20, 160, 35);
 			ta.setBorder(new LineBorder(new Color(250,250,250), 2, false));
-			//ta.setVerticalAlignment(JTextArea.CENTER);
-			/*
-			//ID用ラベル
-			labelID = new JLabel("プレイヤID："+player.getID());
-			labelID.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
-			labelID.setForeground(new Color(0,155,0));
-			this.add(labelID);
-			labelID.setBounds(6*w/9+50, h/20, 300, 30);
-			//レート用ラベル
-			labelR = new JLabel("レーティング："+String.valueOf(player.getRecord()[5]));
-			labelR.setFont(new Font("PixelMplus10", Font.PLAIN, 14));
-			labelR.setForeground(new Color(0,155,0));
-			this.add(labelR);
-			labelR.setBounds(6*w/9+50, h*1/10, 300, 30);
-			 * */
 			//MODEラベル1
 			labelMode1 = new JLabel("MODE");
 			labelMode1.setFont(new Font("PixelMplus10", Font.PLAIN, 70));
@@ -801,29 +754,29 @@ public class Client extends JFrame implements WindowListener{
 			bRank.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bRank);
 			bRank.setBounds(11*w/30 +5, 2*h/5+10, 200, 50);
-			bRank.addMouseListener(this);//マウス操作を認識できるようにする
-			bRank.setActionCommand("rank");//ボタンを識別するための名前を付加する
+			bRank.addMouseListener(this);
+			bRank.setActionCommand("ランクマッチ");
 			//スペシャルマッチボタン
 			bSpecial = new JButton("スペシャルマッチ");
 			bSpecial.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bSpecial);
 			bSpecial.setBounds(11*w/30+5, 3*h/5, 200, 50);
-			bSpecial.addMouseListener(this);//マウス操作を認識できるようにする
-			bSpecial.setActionCommand("special");//ボタンを識別するための名前を付加する
+			bSpecial.addMouseListener(this);
+			bSpecial.setActionCommand("スペシャルマッチ");
 			//戦績・ランキング閲覧ボタン
 			bInfo = new JButton("戦績・ランキング");
 			bInfo.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bInfo);
 			bInfo.setBounds(7*w/10+15, 8*h/9, 200, 35);
-			bInfo.addMouseListener(this);//マウス操作を認識できるようにする
-			bInfo.setActionCommand("info");//ボタンを識別するための名前を付加する
+			bInfo.addMouseListener(this);
+			bInfo.setActionCommand("戦績・ランキング");
 			//戻るボタン
 			bBack = new JButton("戻る");
 			bBack.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			this.add(bBack);
 			bBack.setBounds(10, 8*h/9, 150, 35);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
+			bBack.addMouseListener(this);
+			bBack.setActionCommand("戻る");
 		}
 		//パネル名の取得
 		public String getName() {
@@ -831,10 +784,8 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
-			this.setVisible(false);//パネルを見えなくする
+			JButton theButton = (JButton)e.getComponent();
+			this.setVisible(false);
 			if(theButton == bBack) {//戻るボタンクリック時
 				this.setVisible(true);
 				CheckWhetherToLogoutSubDialog cwtlsd = new CheckWhetherToLogoutSubDialog(client, "cwtlsd");
@@ -844,38 +795,26 @@ public class Client extends JFrame implements WindowListener{
 				client.rrp = new ReadRecordPanel(client, "rrp");
 				client.PanelChange((JPanel)this, (JPanel)client.rrp);
 			} else if (theButton == bRank) {//ランクマッチボタンクリック時
-				/*
-				client.mp = new MatchingPanel(client,"mp", "rank");
-				client.PanelChange((JPanel)this, (JPanel)client.mp);
-				 */
 				client.sfop = new SearchingForOpponentPanel(client, "sfop", "rank");
 				client.PanelChange((JPanel)this, (JPanel)client.sfop);
 
 			} else if (theButton == bSpecial) {//スペシャルマッチボタンクリック時
-				/*
-				client.mp = new MatchingPanel(client,"mp", "special");
-				client.PanelChange((JPanel)this, (JPanel)client.mp);
-				 */
 				client.sfop = new SearchingForOpponentPanel(client, "sfop", "special");
 				client.PanelChange((JPanel)this, (JPanel)client.sfop);
 			} else {
 				osd.setVisible(true);
 			}
 		}
-		public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
-			setCursor(new Cursor(Cursor.HAND_CURSOR));
-		}
-		public void mouseExited(MouseEvent e) {//マウスがオブジェクトから出たときの処理
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		}
+		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}//マウスがオブジェクトに入ったときの処理
+		public void mouseExited(MouseEvent e) {setCursor(new Cursor(Cursor.DEFAULT_CURSOR));}//マウスがオブジェクトから出たときの処理
 		public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
 		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
 	}
 
 	class CheckWhetherToLogoutSubDialog extends JDialog implements MouseListener{
-		JLabel messageLabel;
-		JButton ok;
-		JButton can;
+		JLabel messageLabel;//メッセージラベル
+		JButton ok;//okボタン
+		JButton can;//キャンセルボタン
 		Client client;
 		String str;
 		int w = 480;
@@ -903,19 +842,20 @@ public class Client extends JFrame implements WindowListener{
 			this.add(ok);
 			ok.setBounds(w/3-20, 13*h/18, 90, 30);
 			ok.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			ok.addMouseListener(this);//マウス操作を認識できるようにする
-			ok.setActionCommand("ok");//ボタンを識別するための名前を付加する
+			ok.addMouseListener(this);
+			ok.setActionCommand("OK");
 			//キャンセルボタン
 			can = new JButton("キャンセル");
 			this.add(can);
 			can.setBounds(7*w/12-20, 13*h/18, 90, 30);
 			can.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
-			can.addMouseListener(this);//マウス操作を認識できるようにする
-			can.setActionCommand("cancel");//ボタンを識別するための名前を付加する
+			can.addMouseListener(this);
+			can.setActionCommand("キャンセル");
 		}
 
 		public void mouseClicked(MouseEvent e) {
-			if(e.getSource() == ok) {
+			JButton theButton = (JButton)e.getComponent();
+			if(theButton == ok) {
 				client.mfnmp.setVisible(false);
 				client.PanelChange((JPanel)client.mfnmp, (JPanel)client.mnp);
 				try {socket.close();}
@@ -957,7 +897,6 @@ public class Client extends JFrame implements WindowListener{
 			labelTitle1 = new JLabel("総戦績");
 			labelTitle1.setHorizontalAlignment(JTextField.CENTER);
 			labelTitle1.setBorder(new LineBorder(Color.RED, 2, false));
-			//labelTitle1.setForeground(new Color(130,200,250));
 			labelTitle1.setForeground(Color.WHITE);
 			labelTitle1.setFont(new Font("PixelMplus10", Font.BOLD, 17));
 			this.add(labelTitle1);
@@ -971,7 +910,6 @@ public class Client extends JFrame implements WindowListener{
 			labelScore.setBounds(60, 2*h/12, 300, 30);
 			//勝率用ラベル
 			labelTitle4 = new JLabel("勝率");
-			//labelTitle4.setForeground(new Color(130,200,250));
 			labelTitle4.setForeground(Color.WHITE);
 			labelTitle4.setHorizontalAlignment(JTextField.CENTER);
 			labelTitle4.setBorder(new LineBorder(Color.RED, 2, false));
@@ -989,7 +927,6 @@ public class Client extends JFrame implements WindowListener{
 			labelRatio.setBounds(60, 4*h/12, 300, 30);
 			//投了数用ラベル
 			labelTitle2 = new JLabel("投了数");
-			//labelTitle2.setForeground(new Color(130,200,250));
 			labelTitle2.setForeground(Color.WHITE);
 			labelTitle2.setHorizontalAlignment(JTextField.CENTER);
 			labelTitle2.setBorder(new LineBorder(Color.RED, 2, false));
@@ -1002,31 +939,14 @@ public class Client extends JFrame implements WindowListener{
 			labelResignation.setFont(new Font("PixelMplus10", Font.PLAIN, 17));
 			this.add(labelResignation);
 			labelResignation.setBounds(60, 6*h/12, 300, 30);
-			/*
-			//戦績表示テキストエリア
-			taRecord = new JTextArea("**********", 100, 50);
-			taRecord.setLineWrap(true);
-			taRecord.setWrapStyleWord(true);
-			JScrollPane spRecord = new JScrollPane(taRecord);
-			spRecord.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-			this.add(spRecord);
-			spRecord.setBounds(30, h/2, 300, 180);
-			 */
 			//ランキング用ラベル
 			labelTitle3 = new JLabel("ランキング");
-			//labelTitle3.setForeground(new Color(130,200,250));
 			labelTitle3.setForeground(Color.WHITE);
 			labelTitle3.setHorizontalAlignment(JTextField.CENTER);
 			labelTitle3.setBorder(new LineBorder(Color.RED, 2, false));
 			labelTitle3.setFont(new Font("PixelMplus10", Font.BOLD, 17));
 			this.add(labelTitle3);
 			labelTitle3.setBounds(30, 7*h/12, 100, 30);
-			//ランク表示ラベル
-			/*
-			labelRanking = new JLabel("*************");
-			this.add(labelRanking);
-			labelRanking.setBounds(30, 6*h/12, 300, 30);
-			 */
 			//ランキング表示テキストエリア
 			taRanking = new JTextArea("", 300, 400);
 			taRanking.setForeground(Color.GREEN);
@@ -1047,8 +967,7 @@ public class Client extends JFrame implements WindowListener{
 			bBack = new JButton("戻る");
 			this.add(bBack);
 			bBack.setBounds(10, 8*h/9, 150, 35);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
+			bBack.addMouseListener(this);
 
 		}
 		//パネル名の取得
@@ -1067,31 +986,10 @@ public class Client extends JFrame implements WindowListener{
 			this.add(labelRanking);
 			labelRanking.setBounds(60, 8*h/12, 300, 40);
 		}
-		//ランキング情報設定用スレッド
-		/*
-		class Rank extends Thread{
-			public void run() {
-				flag = false;
-				sendMessage("getRecord");
-				while(!flag){
-					try{Thread.sleep(1000);}
-					catch(InterruptedException ie){ie.printStackTrace();}
-					System.out.println("waiting");
-				}
-			}
-		}
-		 * */
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
-			if(theButton == bBack) {
-				this.setVisible(false);
-				PanelChange((JPanel)this, (JPanel)client.mfnmp);
-			} else {
-				osd.setVisible(true);
-			}
+			this.setVisible(false);
+			PanelChange((JPanel)this, (JPanel)client.mfnmp);
 		}
 		public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
 			setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -1105,7 +1003,6 @@ public class Client extends JFrame implements WindowListener{
 
 	class SearchingForOpponentPanel extends JPanel{//マッチングパネル
 		JTextField tfMessage;//メッセージ用ラベル
-		JButton can;
 		Client client;
 		String str;
 		String mode;
@@ -1131,14 +1028,6 @@ public class Client extends JFrame implements WindowListener{
 			tfMessage.setForeground(Color.WHITE);
 			tfMessage.setBorder(new LineBorder(new Color(240,240,240), 2, false));
 			tfMessage.setBounds(w/3-20, 3*h/7, 300, 50);
-			/*
-			//キャンセルボタン
-			can = new JButton("キャンセル");
-			this.add(can);
-			can.setBounds(w*3/7-20, 7*h/9, 150, 35);
-			can.addMouseListener(this);//マウス操作を認識できるようにする
-			can.setActionCommand("back");//ボタンを識別するための名前を付加する
-			 */
 			//対戦相手を探す
 			findOpponent fo = new findOpponent(this);
 			fo.start();
@@ -1147,7 +1036,7 @@ public class Client extends JFrame implements WindowListener{
 		public String getName() {
 			return str;
 		}
-
+		//対戦相手マッチング用スレッド
 		class findOpponent extends Thread{
 			SearchingForOpponentPanel panel;
 
@@ -1156,12 +1045,16 @@ public class Client extends JFrame implements WindowListener{
 			}
 
 			public void run() {
+				client.flag = false;
+				client.result = false;
+				if(mode.equals("rank"))
+					specialFlag = false;
+				else
+					specialFlag = true;
+
 				sendMessage("findingOpponent");
 				sendMessage(mode);
 				sendMessage("end");
-
-				client.flag = false;
-				client.result = false;
 
 				while(true) {
 					try {
@@ -1179,37 +1072,17 @@ public class Client extends JFrame implements WindowListener{
 							}
 							break;
 						}
-						//System.out.println("待機中");
 						Thread.sleep(1000);
 					}
 					catch(InterruptedException e) {}
 				}
 			}
 		}
-		/*
-		//マウスクリック時の処理
-				public void mouseClicked(MouseEvent e) {
-					JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-					String command = theButton.getActionCommand();//ボタンの名前を取り出す
-					System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
-					sendMessage("cancelToFindOpponent");
-					this.setVisible(false);
-					PanelChange((JPanel)this, (JPanel)client.mfnmp);
-				}
-				public void mouseEntered(MouseEvent e) {//マウスがオブジェクトに入ったときの処理
-					setCursor(new Cursor(Cursor.HAND_CURSOR));
-				}
-				public void mouseExited(MouseEvent e) {//マウスがオブジェクトから出たときの処理
-					setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-				}
-				public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
-				public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
-		 * */
 
 	}
 
 	class MatchingPanel extends JPanel implements MouseListener{//対局画面用パネル
-		Computer cpu;
+		Computer cpu;//CPUオブジェクト
 		int row = 8;//オセロ盤の縦横マスの数
 		Client client;
 		String str;
@@ -1229,19 +1102,19 @@ public class Client extends JFrame implements WindowListener{
 		Timer timer;//タイマースレッド
 		//Confirmer confirmer;//サーバに接続確認信号を送信するスレッド
 		JTextField tfEffect;//特殊効果の表示ラベル
-		int effectNumber;
+		int effectNumber;//発生中エフェクト数
 		JTextArea taLog;//ログ
 		ImageIcon blackIcon, whiteIcon, boardIcon, placeableIcon, unplaceableIcon, eventIcon,
 		eventPlaceableIcon, hiddenIcon, explosionBlackIcon, explosionWhiteIcon, explosionUnplaceableIcon,
 		blackHackunIcon, whiteHackunIcon, blackHackunExplosionIcon, whiteHackunExplosionIcon; //アイコン
 		Clip se;//SE
-		int previousRate[] = new int[2];
-		int cpuOperation;
-		int winner;
-		int event = 0;
-		boolean flagEvent = false;
-		boolean nikaiFlag = false;
-		int dispValue[];
+		int previousRate[] = new int[2];//対局前レート保持用配列
+		int cpuOperation;//CPUのseekメソッド実行の戻り値を格納
+		int winner;//OthelloのcheckWinnerメソッドの戻り値を格納
+		int event = 0;//発生しているイベントを判別
+		boolean flagEvent = false;//特定のイベント発生中判別
+		boolean nikaiFlag = false;//二回行動発生中判別
+		int dispValue[];//画面描画時に使用
 		CheckWhetherToResignSubDialog cwtrsd;
 		int w = 750;
 		int h = 500;
@@ -1260,10 +1133,10 @@ public class Client extends JFrame implements WindowListener{
 				if(mode.equals("rank")) othello = new Othello(0);//ランクマッチの場合
 				else {
 					othello = new Othello(1);//スペシャルマッチの場合
-					othello.s_generategrids(0);
+					othello.s_generategrids(specialNumber);
 				}
 
-				if(player.getColor().equals("black")) {//手番が後手なら
+				if(player.getColor().equals("black")) {
 					if(mode.equals("rank"))
 						othello.checkPlaceable();
 					else
@@ -1285,7 +1158,7 @@ public class Client extends JFrame implements WindowListener{
 			}
 
 			//ウィンドウ設定
-			this.setSize(w, h);//ウィンドウのサイズを設定
+			this.setSize(w, h);
 			this.setLayout(null);
 			this.setBackground(new Color(130, 0, 170));
 			//アイコン設定(画像ファイルをアイコンとして使う)
@@ -1307,7 +1180,7 @@ public class Client extends JFrame implements WindowListener{
 				whiteHackunExplosionIcon = new ImageIcon(new File("explosionWhite.gif").getAbsolutePath());//子ハックン破壊
 			}
 			//オセロ盤面の初期化
-			buttonArray = new JButton[row][row];//ボタンの配列を作成
+			buttonArray = new JButton[row][row];
 			dispValue = new int[6];
 			if(System.getProperty("os.name").toLowerCase().startsWith("mac")) {
 				dispValue[0] = 40;
@@ -1340,23 +1213,21 @@ public class Client extends JFrame implements WindowListener{
 				this.add(verticalNumber);
 			}
 			//設定ボタン
-			bOption = new JButton("設定");//終了ボタンを作成
-			this.add(bOption); //終了ボタンをパネルに追加
+			bOption = new JButton("設定");
+			this.add(bOption);
 			bOption.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
-			bOption.setBounds(4*w/5, 35, 120, 35);//終了ボタンの境界を設定
-			bOption.addMouseListener(this);//マウス操作を認識できるようにする
-			bOption.setActionCommand("option");//ボタンを識別するための名前を付加する
+			bOption.setBounds(4*w/5, 35, 120, 35);
+			bOption.addMouseListener(this);
+			bOption.setActionCommand("設定");
 			//投了ボタン
-			bResign = new JButton("投了");//パスボタンを作成
-			this.add(bResign); //パスボタンをパネルに追加
+			bResign = new JButton("投了");
+			this.add(bResign);
 			bResign.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
-			bResign.setBounds(4*w/5, 75, 120, 35);//パスボタンの境界を設定
-			bResign.addMouseListener(this);//マウス操作を認識できるようにする
-			bResign.setActionCommand("resign");//ボタンを識別するための名前を付加する
+			bResign.setBounds(4*w/5, 75, 120, 35);
+			bResign.addMouseListener(this);
+			bResign.setActionCommand("投了");
 			//黒駒の数用ラベル
 			tfBlackNumber = new JTextField("●　" + othello.getBlackstone() + "枚");
-			//tfBlackNumber.setBackground(new Color(250,250,250));
-			//tfBlackNumber.setBorder(new LineBorder(new Color(250,250,250), 2, false));
 			tfBlackNumber.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 			tfBlackNumber.setHorizontalAlignment(JTextField.CENTER);
 			tfBlackNumber.setEditable(false);
@@ -1379,46 +1250,44 @@ public class Client extends JFrame implements WindowListener{
 			taLog.setEditable(false);
 			taLog.setLineWrap(true);
 			taLog.setWrapStyleWord(true);
-			//this.add(taLog);
 			JScrollPane scroll = new JScrollPane(taLog);
 			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scroll.setBounds(6*w/11-20, 7*h/13-5, 330, 200);
 			this.add(scroll);
-			//taLog.append("開始しました\n");
 			//残り時間表示用ラベル
 			timer = new Timer(this);
 			timer.addTo(this);
 			timer.start();
-			if(player.getColor().equals("black")) timer.stop(false);//先手ならタイマー始動
+			if(player.getColor().equals("black")) timer.stop(false);
 			else timer.stop(true);
 			//modeがネットワーク対戦であるとき
 			if(mode.equals("rank") || mode.equals("special")) {
 				//色表示用ラベル
 				if(player.getColor().equals("black"))
-					tfColor = new JTextField("あなたは黒です");//色情報を表示するためのラベルを作成
+					tfColor = new JTextField("あなたは黒です");
 				else
-					tfColor = new JTextField("あなたは白です");//色情報を表示するためのラベルを作成
+					tfColor = new JTextField("あなたは白です");
 				tfColor.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 				tfColor.setHorizontalAlignment(JTextField.CENTER);
 				tfColor.setBackground(Color.BLACK);
 				tfColor.setForeground(Color.WHITE);
 				tfColor.setBorder(new LineBorder(new Color(240,240,240), 2, false));
 				tfColor.setEditable(false);
-				tfColor.setBounds(w/5-30, 3*h/4+10, 160, 40);//境界を設定
-				this.add(tfColor);//色表示用ラベルをパネルに追加
+				tfColor.setBounds(w/5-30, 3*h/4+10, 160, 40);
+				this.add(tfColor);
 				//手番表示用ラベル
 				if(player.getColor().equals("black"))
-					tfTurn = new JTextField("あなたの番です");//手番情報を表示するためのラベルを作成
+					tfTurn = new JTextField("あなたの番です");
 				else
-					tfTurn = new JTextField("相手の番です");//手番情報を表示するためのラベルを作成
+					tfTurn = new JTextField("相手の番です");
 				tfTurn.setFont(new Font("PixelMplus10", Font.PLAIN, 12));
 				tfTurn.setHorizontalAlignment(JTextField.CENTER);
 				tfTurn.setBackground(Color.BLACK);
 				tfTurn.setForeground(Color.WHITE);
 				tfTurn.setBorder(new LineBorder(new Color(240,240,240), 2, false));
 				tfTurn.setEditable(false);
-				tfTurn.setBounds(w/5-30, 3*h/4+53, 160, 40);//境界を設定
-				this.add(tfTurn);//手番情報ラベルをパネルに追加
+				tfTurn.setBounds(w/5-30, 3*h/4+53, 160, 40);
+				this.add(tfTurn);
 				labelPlayer1 = new JLabel(player.getName() + " " + player.getRecord()[5]);
 				labelPlayer1.setFont(new Font("PixelMplus10", Font.ITALIC, 25));
 				labelPlayer1.setForeground(new Color(255,255,0));
@@ -1438,8 +1307,6 @@ public class Client extends JFrame implements WindowListener{
 				labelPlayer2.setForeground(new Color(255,255,0));
 				this.add(labelPlayer2);
 				labelPlayer2.setBounds(6*w/11-70, 3*h/13-20, 300, 40);
-				//プレイヤ情報用ラベル
-
 				if(mode.equals("special")) {
 					//特殊効果発動是非表示用ラベル
 					effectNumber=1;
@@ -1464,8 +1331,8 @@ public class Client extends JFrame implements WindowListener{
 				tfColor.setBorder(new LineBorder(new Color(240,240,240), 2, false));
 				tfColor.setHorizontalAlignment(JTextField.CENTER);
 				tfColor.setEditable(false);
-				tfColor.setBounds(w/5-30, 3*h/4+25, 160, 40);//境界を設定
-				this.add(tfColor);//色表示用ラベルをパネルに追加
+				tfColor.setBounds(w/5-30, 3*h/4+25, 160, 40);
+				this.add(tfColor);
 				//モード表示
 				labelMode1 = new JLabel(mode.toUpperCase());
 				labelMode1.setFont(new Font("PixelMplus10", Font.PLAIN, 50));
@@ -1480,10 +1347,63 @@ public class Client extends JFrame implements WindowListener{
 				this.add(labelMode1);
 				this.add(labelMode2);
 			}
+			//設定画面の生成
 			osd = new OptionSubDialog(client, "osd");
 			osd.setLocation(client.w/6+430, client.h/6+250);
 			osd.setVisible(false);
-			updateDisp(9,9);
+			//盤面の描画
+			if(mode.equals("special")) {
+				for(int j=0; j<row; j++) {
+					int yy = dispValue[0] + j*dispValue[1];
+					for(int i=0; i<row; i++) {
+						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i] = new JButton(whiteHackunIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackHackunIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i] = new JButton(unplaceableIcon);}
+						else if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
+							if(PLACABLE) buttonArray[j][i] = new JButton(placeableIcon);
+							else buttonArray[j][i] = new JButton(boardIcon);
+						}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i] = new JButton(eventIcon);}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==2) {
+							if(PLACABLE) buttonArray[j][i] = new JButton(eventPlaceableIcon);
+							else buttonArray[j][i] = new JButton(eventIcon);
+						}
+
+						int xx = dispValue[0] + i*dispValue[1];
+						this.add(buttonArray[j][i]);
+						buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
+						buttonArray[j][i].addMouseListener(this);//マウス操作を認識できるようにする
+						buttonArray[j][i].setActionCommand(Integer.toString(j*8+i));//ボタンを識別するための名前(番号)を付加する
+					}
+				}
+			}
+			else {
+				for(int j=0; j<row; j++) {
+					int yy = dispValue[0] + j*dispValue[1];
+					for(int i=0; i<row; i++) {
+						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i] = new JButton(whiteIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
+						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i] = new JButton(unplaceableIcon);}
+						else if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
+							if(PLACABLE) buttonArray[j][i] = new JButton(placeableIcon);
+							else buttonArray[j][i] = new JButton(boardIcon);
+						}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i] = new JButton(eventIcon);}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==2) {
+							if(PLACABLE) buttonArray[j][i] = new JButton(eventPlaceableIcon);
+							else buttonArray[j][i] = new JButton(eventIcon);
+						}
+
+						int xx = dispValue[0] + i*dispValue[1];
+						this.add(buttonArray[j][i]);
+						buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
+						buttonArray[j][i].addMouseListener(this);//マウス操作を認識できるようにする
+						buttonArray[j][i].setActionCommand(Integer.toString(j*8+i));//ボタンを識別するための名前(番号)を付加する
+					}
+				}
+			}
 		}
 
 		//メソッド
@@ -1495,7 +1415,7 @@ public class Client extends JFrame implements WindowListener{
 			return mode;
 		}
 
-		public int[] getPreviousRate() {
+		public int[] getPreviousRate() {//対局前のレート取得
 			return previousRate;
 		}
 
@@ -1525,7 +1445,7 @@ public class Client extends JFrame implements WindowListener{
 							this.tf.setText("残り時間  " + String.valueOf(numMinute) + "：0" + String.valueOf(numSecond));
 							if(numSecond==0) {
 								if(numMinute == 0) {
-									finishMatching("timeup");
+									finishMatching("timeup", false);
 									break;
 								}
 								numMinute--;
@@ -1557,32 +1477,11 @@ public class Client extends JFrame implements WindowListener{
 			}
 		}
 
-		/*使わない可能性あり
-		class Confirmer extends Thread{ //サーバに接続確認のための信号を送信するためのスレッド内部クラス
-			Boolean flagFinish = false;
-
-			public void run() {
-				while(!this.flagFinish) {
-					sendMessage("confirmation");
-					try{
-						Thread.sleep(5000);
-					}
-					catch(InterruptedException e) {}
-				}
-			}
-			void finish() {
-				this.flagFinish = true;
-			}
-		}
-		 * */
-
-
-		public void finishMatching(String str) {//対局を終了(str:win, lose, draw, resign, timeup, )
+		public void finishMatching(String str, boolean exception) {//対局を終了(str:win, lose, draw, resign, timeup, )
 			timer.finish();
 			bgm1.stop();
 			bgm1.flush();
 			if(mode.equals("rank") || mode.equals("special")) {//ネットワーク対局時
-				//confirmer.finish();
 				previousRate[0] = player.getRecord()[5];
 				previousRate[1] = opponent.getRecord()[5];
 				if(mode.equals("rank")) {//ランクマッチ時
@@ -1602,25 +1501,26 @@ public class Client extends JFrame implements WindowListener{
 						}
 					}
 				}
-				sendMessage("noticeEndMatching");
-				sendMessage(str);
-				if(!str.equals("draw"))
+				if(exception == false) {
+					sendMessage("noticeEndMatching");
+					sendMessage(str);
 					sendMessage(String.valueOf(player.getRecord()[5]));
-				sendMessage("end");
+					sendMessage("end");
+				}
 			}
 			int[] r = new int[6];
 			r = player.getRecord();
 			r[0]++;
 			if(str.equals("win")) {
-				client.emsd = new EndMatchingSubDialog(client, "emsd", str);//対戦終了時ダイアログ作成
+				client.emsd = new EndMatchingSubDialog(client, "emsd", str);
 				r[1]++;
 			}
 			else if(str.equals("draw")) {
-				client.emsd = new EndMatchingSubDialog(client, "emsd", str);//対戦終了時ダイアログ作成
+				client.emsd = new EndMatchingSubDialog(client, "emsd", str);
 				r[3]++;
 			}
 			else {
-				client.emsd = new EndMatchingSubDialog(client, "emsd", "lose");//対戦終了時ダイアログ作成
+				client.emsd = new EndMatchingSubDialog(client, "emsd", "lose");
 				r[2]++;
 				if(str.equals("resign"))
 					r[4]++;
@@ -1647,21 +1547,22 @@ public class Client extends JFrame implements WindowListener{
 		public void acceptAction(int x, int y) {//ランクマッチ相手からの操作の受付とそれに応じた処理
 			if(mode.equals("rank")) {
 				othello.checkPlaceable();
-				othello.setStone(x, y);//ターンが変わる
+				othello.setStone(x, y);
+				updateDisp(x, y);
 				if(SE) {
 					se = createClip(new File("othello.wav"));
-					se.start();//SEを流す
+					se.start();
 				}
 
 				if(!othello.checkPlaceable()) {//置けない場合
 					othello.changeTurn();
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
-							finishMatching("win");
+							finishMatching("win", false);
 						else if(winner == 0)
-							finishMatching("draw");
+							finishMatching("draw", false);
 						else
-							finishMatching("lose");
+							finishMatching("lose", false);
 					}
 					updateDisp(8,8);
 				}
@@ -1899,11 +1800,11 @@ public class Client extends JFrame implements WindowListener{
 
 				if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 					if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
-						finishMatching("win");
+						finishMatching("win", false);
 					else if(winner == 0)
-						finishMatching("draw");
+						finishMatching("draw", false);
 					else
-						finishMatching("lose");
+						finishMatching("lose", false);
 				}
 			}
 			if((othello.getTurn() == -1 && player.getColor().equals("black")) || (othello.getTurn() == 1 && player.getColor().equals("white")))
@@ -1913,7 +1814,7 @@ public class Client extends JFrame implements WindowListener{
 		}
 
 		public void updateDisp(int x, int y){ // 画面を更新する
-			if(x!=8 && y!=8 && x!=9 && y!=9) {//x==8とy==8は例外
+			if(x!=8 && y!=8) {//x==8とy==8は例外
 				switch(othello.getTurn()) {
 					case 1:
 						if(player.getColor().equals("black"))
@@ -1930,65 +1831,46 @@ public class Client extends JFrame implements WindowListener{
 			}
 			if(mode.equals("special")) {
 				for(int j=0; j<row; j++) {
-					int yy = dispValue[0] + j*dispValue[1];
 					for(int i=0; i<row; i++) {
-						if(x!=9 && y!=9)
-							this.remove(buttonArray[j][i]);
-						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i] = new JButton(whiteHackunIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackHackunIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i] = new JButton(unplaceableIcon);}
-						else if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
-							if(PLACABLE) buttonArray[j][i] = new JButton(placeableIcon);
-							else buttonArray[j][i] = new JButton(boardIcon);
+						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i].setIcon(whiteHackunIcon);}
+						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i].setIcon(blackHackunIcon);}
+						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i].setIcon(boardIcon);}
+						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i].setIcon(unplaceableIcon);}
+						else if(othello.getGrids()[j][i] == 2){
+							if(PLACABLE) buttonArray[j][i].setIcon(placeableIcon);
+							else buttonArray[j][i].setIcon(boardIcon);
 						}
-						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i] = new JButton(eventIcon);}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i].setIcon(eventIcon);}
 						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==2) {
-							if(PLACABLE) buttonArray[j][i] = new JButton(eventPlaceableIcon);
-							else buttonArray[j][i] = new JButton(eventIcon);
+							if(PLACABLE) buttonArray[j][i].setIcon(eventPlaceableIcon);
+							else buttonArray[j][i].setIcon(eventIcon);
 						}
-
-						int xx = dispValue[0] + i*dispValue[1];
-						this.add(buttonArray[j][i]);
-						buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
-						buttonArray[j][i].addMouseListener(this);//マウス操作を認識できるようにする
-						buttonArray[j][i].setActionCommand(Integer.toString(j*8+i));//ボタンを識別するための名前(番号)を付加する
 					}
 				}
 			}
 			else {
 				for(int j=0; j<row; j++) {
-					int yy = dispValue[0] + j*dispValue[1];
 					for(int i=0; i<row; i++) {
-						if(x!=9 && y!=9)
-							this.remove(buttonArray[j][i]);
-						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i] = new JButton(whiteIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i] = new JButton(blackIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i] = new JButton(boardIcon);}//盤面状態に応じたアイコンを設定
-						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i] = new JButton(unplaceableIcon);}
-						else if(othello.getGrids()[j][i] == 2){ //盤面状態に応じたアイコンを設定
-							if(PLACABLE) buttonArray[j][i] = new JButton(placeableIcon);
-							else buttonArray[j][i] = new JButton(boardIcon);
+						if(othello.getGrids()[j][i] == 1){ buttonArray[j][i].setIcon(whiteIcon);}
+						else if(othello.getGrids()[j][i] == -1){ buttonArray[j][i].setIcon(blackIcon);}
+						else if(othello.getGrids()[j][i] == 0 || othello.getGrids()[j][i] == 5){ buttonArray[j][i].setIcon(boardIcon);}
+						else if(othello.getGrids()[j][i]%10==3) {buttonArray[j][i].setIcon(unplaceableIcon);}
+						else if(othello.getGrids()[j][i] == 2){
+							if(PLACABLE) buttonArray[j][i].setIcon(placeableIcon);
+							else buttonArray[j][i].setIcon(boardIcon);
 						}
-						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i] = new JButton(eventIcon);}
+						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==0){ buttonArray[j][i].setIcon(eventIcon);}
 						else if(othello.getGrids()[j][i]/10!=0 && othello.getGrids()[j][i]%10==2) {
-							if(PLACABLE) buttonArray[j][i] = new JButton(eventPlaceableIcon);
-							else buttonArray[j][i] = new JButton(eventIcon);
+							if(PLACABLE) buttonArray[j][i].setIcon(eventPlaceableIcon);
+							else buttonArray[j][i].setIcon(eventIcon);
 						}
-
-						int xx = dispValue[0] + i*dispValue[1];
-						this.add(buttonArray[j][i]);
-						buttonArray[j][i].setBounds(xx, yy, 45, 45);//ボタンの大きさと位置を設定する．
-						buttonArray[j][i].addMouseListener(this);//マウス操作を認識できるようにする
-						buttonArray[j][i].setActionCommand(Integer.toString(j*8+i));//ボタンを識別するための名前(番号)を付加する
 					}
 				}
 			}
 
-			if(x!=9 && y!=9) {
-				tfBlackNumber.setText("●　" + othello.getBlackstone() + "枚");
-				tfWhiteNumber.setText("●　" + othello.getWhitestone() + "枚");
-			}
+			tfBlackNumber.setText("●　" + othello.getBlackstone() + "枚");
+			tfWhiteNumber.setText("●　" + othello.getWhitestone() + "枚");
+
 			if(event != 0) {
 				switch(event) {
 					case 3:
@@ -2007,11 +1889,10 @@ public class Client extends JFrame implements WindowListener{
 		}
 
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
-			JButton theButton = (JButton)e.getComponent();//クリックしたオブジェクトを得る．キャストを忘れずに
-			String command = theButton.getActionCommand();//ボタンの名前を取り出す
-			System.out.println("マウスがクリックされました。押されたボタンは " + command + "です。");//テスト用に標準出力
+			JButton theButton = (JButton)e.getComponent();
+			String command = theButton.getActionCommand();
 			if(theButton == bResign) {//投了ボタンクリック時
-				CheckWhetherToResignSubDialog cwtrsd = new CheckWhetherToResignSubDialog(client, "cwtrsd");//確認用ダイアログ作成
+				CheckWhetherToResignSubDialog cwtrsd = new CheckWhetherToResignSubDialog(client, "cwtrsd");
 				cwtrsd.setLocation(client.w/6+430, client.h/6+250);
 				cwtrsd.setVisible(true);
 			}
@@ -2037,11 +1918,11 @@ public class Client extends JFrame implements WindowListener{
 					if(!othello.checkPlaceable()) {//相手がおけない場合
 						if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 							if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
-								finishMatching("win");
+								finishMatching("win", false);
 							else if(winner == 0)
-								finishMatching("draw");
+								finishMatching("draw", false);
 							else
-								finishMatching("lose");
+								finishMatching("lose", false);
 						}
 
 						othello.changeTurn();
@@ -2255,11 +2136,11 @@ public class Client extends JFrame implements WindowListener{
 
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
 						if((winner == -1 && player.getColor().equals("black")) || (winner == 1 && player.getColor().equals("white")))
-							finishMatching("win");
+							finishMatching("win", false);
 						else if(winner == 0)
-							finishMatching("draw");
+							finishMatching("draw", false);
 						else
-							finishMatching("lose");
+							finishMatching("lose", false);
 					}
 
 					if(event==0 && nikaiFlag==false && !othello.s_checkPlaceable()) {//相手がおけない場合
@@ -2285,13 +2166,9 @@ public class Client extends JFrame implements WindowListener{
 						se.start();//SEを流す
 					}
 					timer.stop(true);
-					/*try {
-						Thread.sleep(500);
-					}
-					catch(InterruptedException ie) {}*/
 					if(othello.checkPlaceable()) {//コンピュータに打つ手がある場合
 						do {
-							cpuOperation = cpu.think(othello.getGrids());
+							cpuOperation = cpu.seek(othello.getGrids());
 							othello.setStone(cpuOperation%10, (cpuOperation-cpuOperation%10)/10);//ターンが変わる
 							updateDisp(cpuOperation%10,(cpuOperation-cpuOperation%10)/10);
 							if(SE) {
@@ -2312,9 +2189,9 @@ public class Client extends JFrame implements WindowListener{
 					}
 					catch(InterruptedException ie) {}
 					if(!((winner = othello.checkWinner()) == 10)) {//勝敗判断
-						if(winner == -1) finishMatching("win");
-						else if(winner == 0) finishMatching("draw");
-						else finishMatching("lose");
+						if(winner == -1) finishMatching("win", false);
+						else if(winner == 0) finishMatching("draw", false);
+						else finishMatching("lose", false);
 					}
 					timer.stop(false);
 
@@ -2329,16 +2206,16 @@ public class Client extends JFrame implements WindowListener{
 	}
 
 	class OptionSubDialog extends JDialog implements MouseListener{//設定ダイアログ
-		JLabel labelBGM;
-		JLabel labelSE;
-		JLabel labelPlacable;
-		JRadioButton radioON1;
-		JRadioButton radioON2;
-		JRadioButton radioON3;
-		JRadioButton radioOFF1;
-		JRadioButton radioOFF2;
-		JRadioButton radioOFF3;
-		JButton bBack;
+		JLabel labelBGM;//BGMラベル
+		JLabel labelSE;//SEラベル
+		JLabel labelPlacable;//置ける場所表示ラベル
+		JRadioButton radioON1;//BGM ONボタン
+		JRadioButton radioON2;//SE ONボタン
+		JRadioButton radioON3;//置ける場所表示 ONボタン
+		JRadioButton radioOFF1;//BGM OFFボタン
+		JRadioButton radioOFF2;//SE OFFボタン
+		JRadioButton radioOFF3;//置ける場所表示 OFFボタン
+		JButton bBack;//戻るボタン
 		Client client;
 		String str;
 		int w = 360;
@@ -2387,8 +2264,8 @@ public class Client extends JFrame implements WindowListener{
 			radioON1.setBounds(w/2, 2*h/7-25, 55, 25);
 			radioON1.setForeground(Color.WHITE);
 			radioON1.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioON1.addMouseListener(this);//マウス操作を認識できるようにする
-			radioON1.setActionCommand("on1");//ボタンを識別するための名前を付加する
+			radioON1.addMouseListener(this);
+			radioON1.setActionCommand("BGM ON");
 			//ONラジオボタン2
 			if(client.SE) {
 				radioON2 = new JRadioButton("ON",true);
@@ -2402,8 +2279,8 @@ public class Client extends JFrame implements WindowListener{
 			radioON2.setBounds(w/2, 3*h/7-25, 55, 25);
 			radioON2.setForeground(Color.WHITE);
 			radioON2.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioON2.addMouseListener(this);//マウス操作を認識できるようにする
-			radioON2.setActionCommand("on2");//ボタンを識別するための名前を付加する
+			radioON2.addMouseListener(this);
+			radioON2.setActionCommand("SE ON");
 			//ONラジオボタン3
 			if(client.PLACABLE) {
 				radioON3 = new JRadioButton("ON",true);
@@ -2417,36 +2294,36 @@ public class Client extends JFrame implements WindowListener{
 			radioON3.setBounds(w/2, 4*h/7-25, 55, 25);
 			radioON3.setForeground(Color.WHITE);
 			radioON3.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioON3.addMouseListener(this);//マウス操作を認識できるようにする
-			radioON3.setActionCommand("on3");//ボタンを識別するための名前を付加する
+			radioON3.addMouseListener(this);
+			radioON3.setActionCommand("置ける場所表示 ON");
 			//OFFラジオボタン1
 			this.add(radioOFF1);
 			radioOFF1.setBounds(7*w/10, 2*h/7-25, 60, 25);
 			radioOFF1.setForeground(Color.WHITE);
 			radioOFF1.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioOFF1.addMouseListener(this);//マウス操作を認識できるようにする
-			radioOFF1.setActionCommand("off1");//ボタンを識別するための名前を付加する
+			radioOFF1.addMouseListener(this);
+			radioOFF1.setActionCommand("BGM OFF");
 			//OFFラジオボタン2
 			this.add(radioOFF2);
 			radioOFF2.setBounds(7*w/10, 3*h/7-25, 60, 25);
 			radioOFF2.setForeground(Color.WHITE);
 			radioOFF2.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioOFF2.addMouseListener(this);//マウス操作を認識できるようにする
-			radioOFF2.setActionCommand("off2");//ボタンを識別するための名前を付加する
+			radioOFF2.addMouseListener(this);
+			radioOFF2.setActionCommand("SE OFF");
 			//OFFラジオボタン3
 			this.add(radioOFF3);
 			radioOFF3.setBounds(7*w/10, 4*h/7-25, 60, 25);
 			radioOFF3.setForeground(Color.WHITE);
 			radioOFF3.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
-			radioOFF3.addMouseListener(this);//マウス操作を認識できるようにする
-			radioOFF3.setActionCommand("off3");//ボタンを識別するための名前を付加する
+			radioOFF3.addMouseListener(this);
+			radioOFF3.setActionCommand("置ける場所表示 OFF");
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
 			bBack.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
 			bBack.setBounds(3*w/7-15, 6*h/7-20, 90, 24);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
+			bBack.addMouseListener(this);
+			bBack.setActionCommand("戻る");
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
@@ -2526,7 +2403,7 @@ public class Client extends JFrame implements WindowListener{
 			bOK.setFont(new Font("PixelMplus10", Font.PLAIN, 13));
 			this.add(bOK);
 			bOK.setBounds(w*3/15, 6*h/8, w/4, h/10);
-			bOK.addMouseListener(this);//マウス操作を認識できるようにする
+			bOK.addMouseListener(this);
 			//Cancelボタン
 			bCan = new JButton("キャンセル");
 			bCan.setFont(new Font("PixelMplus10", Font.PLAIN, 10));
@@ -2538,7 +2415,7 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseClicked(MouseEvent e) {
 			setVisible(false);
 			if((JButton)e.getComponent() == bOK) //OKボタンクリック時
-				mp.finishMatching("resign");
+				mp.finishMatching("resign", false);
 			dispose();//このダイアログを破棄
 		}
 		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}//マウスがオブジェクトに入ったときの処理
@@ -2573,27 +2450,16 @@ public class Client extends JFrame implements WindowListener{
 			tfMessage.setHorizontalAlignment(JTextField.CENTER);
 			this.add(tfMessage);
 			tfMessage.setBounds(w*3/8-35, 5*h/11-30, 200, 40);
-			/*
-			//キャンセルボタン
-			bCan = new JButton("キャンセル");
-			this.add(bCan);
-			bCan.setBounds(22*w/56, 8*h/11, 120, 40);
-			bCan.addMouseListener(this);//マウス操作を認識できるようにする
-			 */
-
 			//再戦を希望する
 			new tryToRematch().start();
 		}
 		//メソッド
 		class tryToRematch extends Thread{
 			public void run() {
-				/*
 				if(client.mp.getMode().equals("rank"))
 					sendMessage("rankRematch");
 				else
 					sendMessage("specialRematch");
-				 * */
-				sendMessage("Rematch");
 				client.flag = false;
 				client.result = false;
 				cancelFlag = false;
@@ -2623,19 +2489,6 @@ public class Client extends JFrame implements WindowListener{
 				}
 			}
 		}
-
-		/*
-		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
-			cancelFlag = true;
-			sendMessage("cancelToRematch");
-			dispose();//このダイアログを破棄
-			client.emsd.setVisible(true);
-		}
-		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}//マウスがオブジェクトに入ったときの処理
-		public void mouseExited(MouseEvent e) {setCursor(new Cursor(Cursor.DEFAULT_CURSOR));}//マウスがオブジェクトから出たときの処理
-		public void mousePressed(MouseEvent e) {}//マウスでオブジェクトを押したときの処理
-		public void mouseReleased(MouseEvent e) {}//マウスで押していたオブジェクトを離したときの処理
-		 * */
 
 	}
 
@@ -2740,14 +2593,14 @@ public class Client extends JFrame implements WindowListener{
 			bRematch = new JButton("再戦");
 			this.add(bRematch);
 			bRematch.setBounds(1*w/5+30, 6*h/7-20, 90, 24);
-			bRematch.addMouseListener(this);//マウス操作を認識できるようにする
-			bRematch.setActionCommand("rematch");//ボタンを識別するための名前を付加する
+			bRematch.addMouseListener(this);
+			bRematch.setActionCommand("再戦");
 			//戻るボタン
 			bBack = new JButton("戻る");
 			this.add(bBack);
 			bBack.setBounds(3*w/5-20, 6*h/7-20, 90, 24);
-			bBack.addMouseListener(this);//マウス操作を認識できるようにする
-			bBack.setActionCommand("back");//ボタンを識別するための名前を付加する
+			bBack.addMouseListener(this);
+			bBack.setActionCommand("戻る");
 		}
 		//パネル名の取得
 		public String getName() {
@@ -2755,10 +2608,11 @@ public class Client extends JFrame implements WindowListener{
 		}
 		//マウスクリック時の処理
 		public void mouseClicked(MouseEvent e) {
-			if(e.getSource() == bRematch) {//再戦ボタンクリック時
-				this.setVisible(false);//このダイアログを隠す
-				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {//ネットワーク対局なら
-					TotalizingSubDialog tsd = new TotalizingSubDialog(client, "tsd");//再戦希望集計時ダイアログの作成
+			JButton theButton = (JButton)e.getComponent();
+			if(theButton == bRematch) {//再戦ボタンクリック時
+				this.setVisible(false);
+				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {
+					TotalizingSubDialog tsd = new TotalizingSubDialog(client, "tsd");
 					tsd.setLocation(client.w/6+370, client.h/6+200);
 					tsd.setVisible(true);
 				}
@@ -2776,15 +2630,15 @@ public class Client extends JFrame implements WindowListener{
 					client.mp.setVisible(true);
 				}
 			} else {//戻るボタンクリック時
-				dispose();//破棄
-				client.mp.setVisible(false);//対局パネルの非表示
+				dispose();
+				client.mp.setVisible(false);
 
-				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {//ネットワーク対局なら
+				if(client.mp.getMode().equals("rank") || client.mp.getMode().equals("special")) {
 					mfnmp = new MenuForNetworkMatchingPanel(client, "mfnmp");
-					client.PanelChange((JPanel)client.mp, (JPanel)client.mfnmp);//ネットワーク対局用メニュー画面へ遷移
+					client.PanelChange((JPanel)client.mp, (JPanel)client.mfnmp);
 				}
-				else //ローカル対局なら
-					client.PanelChange((JPanel)client.mp, (JPanel)client.clp);//レベル選択画面へ遷移
+				else
+					client.PanelChange((JPanel)client.mp, (JPanel)client.clp);
 			}
 		}
 		public void mouseEntered(MouseEvent e) {setCursor(new Cursor(Cursor.HAND_CURSOR));}//マウスがオブジェクトに入ったときの処理
@@ -2872,10 +2726,10 @@ public class Client extends JFrame implements WindowListener{
 	public boolean connectServer(String ipAddress, int port){	// サーバに接続
 		socket = null;
 		try {
-			socket = new Socket(ipAddress, port); //サーバ(ipAddress, port)に接続
-			out = new PrintWriter(socket.getOutputStream(), true); //データ送信用オブジェクトの用意
-			receiver = new Receiver(socket); //受信用オブジェクトの準備
-			receiver.start();//受信用オブジェクト(スレッド)起動
+			socket = new Socket(ipAddress, port);
+			out = new PrintWriter(socket.getOutputStream(), true);
+			receiver = new Receiver(socket);
+			receiver.start();
 			System.out.println("接続されました。");
 			return true;
 		} catch (UnknownHostException e) {
@@ -2887,22 +2741,21 @@ public class Client extends JFrame implements WindowListener{
 		}
 	}
 
-	public void sendMessage(String msg){	// サーバに情報を送信
-		out.println(msg);//送信データをバッファに書き出す
-		out.flush();//送信データを送る
-		System.out.println("サーバにメッセージ " + msg + " を送信しました"); //テスト標準出力
+	public void sendMessage(String msg){
+		out.println(msg);
+		out.flush();
 	}
 
 	// データ受信用スレッド(内部クラス)
 	class Receiver extends Thread {
-		private InputStreamReader sisr; //受信データ用文字ストリーム
-		private BufferedReader br; //文字ストリーム用のバッファ
+		private InputStreamReader sisr;
+		private BufferedReader br;
 
 		// 内部クラスReceiverのコンストラクタ
 		Receiver (Socket socket){
 			try{
-				sisr = new InputStreamReader(socket.getInputStream()); //受信したバイトデータを文字ストリームに
-				br = new BufferedReader(sisr);//文字ストリームをバッファリングする
+				sisr = new InputStreamReader(socket.getInputStream());
+				br = new BufferedReader(sisr);
 			} catch (IOException e) {
 				System.err.println("データ受信時にエラーが発生しました: " + e);
 			}
@@ -2912,14 +2765,13 @@ public class Client extends JFrame implements WindowListener{
 			while(true) {//データを受信し続ける
 				try {
 					String inputLine = br.readLine();//目的を読み込む
-					if(inputLine.equals("sendAccountInfo")) {//目的がアカウント情報の送信だった場合
+					if(inputLine.equals("sendAccountInfo")) {//目的がアカウント情報の送信の場合
 						int i=0;
-						String accountInfo[] = new String[3];//アカウント情報用配列
-						//receiveMessage(inputLine);//データ受信用メソッドを呼び出す
-						while(true) {//データを受信し続ける
-							inputLine = br.readLine();//１行読み込む
-							if(!inputLine.equals("end")) {//終了サインじゃなかったら
-								accountInfo[i++] = inputLine;//アカウント情報用配列に格納
+						String accountInfo[] = new String[3];
+						while(true) {
+							inputLine = br.readLine();
+							if(!inputLine.equals("end")) {
+								accountInfo[i++] = inputLine;
 							}
 							else {
 								player = new Player(accountInfo[0], accountInfo[1], accountInfo[2]);
@@ -2934,7 +2786,7 @@ public class Client extends JFrame implements WindowListener{
 							}
 						}
 					}
-					else if(inputLine.equals("sendLoginResult")) {//目的がログイン認証結果の送信だった場合
+					else if(inputLine.equals("sendLoginResult")) {//目的がログイン結果の送信の場合
 						inputLine = br.readLine();
 						System.out.println(inputLine);
 						if(inputLine.equals("succeeded")) {
@@ -2942,12 +2794,12 @@ public class Client extends JFrame implements WindowListener{
 							String[] userInfo = new String[9];
 							int i=0;
 							while(true) {
-								inputLine = br.readLine();//１行読み込む
+								inputLine = br.readLine();
 								System.out.println(inputLine);
-								if(!inputLine.equals("end")) {//endじゃない限り
-									userInfo[i++] = inputLine;//対局情報用配列に格納
+								if(!inputLine.equals("end")) {
+									userInfo[i++] = inputLine;
 								} else {
-									player = new Player(userInfo[0],userInfo[1],userInfo[2]);//先手後手情報の設定
+									player = new Player(userInfo[0],userInfo[1],userInfo[2]);
 									int[] r = new int [6];
 									for(int a=0; a<6;a++) {
 										r[a] = Integer.parseInt(userInfo[a+3]);
@@ -2965,17 +2817,17 @@ public class Client extends JFrame implements WindowListener{
 						System.out.println(inputLine);
 						inputLine = br.readLine();
 						System.out.println(inputLine);
-						if(inputLine.equals("succeeded")) {//対戦相手が見つかったら
+						if(inputLine.equals("succeeded")) {
 							result = true;
 							int i=0;
-							String matchingInfo[] = new String[3];//対局情報用配列
+							String matchingInfo[] = new String[4];
 							while(true) {
 								inputLine = br.readLine();
-								if(!inputLine.equals("end")) {//endじゃない限り
+								if(!inputLine.equals("end")) {
 									System.out.println(inputLine);
-									matchingInfo[i++] = inputLine;//対局情報用配列に格納
+									matchingInfo[i++] = inputLine;
 								} else {
-									player.setColor(matchingInfo[0]);//先手後手情報の設定
+									player.setColor(matchingInfo[0]);
 									opponent = new Player(matchingInfo[1],"0","0");
 									int[] r = new int [6];
 									for(int a=0; a<5;a++) {
@@ -2983,11 +2835,14 @@ public class Client extends JFrame implements WindowListener{
 									}
 									r[5] = Integer.parseInt(matchingInfo[2]);
 									opponent.setRecord(r);
+									if(specialFlag)
+										//specialNumber = Integer.parseInt(matchingInfo[3]);
+										specialNumber = 0;
 									break;
 								}
 							}
 						}
-						else if(inputLine.equals("failed")) {//対戦相手が見つからなかったら
+						else if(inputLine.equals("failed")) {
 							result = false;
 						}
 						Thread.sleep(500);
@@ -2999,14 +2854,14 @@ public class Client extends JFrame implements WindowListener{
 						else result = false;
 						flag = true;
 					}
-					else if(inputLine.equals("sendOperation")) {
+					else if(inputLine.equals("sendOperation")) {//目的が操作情報の転送だったら
 						inputLine = br.readLine();
 						int x = Integer.parseInt(inputLine);
 						inputLine = br.readLine();
 						int y = Integer.parseInt(inputLine);
 						mp.acceptAction(x,y);
 					}
-					else if(inputLine.equals("sendRecord")) {
+					else if(inputLine.equals("sendRecord")) {//目的が戦績・ランキング情報の送信だったら
 						int i= 1;
 						System.out.println(inputLine);
 						while(!(inputLine = br.readLine()).equals("rate")) {
@@ -3019,10 +2874,9 @@ public class Client extends JFrame implements WindowListener{
 						rrp.setRank(inputLine);
 						flag = true;
 					}
-					else if(inputLine.equals("noticeEndMatching")) {
+					else if(inputLine.equals("noticeEndMatching")) {//目的が対局終了の知らせだったら
 						br.readLine();
-						//何かしらのflagを立てて何を元にしたwinかを判別
-						mp.finishMatching("win");
+						mp.finishMatching("win", true);
 					}
 					else if(inputLine.equals("end")) {}
 					Thread.sleep(500);
@@ -3037,14 +2891,6 @@ public class Client extends JFrame implements WindowListener{
 			}
 		}
 	}
-	/*
-	 * public void receiveMessage(String msg){	// メッセージの受信
-		System.out.println("サーバからメッセージ " + msg + " を受信しました"); //テスト用標準出力
-	}
-	 * */
-
-
-
 
 	public void windowOpened(WindowEvent e) {}
 	public void windowClosing(WindowEvent e) {
