@@ -1,10 +1,9 @@
 import java.io.BufferedReader;
 //テキストファイルなどの文字コードを指定して読み込むためには、
-//InputStreamReader及びFileInputStreamクラスを拡張したBufferedReaderクラスを使用します。
+//InputStreamReader及びFileInputStreamクラスを拡張したBufferedReaderクラスを使用。
 import java.io.IOException;
-import java.io.InputStreamReader;//指定したストリームを、指定した文字コードで構成されるテキストファイルとして読み込みます
-import java.io.PrintWriter;//文字コードを指定してファイルに書き込みを行います。
-//一例として、BufferedWriter、OutputStreamWriter及びFileOutputStreamクラスを拡張した、PrintWriterクラス
+import java.io.InputStreamReader;//指定したストリームを、指定した文字コードで構成されるテキストファイルとして読み込む
+import java.io.PrintWriter;//文字コードを指定してファイルに書き込みを行う。
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,13 +17,12 @@ import java.util.Random;
 public class Server{
 	private static final java.lang.String String = null;
 	private int port;
-//	private boolean online;
 	private PrintWriter[] out; //データ送信用オブジェクト
 	private Receiver [] receiver; //データ受信用オブジェクト
     HashMap <String,Player> Playerslist = new HashMap <String,Player>();
-    //keyはid,valueはそのPlayerクラスで情報管理
+    //keyはid,valueはそのPlayerクラスでデータ管理
     HashMap <String,Integer> Ratelist = new HashMap <String,Integer>();
-    //keyはid,valueはそのレートでランキング作成の際に利用する
+    //keyはid,valueはそのレートでランキング作成の際に利用
 
     int[] MatchingList = new int[2];//レート戦マッチングルーム
     int[] SpecialList = new int[2];//スペシャル戦マッチングルーム
@@ -40,8 +38,8 @@ public class Server{
 	//コンストラクタ
 	public Server(int port) { //待ち受けポートを引数とする
 		this.port = port; //待ち受けポートを渡す
-		out = new PrintWriter [100]; //データ送信用オブジェクトを2クライアント分用意
-		receiver = new Receiver [100]; //データ受信用オブジェクトを2クライアント分用意
+		out = new PrintWriter [100]; //データ送信用オブジェクトを100クライアント分用意
+		receiver = new Receiver [100]; //データ受信用オブジェクトを100クライアント分用意
 		MatchingList[0] = -1;
 	    MatchingList[1] = -1;
 	    SpecialList[0] = -1;
@@ -50,7 +48,6 @@ public class Server{
 	    ReMatchingList[1] = -1;
 	    ReSpecialList[0] = -1;
 	    ReSpecialList[1] = -1;
-
 	}
 
 	// データ受信用 スレッド(内部クラス)
@@ -74,7 +71,7 @@ public class Server{
 				System.err.println("データ受信時にエラーが発生しました: " + e);
 			}
 		}
-		// 内部クラス Receiverのメソッド、ここで受信してメソッド「」を呼び出す
+		// 内部クラス Receiverのメソッド、受信してメソッドを呼び出す
 		public void run(){
 			try{
 				while(true) {// データを受信し続ける
@@ -87,26 +84,25 @@ public class Server{
 							sendMessage("noticeEndMatching",player[playerNo].getOpponentPlayerNo());
 							sendMessage("resign",player[playerNo].getOpponentPlayerNo());
 							sendMessage("end",player[playerNo].getOpponentPlayerNo());
-              String id=player[playerNo].getID();//レート更新
-  						Player value = Playerslist.get(id);
-  						int[] r = new int[6];
-  						r = value.getRecord();
-              r[0]++;
-              r[2]++;
-              r[4]++;
+							String id=player[playerNo].getID();//レート更新
+	  						Player value = Playerslist.get(id);
+	  						int[] r = new int[6];
+	  						r = value.getRecord();
+	  						r[0]++;
+	  						r[2]++;
+	  						r[4]++;
 							r[5]=player[playerNo].getRecord()[5] - (int)(16+0.04*(player[playerNo].getRecord()[5]-player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]));
 							value.setRecord(r);
-  						Playerslist.replace(id, value);//戦績情報更新完了
-              id=player[player[playerNo].getOpponentPlayerNo()].getID();
-              value = Playerslist.get(id);
-              r = value.getRecord();
-              r[0]++;
-              r[1]++;
-              r[5] = player[player[playerNo].getOpponentPlayerNo()].getRecord()[5] + (int)(16+0.04*(player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]-player[playerNo].getRecord()[5]));
-              value.setRecord(r);
-              Playerslist.replace(id, value);//戦績情報更新完了
+							Playerslist.replace(id, value);//戦績情報更新完了
+							id=player[player[playerNo].getOpponentPlayerNo()].getID();
+							value = Playerslist.get(id);
+							r = value.getRecord();
+							r[0]++;
+							r[1]++;
+							r[5] = player[player[playerNo].getOpponentPlayerNo()].getRecord()[5] + (int)(16+0.04*(player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]-player[playerNo].getRecord()[5]));
+			                value.setRecord(r);
+			                Playerslist.replace(id, value);//戦績情報更新完了
 						}
-//						online[id]=false;
 						Playerslist.get(player[playerNo].getID()).setOnline(false);
 						List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 
@@ -133,14 +129,11 @@ public class Server{
 							}
 						}
 						registerUser(user[0],user[1]);//[0]name,[1]password
-						//{sendAccountInfo,name,password,id,end}を返す
 
 					}
 				    else if(inputLine.equals("login")) {//目的が「ログイン認証要請」
-				    	//player[playerNo] = Playerslist.get(id);
 						i=0;
 						String user[] = new String[2];
-
 
 						while(true) {
 							inputLine = br.readLine();
@@ -153,13 +146,8 @@ public class Server{
 							}
 						}
 						confirmData(user[0],user[1]);//,[0]id,[1]password
-						//{sendLoginResult,succeed or failed,end}を返す
-
 					}
-
 				    else if(inputLine.equals("findingOpponent")) {//目的が「対戦相手とのマッチング」
-
-						//player[playerNo] = Playerslist.get(id);
 						String mode= br.readLine();//rank or special
 						sendMessage("sendFindingResult",player[playerNo].getMyPlayerNo());
 						flagMatched=false;
@@ -214,12 +202,8 @@ public class Server{
 								}
 							}
 						}
-
-						//removeMatchingList();//MatchingListから外す
 						sendMessage("end",player[playerNo].getMyPlayerNo());
-
 					}
-
 					else if(inputLine.equals("sendOperation")) {//目的が「操作情報の送信」
 						i=0;
 						String user[] = new String[2];
@@ -236,8 +220,6 @@ public class Server{
 						}
 						forwardMessage(Integer.parseInt(user[0]),Integer.parseInt(user[1]));//[0]x座標,[1]y座標
 					}
-
-
 					else if(inputLine.equals("noticeEndMatching")) {//目的が「対局終了時をクライアントからサーバに知らせる」
 						i=0;
 						matchingFlag=false;
@@ -257,16 +239,16 @@ public class Server{
 						Player value = Playerslist.get(id);
 						int[] r = new int[6];
 						r = value.getRecord();
-            r[0]++;
-            if(user[0].equals("win"))
-              r[1]++;
-            else if(user[0].equals("draw"))
-              r[3]++;
-            else {
-              r[2]++;
-              if(user[0].equals("resign"))
-                r[4]++;
-            }
+			            r[0]++;
+			            if(user[0].equals("win"))
+			              r[1]++;
+			            else if(user[0].equals("draw"))
+			              r[3]++;
+			            else {
+			              r[2]++;
+			              if(user[0].equals("resign"))
+			                r[4]++;
+			            }
 						r[5] = Integer.parseInt(user[1]);
 						value.setRecord(r);
 						Playerslist.replace(id, value);//戦績情報更新完了
@@ -275,30 +257,25 @@ public class Server{
 							sendMessage("noticeEndMatching",player[playerNo].getOpponentPlayerNo());
 							sendMessage(user[0],player[playerNo].getOpponentPlayerNo());
 							sendMessage("end",player[playerNo].getOpponentPlayerNo());
-              id=player[player[playerNo].getOpponentPlayerNo()].getID();
-  						value = Playerslist.get(id);
-  						r = value.getRecord();
-              r[0]++;
-              r[1]++;
-  						r[5] = player[player[playerNo].getOpponentPlayerNo()].getRecord()[5] + (int)(16+0.04*(player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]-player[playerNo].getRecord()[5]));
-  						value.setRecord(r);
-  						Playerslist.replace(id, value);//戦績情報更新完了
+							id=player[player[playerNo].getOpponentPlayerNo()].getID();
+							value = Playerslist.get(id);
+							r = value.getRecord();
+							r[0]++;
+							r[1]++;
+	  						r[5] = player[player[playerNo].getOpponentPlayerNo()].getRecord()[5] + (int)(16+0.04*(player[player[playerNo].getOpponentPlayerNo()].getRecord()[5]-player[playerNo].getRecord()[5]));
+	  						value.setRecord(r);
+	  						Playerslist.replace(id, value);//戦績情報更新完了
 						}
 					}
-
 					else if(inputLine.equals("getRecord")) {//目的が「ランキング送信」
 						sendMessage("sendRecord",player[playerNo].getMyPlayerNo());
 						sendGrade();
 					}
-
 					else if(inputLine.equals("rankRematch")) {//目的が「再戦」
-						//String mode=br.readLine();
 						sendMessage("sendRematchResult",player[playerNo].getMyPlayerNo());
 						addReMatchingList(player[playerNo].getMyPlayerNo(),"rank");
 
 						int t = 10;
-						//flagReMatched = false;
-
 						while(true){
 			              if(flagReMatched == true){
 			                matchingFlag=true;
@@ -452,7 +429,6 @@ public class Server{
 		}
 
 	    public void sendGrade() {//ランキング情報の送信
-	    	//HashMap <String,Integer> Ratelist = new HashMap <String,Integer>();
 	    	List<Entry<String, Player>> list = new ArrayList<Entry<String, Player>>(Playerslist.entrySet());
 	    	for(Entry<String, Player> entry : list) {
 	    		Ratelist.put(entry.getKey(),entry.getValue().getRecord()[5]);
@@ -468,7 +444,7 @@ public class Server{
 	    	});
 	    	int count=0;
 	    	int rank=0;
-	        // 7. ループで要素順に値を取得する
+	        //ループで要素順に値を取得する
 	        for(Entry<String, Integer> entry : list_entries) {
 	           count++;
 
@@ -506,120 +482,118 @@ public class Server{
 				matchingFlag=false;
 	    }
 
-			public void addMatchingList(int playerNo,String str) {//対戦リスト
-		    	if(str.equals ("rank")) {
+		public void addMatchingList(int playerNo,String str) {//対戦リスト
+	    	if(str.equals ("rank")) {
 
-		    	    if(MatchingList[0] == -1) {//playerがいないなら
-		    		MatchingList[0] = playerNo;
-		    	    }
-		    	    else {//playerがいるなら
-		    		   MatchingList[1] = playerNo;
+	    	    if(MatchingList[0] == -1) {//playerがいないなら
+	    		MatchingList[0] = playerNo;
+	    	    }
+	    	    else {//playerがいるなら
+	    		   MatchingList[1] = playerNo;
 
-		    		   player[MatchingList[0]].setOpponentPlayerNo(MatchingList[1]);//相手のplayerNo格納
-		    		   player[MatchingList[1]].setOpponentPlayerNo(MatchingList[0]);
-
-
-		    		   flagMatched = true;//ルームが埋まっている
-					   matchingFlag=true;
-		    		   sendMessage("succeeded",MatchingList[0]);
-		    		   sendMessage("succeeded",MatchingList[1]);
-		    		   sendColor(MatchingList[0],MatchingList[1]);
-		    		   sendMessage(player[MatchingList[1]].getName(),MatchingList[0]);//name
-		    		   sendMessage(Integer.toString(player[MatchingList[1]].getRecord()[5]),MatchingList[0]);//rate
-		    		   sendMessage(player[MatchingList[0]].getName(),MatchingList[1]);//name
-		    		   sendMessage(Integer.toString(player[MatchingList[0]].getRecord()[5]),MatchingList[1]);//rate
+	    		   player[MatchingList[0]].setOpponentPlayerNo(MatchingList[1]);//相手のplayerNo格納
+	    		   player[MatchingList[1]].setOpponentPlayerNo(MatchingList[0]);
 
 
-		    		   MatchingList[0] = -1;//新しいルームのため,いない表示にする
-		    		   MatchingList[1] = -1;
-		    	    }
-		    	}else if(str .equals ("special")){
-
-		    	    if(SpecialList[0] == -1) {
-		    	    	SpecialList[0] = playerNo;
-		    	    }
-		    	    else {
-		    	       SpecialList[1] = playerNo;
-
-		    		   player[SpecialList[0]].setOpponentPlayerNo(SpecialList[1]);//相手のplayerNo
-		    		   player[SpecialList[1]].setOpponentPlayerNo(SpecialList[0]);
-
-		    		   flagSpecialMatched = true;
-		    		   matchingFlag=true;
-		    		   sendMessage("succeeded",SpecialList[0]);
-		    		   sendMessage("succeeded",SpecialList[1]);
-		    		   sendColor(SpecialList[0],SpecialList[1]);
-		    		   sendMessage(player[SpecialList[1]].getName(),SpecialList[0]);//1も同じように送る？
-		    		   sendMessage(Integer.toString(player[SpecialList[1]].getRecord()[5]),SpecialList[0]);
-		    		   sendMessage(player[SpecialList[0]].getName(),SpecialList[1]);//1も同じように送る？
-		    		   sendMessage(Integer.toString(player[SpecialList[0]].getRecord()[5]),SpecialList[1]);
-
-		    		   Random rand = new Random();//0から3までの乱数
-			   	       int n1 = rand.nextInt(10);
-			   	       int n2 = rand.nextInt(10);
-				   	   sendMessage(Integer.toString(n1),SpecialList[0]);
-				   	   sendMessage(Integer.toString(n2),SpecialList[1]);
-
-		    		   SpecialList[0] = -1;
-		    		   SpecialList[1] = -1;
-		    	    }
-		    	}
-		    }
-
-			public void addReMatchingList(int playerNo,String str) {//再戦リスト
-				if(str.equals ("rank")) {
-					if(ReMatchingList[0] == -1) {//playerがいないなら
-					    ReMatchingList[0] = playerNo;
-				    }
-				    else {
-				    	ReMatchingList[1] = playerNo;
-
-					   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
-					   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
+	    		   flagMatched = true;//ルームが埋まっている
+				   matchingFlag=true;
+	    		   sendMessage("succeeded",MatchingList[0]);
+	    		   sendMessage("succeeded",MatchingList[1]);
+	    		   sendColor(MatchingList[0],MatchingList[1]);
+	    		   sendMessage(player[MatchingList[1]].getName(),MatchingList[0]);//name
+	    		   sendMessage(Integer.toString(player[MatchingList[1]].getRecord()[5]),MatchingList[0]);//rate
+	    		   sendMessage(player[MatchingList[0]].getName(),MatchingList[1]);//name
+	    		   sendMessage(Integer.toString(player[MatchingList[0]].getRecord()[5]),MatchingList[1]);//rate
 
 
-					   flagReMatched = true;
-					   matchingFlag=true;
-					   sendMessage("succeeded",ReMatchingList[0]);
-					   sendMessage("succeeded",ReMatchingList[1]);
-					   sendColor(ReMatchingList[0],ReMatchingList[1]);
-					   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
-					   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
-					   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
-					   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
+	    		   MatchingList[0] = -1;//新しいルームのため,いない表示にする
+	    		   MatchingList[1] = -1;
+	    	    }
+	    	}else if(str .equals ("special")){
 
-					   ReMatchingList[0] = -1;
-					   ReMatchingList[1] = -1;
-				    }
-				}else if(str .equals ("special")) {
-					if(ReSpecialList[0] == -1) {//playerがいないなら
-						ReSpecialList[0] = playerNo;
-				    }
-				    else {
-				    	ReSpecialList[1] = playerNo;
+	    	    if(SpecialList[0] == -1) {
+	    	    	SpecialList[0] = playerNo;
+	    	    }
+	    	    else {
+	    	       SpecialList[1] = playerNo;
 
-					   player[ReSpecialList[0]].setOpponentPlayerNo(ReSpecialList[1]);//相手のplayerNo
-					   player[ReSpecialList[1]].setOpponentPlayerNo(ReSpecialList[0]);
+	    		   player[SpecialList[0]].setOpponentPlayerNo(SpecialList[1]);//相手のplayerNo
+	    		   player[SpecialList[1]].setOpponentPlayerNo(SpecialList[0]);
+
+	    		   flagSpecialMatched = true;
+	    		   matchingFlag=true;
+	    		   sendMessage("succeeded",SpecialList[0]);
+	    		   sendMessage("succeeded",SpecialList[1]);
+	    		   sendColor(SpecialList[0],SpecialList[1]);
+	    		   sendMessage(player[SpecialList[1]].getName(),SpecialList[0]);//1も同じように送る？
+	    		   sendMessage(Integer.toString(player[SpecialList[1]].getRecord()[5]),SpecialList[0]);
+	    		   sendMessage(player[SpecialList[0]].getName(),SpecialList[1]);//1も同じように送る？
+	    		   sendMessage(Integer.toString(player[SpecialList[0]].getRecord()[5]),SpecialList[1]);
+
+	    		   Random rand = new Random();//0から3までの乱数
+		   	       int n1 = rand.nextInt(10);
+		   	       int n2 = rand.nextInt(10);
+			   	   sendMessage(Integer.toString(n1),SpecialList[0]);
+			   	   sendMessage(Integer.toString(n2),SpecialList[1]);
+
+	    		   SpecialList[0] = -1;
+	    		   SpecialList[1] = -1;
+	    	    }
+	    	}
+	    }
+
+		public void addReMatchingList(int playerNo,String str) {//再戦リスト
+			if(str.equals ("rank")) {
+				if(ReMatchingList[0] == -1) {//playerがいないなら
+				    ReMatchingList[0] = playerNo;
+			    }
+			    else {
+			    	ReMatchingList[1] = playerNo;
+
+				   player[ReMatchingList[0]].setOpponentPlayerNo(ReMatchingList[1]);//相手のplayerNo
+				   player[ReMatchingList[1]].setOpponentPlayerNo(ReMatchingList[0]);
 
 
-					   flagReSpecialMatched = true;
-					   matchingFlag=true;
-					   sendMessage("succeeded",ReSpecialList[0]);
-					   sendMessage("succeeded",ReSpecialList[1]);
-					   sendColor(ReSpecialList[0],ReSpecialList[1]);
-					   sendMessage(player[ReSpecialList[1]].getName(),ReSpecialList[0]);
-					   sendMessage(Integer.toString(player[ReSpecialList[1]].getRecord()[5]),ReSpecialList[0]);
-					   sendMessage(player[ReSpecialList[0]].getName(),ReSpecialList[1]);
-					   sendMessage(Integer.toString(player[ReSpecialList[0]].getRecord()[5]),ReSpecialList[1]);
+				   flagReMatched = true;
+				   matchingFlag=true;
+				   sendMessage("succeeded",ReMatchingList[0]);
+				   sendMessage("succeeded",ReMatchingList[1]);
+				   sendColor(ReMatchingList[0],ReMatchingList[1]);
+				   sendMessage(player[ReMatchingList[1]].getName(),ReMatchingList[0]);
+				   sendMessage(Integer.toString(player[ReMatchingList[1]].getRecord()[5]),ReMatchingList[0]);
+				   sendMessage(player[ReMatchingList[0]].getName(),ReMatchingList[1]);
+				   sendMessage(Integer.toString(player[ReMatchingList[0]].getRecord()[5]),ReMatchingList[1]);
 
-					   ReSpecialList[0] = -1;
-					   ReSpecialList[1] = -1;
-				    }
-				}
+				   ReMatchingList[0] = -1;
+				   ReMatchingList[1] = -1;
+			    }
+			}else if(str .equals ("special")) {
+				if(ReSpecialList[0] == -1) {//playerがいないなら
+					ReSpecialList[0] = playerNo;
+			    }
+			    else {
+			    	ReSpecialList[1] = playerNo;
+
+				   player[ReSpecialList[0]].setOpponentPlayerNo(ReSpecialList[1]);//相手のplayerNo
+				   player[ReSpecialList[1]].setOpponentPlayerNo(ReSpecialList[0]);
+
+
+				   flagReSpecialMatched = true;
+				   matchingFlag=true;
+				   sendMessage("succeeded",ReSpecialList[0]);
+				   sendMessage("succeeded",ReSpecialList[1]);
+				   sendColor(ReSpecialList[0],ReSpecialList[1]);
+				   sendMessage(player[ReSpecialList[1]].getName(),ReSpecialList[0]);
+				   sendMessage(Integer.toString(player[ReSpecialList[1]].getRecord()[5]),ReSpecialList[0]);
+				   sendMessage(player[ReSpecialList[0]].getName(),ReSpecialList[1]);
+				   sendMessage(Integer.toString(player[ReSpecialList[0]].getRecord()[5]),ReSpecialList[1]);
+
+				   ReSpecialList[0] = -1;
+				   ReSpecialList[1] = -1;
+			    }
 			}
-
+		}
 	}
-
 
 	public void acceptClient(){ //クライアントの接続(サーバの起動)
 		try {
@@ -629,25 +603,18 @@ public class Server{
 
 			while (true) {
 				Socket socket = ss.accept();//新規接続を受け付ける
-				int playerNo =i;//プレイヤ識別番号,ログインで毎回違う
-//				online[id]=true;
+				int playerNo =i;//プレイヤ識別番号
 				System.out.println("プレイヤ" + playerNo + "と接続しました。");
 				out[playerNo]  = new PrintWriter(socket.getOutputStream(), true);//データ送信オブジェクトを用意
 				receiver[playerNo] = new Receiver(socket,playerNo);//データ受信オブジェクト(スレッド)を用意
 				receiver[playerNo] .start();//データ送信オブジェクト(スレッド)を起動
 				receiver[i]=new Receiver(socket,playerNo);
 				i++;
-
 			}
-
-
 		} catch (Exception e) {
 			System.err.println("ソケット作成時にエラーが発生しました: " + e);
 		}
 	}
-
-
-
 
     public void sendColor(int p1,int p2){ //先手後手情報(白黒)の送信
         sendMessage("black",p1);
@@ -661,9 +628,7 @@ public class Server{
 	}
 
 	public static void main(String[] args){
-		Server server = new Server(11188); //待ち受けポート1112番でサーバオブジェクトを準備
+		Server server = new Server(12116); //待ち受けポート12116番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
-
-
 	}
 }
