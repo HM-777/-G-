@@ -51,7 +51,7 @@ import java.util.Random;
  		    		othello.checkPlaceable();
  		    		othello.setStone(x,y);
  						if(othello.checkPlaceable()){
- 							cpuOperation = cpu.think(othello.getGrids());
+ 							cpuOperation = cpu.seek(othello.getGrids());
  							othello.setStone(cpuOperation%10, (cpuOperation-cpuOperation%10)/10);//ターンが変わる
  				    	out.println("sendOperation");
  				    	out.flush();
@@ -64,7 +64,7 @@ import java.util.Random;
  								do {
  									othello.changeTurn();
  									othello.checkPlaceable();
- 									cpuOperation = cpu.think(othello.getGrids());
+ 									cpuOperation = cpu.seek(othello.getGrids());
  									othello.setStone(cpuOperation%10, (cpuOperation-cpuOperation%10)/10);//ターンが変わる
  							    	out.println("sendOperation");
  							    	out.flush();
