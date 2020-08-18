@@ -1191,11 +1191,13 @@ s_checkPlaceable();
 
 
 public static void main(String args[]) {//CPU同士で対戦できるようにしてる
-int i=0;
+/*
+	int i=0;
 int alpha=0;
 int randomc=0;
 
 while(i<30) {//ここのiが対局数
+
 
 	 Othello a=new Othello(0);
 	Othello b=new Othello(0);
@@ -1227,7 +1229,7 @@ a.s_match(check, x, y);
 a.changeTurn();*/
 
 
-
+/*
 
 	int put2=com2.think(a.getGrids());
 a.setStone(put2%10,(put2-put2%10)/10);
@@ -1262,7 +1264,7 @@ System.out.println("\nrandom_cpu_turn\n x="+put2%10+" y="+(put2-put2%10)/10);
 				a.s_match(check,x,y);
 				a.changeTurn();*/
 
-
+/*
 			}
 
 			}
@@ -1288,5 +1290,6 @@ if(a.checkWinner()==a.white) {
 i++;
 }
 System.out.println("alpha_win:"+alpha+"random_win:"+randomc);
+*/
 }
 }
