@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Random;
 
  public class ServerDriver{
-	 static int port = 12116;
+	 static int port = 12345;
      static Othello othello;
      static Computer cpu;
      static int cpuOperation;

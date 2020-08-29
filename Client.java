@@ -186,7 +186,7 @@ public class Client extends JFrame implements WindowListener{
 		public void mouseClicked(MouseEvent e) {//マウスクリック時の処理
 			JButton theButton = (JButton)e.getComponent();
 			if(theButton == bOK) {//OKボタンクリック時
-				if(connectServer(ip.getText(), 11194)) {//正常処理
+				if(connectServer(ip.getText(), 12345)) {//正常処理
 					client.otlp = new OptionToLoginPanel(client, "otlp");
 					client.mnp.setVisible(false);
 					client.PanelChange((JPanel)mnp, (JPanel)client.otlp);

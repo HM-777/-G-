@@ -628,7 +628,7 @@ public class Server{
 	}
 
 	public static void main(String[] args){
-		Server server = new Server(12116); //待ち受けポート12116番でサーバオブジェクトを準備
+		Server server = new Server(12345); //待ち受けポート12345番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
