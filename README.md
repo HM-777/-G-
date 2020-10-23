@@ -1,6 +1,9 @@
 # わくわくはっくおせろ
 特殊機能を備えたオセロゲームです
-詳しくは、(https://github.com/HM-777/Othello/blob/master/わくわくはっくおせろマニュアル.pdf)に記述しています。
+詳しくはこちらに記述しています。
+https://github.com/HM-777/Othello/blob/master/わくわくはっくおせろマニュアル.pdf
+
+
 ![スクリーンショット 2020-10-23 22 03 05](https://user-images.githubusercontent.com/56623611/97009253-d5aed700-157e-11eb-84f4-74d19e643ddf.png)
 
 # 機能
