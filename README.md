@@ -14,6 +14,10 @@
 * 再戦機能
 * 設定変更(BGM, SE, 置ける場所表示)
 
+![スクリーンショット 2020-10-23 22 04 11](https://user-images.githubusercontent.com/56623611/97009534-2a525200-157f-11eb-8425-a2f4ac0512b0.png)
+![スクリーンショット 2020-10-23 22 04 41](https://user-images.githubusercontent.com/56623611/97009541-2c1c1580-157f-11eb-921a-a98bef50cc9b.png)
+![スクリーンショット 2020-10-23 22 04 47](https://user-images.githubusercontent.com/56623611/97009545-2d4d4280-157f-11eb-8a30-ec7ed48f3dfd.png)
+
 # 開発言語
 Java
 
